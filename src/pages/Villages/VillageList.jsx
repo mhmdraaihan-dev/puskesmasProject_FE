@@ -4,6 +4,7 @@ import { getVillages, deleteVillage } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import RoleGuard from "../../components/RoleGuard";
 import ConfirmDialog from "../../components/ConfirmDialog";
+import { isAdmin } from "../../utils/roleHelpers";
 import "../../App.css";
 
 const VillageList = () => {
@@ -19,8 +20,12 @@ const VillageList = () => {
   const { user } = useAuth();
 
   useEffect(() => {
+    if (!isAdmin(user)) {
+      navigate("/");
+      return;
+    }
     fetchVillages();
-  }, []);
+  }, [user, navigate]);
 
   const fetchVillages = async () => {
     try {

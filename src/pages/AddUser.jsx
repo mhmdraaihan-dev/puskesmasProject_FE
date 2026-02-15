@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { registerUser, getVillages } from "../services/api";
+import { useAuth } from "../context/AuthContext";
+import { isAdmin } from "../utils/roleHelpers";
 import "../App.css";
 
 const AddUser = () => {
@@ -17,6 +19,7 @@ const AddUser = () => {
     },
   });
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [villages, setVillages] = useState([]);
@@ -26,8 +29,13 @@ const AddUser = () => {
   const watchPosition = watch("position_user");
 
   useEffect(() => {
+    if (!isAdmin(user)) {
+      alert("Akses ditolak. Halaman ini hanya untuk Admin.");
+      navigate("/");
+      return;
+    }
     fetchVillages();
-  }, []);
+  }, [user, navigate]);
 
   const fetchVillages = async () => {
     try {

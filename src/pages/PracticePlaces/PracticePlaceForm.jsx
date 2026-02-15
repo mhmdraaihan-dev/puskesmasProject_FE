@@ -108,18 +108,6 @@ const PracticePlaceForm = () => {
               : "Tambahkan tempat praktik baru"}
           </p>
         </div>
-        <div>
-          <button
-            onClick={() => navigate("/practice-places")}
-            className="btn-primary"
-            style={{
-              backgroundColor: "transparent",
-              border: "1px solid var(--glass-border)",
-            }}
-          >
-            Batal
-          </button>
-        </div>
       </div>
 
       <div
@@ -209,8 +197,32 @@ const PracticePlaceForm = () => {
             )}
           </div>
 
-          <div style={{ marginTop: "2rem" }}>
-            <button type="submit" disabled={loading} className="btn-primary">
+          <div
+            style={{
+              marginTop: "2rem",
+              display: "flex",
+              justifyContent: "end",
+              gap: "1rem",
+            }}
+          >
+            <button
+              onClick={() => navigate("/practice-places")}
+              type="button"
+              className="btn-primary"
+              style={{
+                backgroundColor: "transparent",
+                border: "1px solid var(--glass-border)",
+                minWidth: "150px",
+              }}
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary"
+              style={{ minWidth: "150px" }}
+            >
               {loading
                 ? "Menyimpan..."
                 : isEditMode

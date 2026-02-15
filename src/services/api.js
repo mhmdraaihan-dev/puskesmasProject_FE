@@ -172,9 +172,241 @@ export const rejectHealthData = async (dataId, alasanPenolakan) => {
   return response.data;
 };
 
-export const getPendingData = async () => {
-  const response = await api.get("/health-data-pending");
+// ==================== PEMERIKSAAN KEHAMILAN API ====================
+export const getKehamilanList = async (params = {}) => {
+  const response = await api.get("/pemeriksaan-kehamilan", { params });
   return response.data;
+};
+
+export const getKehamilanDetail = async (id) => {
+  const response = await api.get(`/pemeriksaan-kehamilan/${id}`);
+  return response.data;
+};
+
+export const createKehamilan = async (data) => {
+  const response = await api.post("/pemeriksaan-kehamilan", data);
+  return response.data;
+};
+
+export const updateKehamilan = async (id, data) => {
+  const response = await api.put(`/pemeriksaan-kehamilan/${id}`, data);
+  return response.data;
+};
+
+export const deleteKehamilan = async (id) => {
+  const response = await api.delete(`/pemeriksaan-kehamilan/${id}`);
+  return response.data;
+};
+
+export const verifyKehamilan = async (id, { status, alasan }) => {
+  const response = await api.patch(`/pemeriksaan-kehamilan/${id}/verify`, {
+    status,
+    alasan,
+  });
+  return response.data;
+};
+
+// ==================== PERSALINAN API ====================
+export const getPersalinanList = async (params = {}) => {
+  const response = await api.get("/persalinan", { params });
+  return response.data;
+};
+
+export const getPersalinanDetail = async (id) => {
+  const response = await api.get(`/persalinan/${id}`);
+  return response.data;
+};
+
+export const createPersalinan = async (data) => {
+  const response = await api.post("/persalinan", data);
+  return response.data;
+};
+
+export const updatePersalinan = async (id, data) => {
+  const response = await api.put(`/persalinan/${id}`, data);
+  return response.data;
+};
+
+export const deletePersalinan = async (id) => {
+  const response = await api.delete(`/persalinan/${id}`);
+  return response.data;
+};
+
+export const verifyPersalinan = async (id, { status, alasan }) => {
+  const response = await api.patch(`/persalinan/${id}/verify`, {
+    status,
+    alasan,
+  });
+  return response.data;
+};
+
+// ==================== KELUARGA BERENCANA API ====================
+export const getKBList = async (params = {}) => {
+  const response = await api.get("/keluarga-berencana", { params });
+  return response.data;
+};
+
+export const getKBDetail = async (id) => {
+  const response = await api.get(`/keluarga-berencana/${id}`);
+  return response.data;
+};
+
+export const createKB = async (data) => {
+  const response = await api.post("/keluarga-berencana", data);
+  return response.data;
+};
+
+export const updateKB = async (id, data) => {
+  const response = await api.put(`/keluarga-berencana/${id}`, data);
+  return response.data;
+};
+
+export const deleteKB = async (id) => {
+  const response = await api.delete(`/keluarga-berencana/${id}`);
+  return response.data;
+};
+
+export const verifyKB = async (id, { status, alasan }) => {
+  const response = await api.patch(`/keluarga-berencana/${id}/verify`, {
+    status,
+    alasan,
+  });
+  return response.data;
+};
+
+// ==================== IMUNISASI API ====================
+export const getImunisasiList = async (params = {}) => {
+  const response = await api.get("/imunisasi", { params });
+  return response.data;
+};
+
+export const getImunisasiDetail = async (id) => {
+  const response = await api.get(`/imunisasi/${id}`);
+  return response.data;
+};
+
+export const createImunisasi = async (data) => {
+  const response = await api.post("/imunisasi", data);
+  return response.data;
+};
+
+export const updateImunisasi = async (id, data) => {
+  const response = await api.put(`/imunisasi/${id}`, data);
+  return response.data;
+};
+
+export const deleteImunisasi = async (id) => {
+  const response = await api.delete(`/imunisasi/${id}`);
+  return response.data;
+};
+
+export const verifyImunisasi = async (id, { status, alasan }) => {
+  const response = await api.patch(`/imunisasi/${id}/verify`, {
+    status,
+    alasan,
+  });
+  return response.data;
+};
+
+// ==================== MASTER PASIEN API ====================
+export const getPasienList = async (params = {}) => {
+  const response = await api.get("/pasien", { params });
+  return response.data;
+};
+
+export const getPasienDetail = async (id) => {
+  const response = await api.get(`/pasien/${id}`);
+  return response.data;
+};
+
+export const createPasien = async (data) => {
+  const response = await api.post("/pasien", data);
+  return response.data;
+};
+
+export const updatePasien = async (id, data) => {
+  const response = await api.put(`/pasien/${id}`, data);
+  return response.data;
+};
+
+export const deletePasien = async (id) => {
+  const response = await api.delete(`/pasien/${id}`);
+  return response.data;
+};
+
+// ==================== REPORTS & EXPORT API ====================
+// ==================== REPORTS & EXPORT API ====================
+export const exportKehamilanData = async (params = {}) => {
+  const response = await api.get("/reports/pemeriksaan-kehamilan/export", {
+    params,
+    responseType: "blob",
+  });
+  return response;
+};
+
+export const exportKehamilanPDF = async (params = {}) => {
+  const response = await api.get("/reports/pemeriksaan-kehamilan/export-pdf", {
+    params,
+    responseType: "blob",
+  });
+  return response;
+};
+
+export const exportPersalinanData = async (params = {}) => {
+  const response = await api.get("/reports/persalinan/export", {
+    params,
+    responseType: "blob",
+  });
+  return response;
+};
+
+export const exportPersalinanPDF = async (params = {}) => {
+  const response = await api.get("/reports/persalinan/export-pdf", {
+    params,
+    responseType: "blob",
+  });
+  return response;
+};
+
+export const exportKBData = async (params = {}) => {
+  const response = await api.get("/reports/keluarga-berencana/export", {
+    params,
+    responseType: "blob",
+  });
+  return response;
+};
+
+export const exportKBPDF = async (params = {}) => {
+  const response = await api.get("/reports/keluarga-berencana/export-pdf", {
+    params,
+    responseType: "blob",
+  });
+  return response;
+};
+
+export const exportImunisasiData = async (params = {}) => {
+  const response = await api.get("/reports/imunisasi/export", {
+    params,
+    responseType: "blob",
+  });
+  return response;
+};
+
+export const exportImunisasiPDF = async (params = {}) => {
+  const response = await api.get("/reports/imunisasi/export-pdf", {
+    params,
+    responseType: "blob",
+  });
+  return response;
+};
+
+// Generic export function for future modules
+export const exportModuleData = async (module, params = {}) => {
+  const response = await api.get(`/reports/${module}/export`, {
+    params,
+    responseType: "blob",
+  });
+  return response;
 };
 
 export default api;

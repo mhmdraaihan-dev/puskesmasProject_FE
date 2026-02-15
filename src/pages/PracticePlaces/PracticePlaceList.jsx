@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { getPracticePlaces, deletePracticePlace } from "../../services/api";
 import RoleGuard from "../../components/RoleGuard";
 import ConfirmDialog from "../../components/ConfirmDialog";
+import { useAuth } from "../../context/AuthContext";
+import { isAdmin } from "../../utils/roleHelpers";
 import "../../App.css";
 
 const PracticePlaceList = () => {
@@ -15,10 +17,15 @@ const PracticePlaceList = () => {
     practiceName: "",
   });
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
+    if (!isAdmin(user)) {
+      navigate("/");
+      return;
+    }
     fetchPracticePlaces();
-  }, []);
+  }, [user, navigate]);
 
   const fetchPracticePlaces = async () => {
     try {

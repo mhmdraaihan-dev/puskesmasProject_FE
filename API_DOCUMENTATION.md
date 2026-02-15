@@ -1,145 +1,150 @@
-# API Documentation - Puskesmas Project
+# API Documentation - Puskesmas Project (SiBidan)
 
-This document outlines the API endpoints available for the frontend team to integrate with the backend services.
+Dokumentasi ini mencakup seluruh endpoint yang tersedia untuk integrasi Frontend.
 
 ## Base URL
-All API endpoints are prefixed with `/api`.
-Example: `http://localhost:3000/api`
+
+`http://localhost:9090/api`
 
 ## Authentication
-The login endpoint returns a JWT `accessToken`. This token should be included in the `Authorization` header for protected routes (implementation pending).
+
+Hampir semua endpoint membutuhkan header `Authorization: Bearer <accessToken>`.
 
 ---
 
 ## 1. User Management
 
-### 1.1 Create User (Register)
-Creates a new user in the system.
+### 1.1 List Users
 
-- **URL**: `/api/user`
+- **URL**: `/api/users`
+- **Method**: `GET`
+- **Access**: All Authenticated Users (untuk keperluan dropdown/list).
+
+### 1.2 Get Detail User
+
+- **URL**: `/api/users/:user_id`
+- **Method**: `GET`
+- **Access**: All Authenticated Users.
+
+### 1.3 Update Status User (Admin)
+
+- **URL**: `/api/users/:user_id/status`
+- **Method**: `PATCH`
+- **Access**: ADMIN
+- **Body**: `{ "status_user": "ACTIVE" | "INACTIVE" }`
+
+### 1.4 Change Password
+
+- **URL**: `/api/users/:user_id/password`
+- **Method**: `PATCH`
+- **Access**: User yang bersangkutan saja.
+- **Body**: `{ "old_password": "...", "new_password": "..." }`
+
+---
+
+## 2. Dashboard
+
+### 2.1 Pending Tasks (Verifikasi)
+
+Mengambil daftar tugas yang menunggu persetujuan (PENDING) dari 4 modul pelayanan.
+
+- **URL**: `/api/dashboard/pending-tasks`
+- **Method**: `GET`
+- **Access**: Bidan Desa (filter desa), Bidan Koordinator (all).
+
+### 2.2 Stats (Akumulasi Data)
+
+Mengambil angka statistik total dan bulan ini.
+
+- **URL**: `/api/dashboard/stats`
+- **Method**: `GET`
+- **Access**: Semua Role (Data terfilter otomatis sesuai wilayahnya).
+
+### 2.3 Village Performance (DEPRECATED)
+
+> **Note**: Endpoint ini sudah dihapus di backend. Gunakan List Module API dengan filter (Lihat Bagian 6).
+
+### 2.4 Approved Records Feed (DEPRECATED)
+
+> **Note**: Endpoint ini sudah dihapus di backend. Gunakan List Module API dengan filter (Lihat Bagian 6).
+
+---
+
+## 3. Pelayanan Kesehatan (4 Modul Utama)
+
+Modul: `pemeriksaan-kehamilan`, `persalinan`, `keluarga-berencana`, `imunisasi`.
+
+### 3.1 List Data & Rekapitulasi
+
+Mengambil data pelayanan. Mendukung filter pencarian dan rekapitulasi laporan.
+
+- **URL**: `/api/{modul}`
+- **Method**: `GET`
+- **Query Parameters**:
+  - `status_verifikasi`: `PENDING`, `APPROVED`, `REJECTED` (Filter status).
+  - `month`: `01` - `12` (Filter bulan laporan).
+  - `year`: `2024` - `2027` (Filter tahun laporan).
+  - `limit`: Jumlah data per halaman.
+- **Access**: Otomatis terfilter sesuai wilayah tugas user.
+
+Contoh untuk Laporan Bulanan:
+`GET /api/pemeriksaan-kehamilan?status_verifikasi=APPROVED&month=02&year=2026`
+
+### 3.2 Create Data (Inputter)
+
+- **URL**: `/api/{modul}`
 - **Method**: `POST`
-- **Content-Type**: `application/json`
+- **Access**: Bidan Praktik.
+- **Note**: `practice_id` otomatis terisi oleh backend dari data user yang login.
 
-#### Request Body
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `full_name` | String | Yes | Full name of the user. |
-| `password` | String | Yes | User's password. |
-| `email` | String | Yes | Unique email address. |
-| `address` | String | Yes | User's address. |
-| `position_user` | Enum | Yes | One of: `bidan_praktik`, `bidan_desa`, `bidan_koordinator` |
-| `role` | Enum | No | default: `USER`. Options: `ADMIN`, `USER` |
-| `status_user` | Enum | No | default: `INACTIVE`. Options: `ACTIVE`, `INACTIVE` |
-| `phone_number` | String | No | User's phone number. |
+### 3.2 Update Data (Revision)
 
-**Example Request:**
-```json
-{
-  "full_name": "Siti Aminah",
-  "password": "securepassword123",
-  "email": "siti.aminah@example.com",
-  "address": "Jl. Mawar No. 10",
-  "position_user": "bidan_desa",
-  "phone_number": "081234567890"
-}
-```
+- **URL**: `/api/{modul}/:id`
+- **Method**: `PUT`
+- **Condition**: Hanya bisa jika status = `REJECTED`. Setelah disave, status otomatis balik jadi `PENDING`.
 
-#### Response (201 Created)
-Returns the created user object (excluding the password).
+### 3.3 Verify Data (Approver)
+
+- **URL**: `/api/{modul}/:id/verify`
+- **Method**: `PATCH`
+- **Access**: Bidan Desa / Koordinator.
+- **Body**:
 
 ```json
 {
-  "user_id": "uuid-string",
-  "full_name": "Siti Aminah",
-  "email": "siti.aminah@example.com",
-  "address": "Jl. Mawar No. 10",
-  "position_user": "bidan_desa",
-  "role": "USER",
-  "status_user": "INACTIVE",
-  "phone_number": "081234567890",
-  "created_at": "2024-02-07T08:00:00.000Z",
-  "updated_at": "2024-02-07T08:00:00.000Z"
+  "status": "APPROVED" | "REJECTED",
+  "alasan": "Wajib diisi jika REJECTED"
 }
 ```
 
 ---
 
-### 1.2 Login User
-Authenticates a user and returns an access token.
+## 4. Master Data
 
-- **URL**: `/api/login`
-- **Method**: `POST`
-- **Content-Type**: `application/json`
+### 4.1 Pasien
 
-#### Request Body
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `email` | String | Yes | Registered email address. |
-| `password` | String | Yes | User's password. |
+- **URL**: `/api/pasien`
+- **Method**: `GET`, `POST`, `PUT`, `DELETE`
+- **Note**: `GET /api/pasien/:id` mengembalikan data pasien beserta 5 histori medis terakhir dari tiap modul.
 
-**Example Request:**
-```json
-{
-  "email": "siti.aminah@example.com",
-  "password": "securepassword123"
-}
-```
+### 4.2 Wilayah (Village)
 
-#### Response (200 OK)
-Returns the user object (excluding sensitive info) and an access token.
-
-```json
-{
-  "user": {
-    "user_id": "uuid-string",
-    "full_name": "Siti Aminah",
-    "email": "siti.aminah@example.com",
-    "position_user": "bidan_desa",
-    "role": "USER",
-    "status_user": "INACTIVE",
-    "created_at": "...",
-    "updated_at": "..."
-  },
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
-```
-
----
-
-### 1.3 Get All Users
-Retrieves a list of all users.
-
-- **URL**: `/api/user`
+- **URL**: `/api/villages`
 - **Method**: `GET`
 
-#### Response (200 OK)
-Returns an array of user objects.
+### 4.3 Tempat Praktik
 
-```json
-[
-  {
-    "user_id": "uuid-1",
-    "full_name": "Siti Aminah",
-    "email": "siti.aminah@example.com",
-    "address": "Jl. Mawar No. 10",
-    "position_user": "bidan_desa",
-    "role": "USER",
-    "status_user": "INACTIVE",
-    "phone_number": "081234567890",
-    "created_at": "...",
-    "updated_at": "..."
-  },
-  {
-    "user_id": "uuid-2",
-    "full_name": "Budi Santoso",
-    "email": "budi@example.com",
-    "address": "Jl. Melati No. 5",
-    "position_user": "bidan_koordinator",
-    "role": "ADMIN",
-    "status_user": "ACTIVE",
-    "phone_number": "08987654321",
-    "created_at": "...",
-    "updated_at": "..."
-  }
-]
-```
+- **URL**: `/api/practice-places`
+- **Method**: `GET`, `POST`, `PUT`
+- **Note**: Tempat Praktik menghubungkan User (Bidan Praktik) dengan Desa.
+
+---
+
+## 5. Village Access Control (Security)
+
+Aplikasi menerapkan penguncian data berdasarkan wilayah (Desa).
+
+- **ADMIN & Bidan Koordinator**: Memiliki akses ke **seluruh desa**.
+- **Bidan Desa**: Hanya bisa mengakses/verifikasi data di **Desa yang ditugaskan**.
+- **Bidan Praktik**: Hanya bisa mengakses/input data di **Tempat Praktik (Desa) miliknya**.
+- **Midwife Unassigned**: Jika user belum di-assign ke Desa atau Tempat Praktik, maka akses ke data kesehatan (Pasien, Kehamilan, dll) akan **DIBLOKIR** sama sekali.
