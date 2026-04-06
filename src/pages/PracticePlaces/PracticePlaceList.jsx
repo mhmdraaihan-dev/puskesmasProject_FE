@@ -1,11 +1,18 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getPracticePlaces, deletePracticePlace } from "../../services/api";
-import RoleGuard from "../../components/RoleGuard";
 import ConfirmDialog from "../../components/ConfirmDialog";
+import RoleGuard from "../../components/RoleGuard";
 import { useAuth } from "../../context/AuthContext";
-import { isAdmin } from "../../utils/roleHelpers";
 import "../../App.css";
+import { deletePracticePlace, getPracticePlaces } from "../../services/api";
+import { isAdmin } from "../../utils/roleHelpers";
+
+const getAssignedMidwivesLabel = (place) => {
+  if (Array.isArray(place.users) && place.users.length > 0) {
+    return place.users.map((practiceUser) => practiceUser.full_name).join(", ");
+  }
+  return place.user?.full_name || "-";
+};
 
 const PracticePlaceList = () => {
   const [practicePlaces, setPracticePlaces] = useState([]);
@@ -19,23 +26,30 @@ const PracticePlaceList = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const getAssignedMidwivesLabel = (place) => {
-    if (Array.isArray(place.users) && place.users.length > 0) {
-      return place.users
-        .map((practiceUser) => practiceUser.full_name)
-        .join(", ");
-    }
-
-    return place.user?.full_name || "-";
-  };
-
   useEffect(() => {
     if (!isAdmin(user)) {
       navigate("/");
       return;
     }
     fetchPracticePlaces();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, navigate]);
+
+  const summary = useMemo(() => {
+    const totalPractices = practicePlaces.length;
+    const totalMidwives = practicePlaces.reduce((sum, place) => {
+      if (Array.isArray(place.users) && place.users.length > 0) {
+        return sum + place.users.length;
+      }
+      return sum + (place.user ? 1 : 0);
+    }, 0);
+    const totalHealthData = practicePlaces.reduce(
+      (sum, place) => sum + (place._count?.health_data || 0),
+      0,
+    );
+
+    return { totalPractices, totalMidwives, totalHealthData };
+  }, [practicePlaces]);
 
   const fetchPracticePlaces = async () => {
     try {
@@ -44,6 +58,7 @@ const PracticePlaceList = () => {
       setPracticePlaces(
         response.success && Array.isArray(response.data) ? response.data : [],
       );
+      setError("");
     } catch (err) {
       setError("Gagal memuat data tempat praktik");
       console.error(err);
@@ -65,19 +80,18 @@ const PracticePlaceList = () => {
 
   return (
     <div className="dashboard">
-      <div className="dashboard-header">
+      <div className="dashboard-header" style={styles.header}>
         <div>
-          <h2>Manajemen Tempat Praktik</h2>
-          <p className="text-muted">Kelola tempat praktik bidan</p>
+          <h2 style={styles.pageTitle}>Manajemen Tempat Praktik</h2>
+          <p className="text-muted" style={styles.pageSubtitle}>
+            Kelola praktik bidan, keterkaitan desa, dan penugasan bidan praktik
+          </p>
         </div>
-        <div style={{ display: "flex", gap: "1rem" }}>
+        <div style={styles.headerActions}>
           <button
             onClick={() => navigate("/")}
             className="btn-primary"
-            style={{
-              backgroundColor: "transparent",
-              border: "1px solid var(--glass-border)",
-            }}
+            style={styles.secondaryButton}
           >
             Kembali
           </button>
@@ -85,6 +99,7 @@ const PracticePlaceList = () => {
             <button
               onClick={() => navigate("/practice-places/add")}
               className="btn-primary"
+              style={styles.primaryButton}
             >
               + Tambah Tempat Praktik
             </button>
@@ -92,106 +107,85 @@ const PracticePlaceList = () => {
         </div>
       </div>
 
-      {error && (
+      <div style={styles.summaryGrid}>
+        <div className="auth-card" style={styles.summaryCard}>
+          <span style={styles.summaryLabel}>Total Praktik</span>
+          <strong style={styles.summaryValue}>{summary.totalPractices}</strong>
+        </div>
+        <div className="auth-card" style={styles.summaryCard}>
+          <span style={styles.summaryLabel}>Bidan Terhubung</span>
+          <strong style={styles.summaryValue}>{summary.totalMidwives}</strong>
+        </div>
+        <div className="auth-card" style={styles.summaryCard}>
+          <span style={styles.summaryLabel}>Riwayat Data</span>
+          <strong style={styles.summaryValue}>{summary.totalHealthData}</strong>
+        </div>
+      </div>
+
+      {error ? (
         <div className="error-alert" style={{ marginBottom: "1rem" }}>
           {error}
         </div>
-      )}
+      ) : null}
 
       {loading ? (
-        <div style={{ textAlign: "center", padding: "3rem" }}>
-          <p>Memuat data...</p>
+        <div style={styles.loadingState}>
+          <p>Memuat data tempat praktik...</p>
         </div>
       ) : practicePlaces.length === 0 ? (
-        <div
-          className="auth-card"
-          style={{ textAlign: "center", padding: "3rem" }}
-        >
-          <p style={{ color: "var(--text-muted)" }}>
-            Belum ada data tempat praktik
+        <div className="auth-card" style={styles.emptyCard}>
+          <h3 style={styles.emptyTitle}>Belum ada data tempat praktik</h3>
+          <p className="text-muted" style={styles.emptySubtitle}>
+            Tambahkan tempat praktik pertama untuk mulai menghubungkan bidan praktik.
           </p>
           <RoleGuard allowedRoles={["ADMIN"]}>
             <button
               onClick={() => navigate("/practice-places/add")}
               className="btn-primary"
-              style={{ marginTop: "1rem" }}
+              style={styles.primaryButton}
             >
               Tambah Tempat Praktik Pertama
             </button>
           </RoleGuard>
         </div>
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))",
-            gap: "1.5rem",
-          }}
-        >
+        <div style={styles.cardGrid}>
           {practicePlaces.map((place) => (
-            <div key={place.practice_id} className="auth-card">
-              <div style={{ marginBottom: "1rem" }}>
-                <h3 style={{ fontSize: "1.25rem", marginBottom: "0.5rem" }}>
-                  {place.nama_praktik}
-                </h3>
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    color: "var(--text-muted)",
-                    marginBottom: "0.5rem",
-                  }}
-                >
-                  Desa: {place.village?.nama_desa || "-"}
-                </p>
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    color: "var(--text-muted)",
-                    marginBottom: "0.5rem",
-                  }}
-                >
-                  Alamat: {place.alamat}
-                </p>
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    color: "var(--text-muted)",
-                  }}
-                >
-                  Bidan: {getAssignedMidwivesLabel(place)}
-                </p>
-                <div
-                  style={{
-                    marginTop: "0.5rem",
-                    fontSize: "0.875rem",
-                    color: "var(--text-muted)",
-                  }}
-                >
-                  Data kesehatan: {place._count?.health_data || 0}
+            <div key={place.practice_id} className="auth-card" style={styles.practiceCard}>
+              <div style={styles.cardHeader}>
+                <div>
+                  <h3 style={styles.cardTitle}>{place.nama_praktik}</h3>
+                  <p className="text-muted" style={styles.cardSubtitle}>
+                    Desa {place.village?.nama_desa || "-"}
+                  </p>
+                </div>
+                <span style={styles.badge}>Praktik</span>
+              </div>
+
+              <div style={styles.metaGrid}>
+                <div style={styles.metaCard}>
+                  <span style={styles.metaLabel}>Alamat</span>
+                  <span style={styles.metaValue}>{place.alamat || "-"}</span>
+                </div>
+                <div style={styles.metaCard}>
+                  <span style={styles.metaLabel}>Bidan Praktik</span>
+                  <span style={styles.metaValue}>
+                    {getAssignedMidwivesLabel(place)}
+                  </span>
+                </div>
+                <div style={styles.metaCard}>
+                  <span style={styles.metaLabel}>Riwayat Data</span>
+                  <span style={styles.metaValue}>
+                    {place._count?.health_data || 0}
+                  </span>
                 </div>
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  gap: "0.5rem",
-                  marginTop: "1rem",
-                  paddingTop: "1rem",
-                  borderTop: "1px solid rgba(255,255,255,0.1)",
-                }}
-              >
+              <div style={styles.cardFooter}>
                 <button
-                  onClick={() =>
-                    navigate(`/practice-places/${place.practice_id}`)
-                  }
+                  onClick={() => navigate(`/practice-places/${place.practice_id}`)}
                   className="btn-primary"
-                  style={{
-                    flex: 1,
-                    padding: "0.5rem",
-                    fontSize: "0.875rem",
-                    backgroundColor: "rgba(59, 130, 246, 0.3)",
-                    border: "1px solid #60a5fa",
-                  }}
+                  style={styles.detailButton}
                 >
                   Detail
                 </button>
@@ -201,13 +195,7 @@ const PracticePlaceList = () => {
                       navigate(`/practice-places/${place.practice_id}/edit`)
                     }
                     className="btn-primary"
-                    style={{
-                      flex: 1,
-                      padding: "0.5rem",
-                      fontSize: "0.875rem",
-                      backgroundColor: "rgba(168, 85, 247, 0.3)",
-                      border: "1px solid #a855f7",
-                    }}
+                    style={styles.editButton}
                   >
                     Edit
                   </button>
@@ -220,13 +208,7 @@ const PracticePlaceList = () => {
                       })
                     }
                     className="btn-primary"
-                    style={{
-                      flex: 1,
-                      padding: "0.5rem",
-                      fontSize: "0.875rem",
-                      backgroundColor: "rgba(239, 68, 68, 0.3)",
-                      border: "1px solid #ef4444",
-                    }}
+                    style={styles.deleteButton}
                   >
                     Hapus
                   </button>
@@ -251,6 +233,123 @@ const PracticePlaceList = () => {
       />
     </div>
   );
+};
+
+const styles = {
+  header: { gap: "1rem", flexWrap: "wrap" },
+  pageTitle: { marginBottom: "0.35rem" },
+  pageSubtitle: { margin: 0 },
+  headerActions: { display: "flex", gap: "0.75rem", flexWrap: "wrap" },
+  primaryButton: { width: "auto", minWidth: "170px", paddingInline: "1rem" },
+  secondaryButton: {
+    width: "auto",
+    minWidth: "120px",
+    paddingInline: "1rem",
+    backgroundColor: "transparent",
+    border: "1px solid var(--glass-border)",
+  },
+  summaryGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: "1rem",
+    marginBottom: "1.5rem",
+  },
+  summaryCard: {
+    maxWidth: "none",
+    margin: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.45rem",
+  },
+  summaryLabel: {
+    fontSize: "0.78rem",
+    textTransform: "uppercase",
+    letterSpacing: "0.06em",
+    color: "var(--color-text-muted)",
+  },
+  summaryValue: { fontSize: "1.55rem", lineHeight: 1.2 },
+  loadingState: { textAlign: "center", padding: "3rem" },
+  emptyCard: {
+    maxWidth: "none",
+    margin: 0,
+    textAlign: "center",
+    padding: "3rem",
+  },
+  emptyTitle: { marginBottom: "0.6rem" },
+  emptySubtitle: { marginBottom: "1.25rem" },
+  cardGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+    gap: "1rem",
+  },
+  practiceCard: { maxWidth: "none", margin: 0 },
+  cardHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: "1rem",
+    marginBottom: "1rem",
+    flexWrap: "wrap",
+  },
+  cardTitle: { fontSize: "1.2rem", marginBottom: "0.25rem" },
+  cardSubtitle: { margin: 0 },
+  badge: {
+    display: "inline-flex",
+    alignItems: "center",
+    padding: "0.4rem 0.8rem",
+    borderRadius: "999px",
+    background: "rgba(59,130,246,0.16)",
+    border: "1px solid rgba(96,165,250,0.35)",
+    color: "#93c5fd",
+    fontSize: "0.8rem",
+    fontWeight: "700",
+  },
+  metaGrid: { display: "grid", gap: "0.85rem" },
+  metaCard: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.35rem",
+    padding: "1rem",
+    borderRadius: "14px",
+    background: "rgba(255,255,255,0.03)",
+    border: "1px solid rgba(255,255,255,0.06)",
+  },
+  metaLabel: {
+    fontSize: "0.78rem",
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
+    color: "var(--color-text-muted)",
+  },
+  metaValue: { lineHeight: 1.5, fontWeight: "600" },
+  cardFooter: {
+    marginTop: "1rem",
+    paddingTop: "1rem",
+    borderTop: "1px solid rgba(255,255,255,0.08)",
+    display: "flex",
+    gap: "0.75rem",
+    flexWrap: "wrap",
+  },
+  detailButton: {
+    width: "auto",
+    minWidth: "110px",
+    paddingInline: "1rem",
+    backgroundColor: "rgba(59,130,246,0.22)",
+    border: "1px solid rgba(96,165,250,0.45)",
+  },
+  editButton: {
+    width: "auto",
+    minWidth: "110px",
+    paddingInline: "1rem",
+    backgroundColor: "rgba(168,85,247,0.22)",
+    border: "1px solid rgba(168,85,247,0.45)",
+  },
+  deleteButton: {
+    width: "auto",
+    minWidth: "110px",
+    paddingInline: "1rem",
+    backgroundColor: "rgba(239,68,68,0.2)",
+    border: "1px solid rgba(248,113,113,0.45)",
+  },
 };
 
 export default PracticePlaceList;

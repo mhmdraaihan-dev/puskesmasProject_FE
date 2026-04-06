@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import UserList from "./pages/UserList";
 import AddUser from "./pages/AddUser";
 import EditUser from "./pages/EditUser";
 import ChangePassword from "./pages/ChangePassword";
@@ -107,6 +108,14 @@ function App() {
           />
 
           {/* User Management */}
+          <Route
+            path="/users"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <UserList />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/add-user"
             element={
