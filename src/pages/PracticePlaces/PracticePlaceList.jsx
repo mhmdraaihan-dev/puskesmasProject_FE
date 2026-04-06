@@ -19,6 +19,16 @@ const PracticePlaceList = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  const getAssignedMidwivesLabel = (place) => {
+    if (Array.isArray(place.users) && place.users.length > 0) {
+      return place.users
+        .map((practiceUser) => practiceUser.full_name)
+        .join(", ");
+    }
+
+    return place.user?.full_name || "-";
+  };
+
   useEffect(() => {
     if (!isAdmin(user)) {
       navigate("/");
@@ -31,7 +41,6 @@ const PracticePlaceList = () => {
     try {
       setLoading(true);
       const response = await getPracticePlaces();
-      // Backend response structure: { success: true, data: [...] }
       setPracticePlaces(
         response.success && Array.isArray(response.data) ? response.data : [],
       );
@@ -132,7 +141,7 @@ const PracticePlaceList = () => {
                     marginBottom: "0.5rem",
                   }}
                 >
-                  🏘️ {place.village?.nama_desa || "-"}
+                  Desa: {place.village?.nama_desa || "-"}
                 </p>
                 <p
                   style={{
@@ -141,10 +150,15 @@ const PracticePlaceList = () => {
                     marginBottom: "0.5rem",
                   }}
                 >
-                  📍 {place.alamat}
+                  Alamat: {place.alamat}
                 </p>
-                <p style={{ fontSize: "0.875rem", color: "var(--text-muted)" }}>
-                  👤 {place.user?.full_name || "-"}
+                <p
+                  style={{
+                    fontSize: "0.875rem",
+                    color: "var(--text-muted)",
+                  }}
+                >
+                  Bidan: {getAssignedMidwivesLabel(place)}
                 </p>
                 <div
                   style={{
@@ -153,7 +167,7 @@ const PracticePlaceList = () => {
                     color: "var(--text-muted)",
                   }}
                 >
-                  📊 {place._count?.health_data || 0} data kesehatan
+                  Data kesehatan: {place._count?.health_data || 0}
                 </div>
               </div>
 

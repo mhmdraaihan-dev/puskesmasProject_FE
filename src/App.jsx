@@ -59,15 +59,33 @@ import ImunisasiDetail from "./pages/Imunisasi/ImunisasiDetail";
 
 // Rekapitulasi Reporting
 import RekapitulasiPage from "./pages/Rekapitulasi/RekapitulasiPage";
+import { POSITIONS } from "./utils/roleHelpers";
 
 import "./App.css";
 
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+const ProtectedRoute = ({
+  children,
+  allowedRoles = [],
+  allowedPositions = [],
+}) => {
+  const { isAuthenticated, loading, user } = useAuth();
 
   if (loading) return <div>Loading...</div>;
 
-  return isAuthenticated ? children : <Navigate to="/login" />;
+  if (!isAuthenticated) return <Navigate to="/login" />;
+
+  if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (
+    allowedPositions.length > 0 &&
+    !allowedPositions.includes(user?.position_user)
+  ) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
 };
 
 function App() {
@@ -92,7 +110,7 @@ function App() {
           <Route
             path="/add-user"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
                 <AddUser />
               </ProtectedRoute>
             }
@@ -100,7 +118,7 @@ function App() {
           <Route
             path="/edit-user/:userId"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
                 <EditUser />
               </ProtectedRoute>
             }
@@ -116,7 +134,7 @@ function App() {
           <Route
             path="/reset-password/:userId"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
                 <ResetPassword />
               </ProtectedRoute>
             }
@@ -126,7 +144,7 @@ function App() {
           <Route
             path="/villages"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
                 <VillageList />
               </ProtectedRoute>
             }
@@ -134,7 +152,7 @@ function App() {
           <Route
             path="/villages/add"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
                 <VillageForm />
               </ProtectedRoute>
             }
@@ -142,7 +160,7 @@ function App() {
           <Route
             path="/villages/:villageId"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
                 <VillageDetail />
               </ProtectedRoute>
             }
@@ -150,7 +168,7 @@ function App() {
           <Route
             path="/villages/:villageId/edit"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
                 <VillageForm />
               </ProtectedRoute>
             }
@@ -160,7 +178,7 @@ function App() {
           <Route
             path="/practice-places"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
                 <PracticePlaceList />
               </ProtectedRoute>
             }
@@ -168,7 +186,7 @@ function App() {
           <Route
             path="/practice-places/add"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
                 <PracticePlaceForm />
               </ProtectedRoute>
             }
@@ -176,7 +194,7 @@ function App() {
           <Route
             path="/practice-places/:practiceId"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
                 <PracticePlaceDetail />
               </ProtectedRoute>
             }
@@ -184,7 +202,7 @@ function App() {
           <Route
             path="/practice-places/:practiceId/edit"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
                 <PracticePlaceForm />
               </ProtectedRoute>
             }
@@ -279,7 +297,9 @@ function App() {
           <Route
             path="/pemeriksaan-kehamilan/add"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute
+                allowedPositions={[POSITIONS.BIDAN_PRAKTIK]}
+              >
                 <PemeriksaanKehamilanForm />
               </ProtectedRoute>
             }
@@ -296,7 +316,9 @@ function App() {
           <Route
             path="/pemeriksaan-kehamilan/:id/edit"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute
+                allowedPositions={[POSITIONS.BIDAN_PRAKTIK]}
+              >
                 <PemeriksaanKehamilanForm />
               </ProtectedRoute>
             }
@@ -314,7 +336,9 @@ function App() {
           <Route
             path="/persalinan/add"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute
+                allowedPositions={[POSITIONS.BIDAN_PRAKTIK]}
+              >
                 <PersalinanForm />
               </ProtectedRoute>
             }
@@ -331,7 +355,9 @@ function App() {
           <Route
             path="/persalinan/:id/edit"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute
+                allowedPositions={[POSITIONS.BIDAN_PRAKTIK]}
+              >
                 <PersalinanForm />
               </ProtectedRoute>
             }
@@ -349,7 +375,9 @@ function App() {
           <Route
             path="/keluarga-berencana/add"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute
+                allowedPositions={[POSITIONS.BIDAN_PRAKTIK]}
+              >
                 <KBForm />
               </ProtectedRoute>
             }
@@ -366,7 +394,9 @@ function App() {
           <Route
             path="/keluarga-berencana/:id/edit"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute
+                allowedPositions={[POSITIONS.BIDAN_PRAKTIK]}
+              >
                 <KBForm />
               </ProtectedRoute>
             }
@@ -384,7 +414,9 @@ function App() {
           <Route
             path="/imunisasi/add"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute
+                allowedPositions={[POSITIONS.BIDAN_PRAKTIK]}
+              >
                 <ImunisasiForm />
               </ProtectedRoute>
             }
@@ -400,7 +432,9 @@ function App() {
           <Route
             path="/imunisasi/:id/edit"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute
+                allowedPositions={[POSITIONS.BIDAN_PRAKTIK]}
+              >
                 <ImunisasiForm />
               </ProtectedRoute>
             }
@@ -410,7 +444,12 @@ function App() {
           <Route
             path="/verification/pending"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute
+                allowedPositions={[
+                  POSITIONS.BIDAN_DESA,
+                  POSITIONS.BIDAN_KOORDINATOR,
+                ]}
+              >
                 <PendingDataList />
               </ProtectedRoute>
             }
@@ -438,7 +477,9 @@ function App() {
           <Route
             path="/rekapitulasi"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute
+                allowedPositions={[POSITIONS.BIDAN_KOORDINATOR]}
+              >
                 <RekapitulasiPage />
               </ProtectedRoute>
             }

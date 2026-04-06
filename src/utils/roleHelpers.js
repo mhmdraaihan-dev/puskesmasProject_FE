@@ -45,12 +45,34 @@ export const isBidanKoordinator = (user) => {
   return user?.position_user === POSITIONS.BIDAN_KOORDINATOR;
 };
 
+export const isAssignedToPractice = (practice, user) => {
+  if (!practice || !user?.user_id) return false;
+
+  if (practice.user_id === user.user_id) return true;
+
+  if (
+    Array.isArray(practice.user_ids) &&
+    practice.user_ids.includes(user.user_id)
+  ) {
+    return true;
+  }
+
+  if (
+    Array.isArray(practice.users) &&
+    practice.users.some((practiceUser) => practiceUser?.user_id === user.user_id)
+  ) {
+    return true;
+  }
+
+  return false;
+};
+
 // Check if user can edit health data
 export const canEditHealthData = (user, healthData) => {
   // Only owner can edit, and only if status is PENDING
   return (
     healthData.status_verifikasi === VERIFICATION_STATUS.PENDING &&
-    healthData.practice_place?.user_id === user?.user_id
+    isAssignedToPractice(healthData.practice_place, user)
   );
 };
 
@@ -59,14 +81,13 @@ export const canDeleteHealthData = (user, healthData) => {
   // Only owner can delete, and only if status is PENDING
   return (
     healthData.status_verifikasi === VERIFICATION_STATUS.PENDING &&
-    healthData.practice_place?.user_id === user?.user_id
+    isAssignedToPractice(healthData.practice_place, user)
   );
 };
 
 // Check if user can verify health data
 export const canVerifyHealthData = (user) => {
-  // Only bidan desa can verify
-  return isBidanDesa(user);
+  return isBidanDesa(user) || isBidanKoordinator(user);
 };
 
 // Check if user can revise rejected data
@@ -74,7 +95,7 @@ export const canReviseHealthData = (user, healthData) => {
   // Only owner can revise, and only if status is REJECTED
   return (
     healthData.status_verifikasi === VERIFICATION_STATUS.REJECTED &&
-    healthData.practice_place?.user_id === user?.user_id
+    isAssignedToPractice(healthData.practice_place, user)
   );
 };
 
@@ -121,12 +142,8 @@ export const getStatusLabel = (status) => {
 
 // Check if user can edit kehamilan data
 export const canEditKehamilan = (user, data) => {
-  // Only owner can edit, and only if status is REJECTED
-  // We check practice_id or user ownership. Assuming data has practice_id and user has practice_id or similar.
-  // However, looking at HealthData logic: data.practice_place?.user_id === user?.user_id
-  // We will use the same logic if possible.
   const isOwner =
-    data.practice_place?.user_id === user?.user_id ||
+    isAssignedToPractice(data.practice_place, user) ||
     (user?.practice_id && data.practice_id === user.practice_id);
 
   return data.status_verifikasi === VERIFICATION_STATUS.REJECTED && isOwner;
@@ -135,7 +152,7 @@ export const canEditKehamilan = (user, data) => {
 // Check if user can delete kehamilan data
 export const canDeleteKehamilan = (user, data) => {
   const isOwner =
-    data.practice_place?.user_id === user?.user_id ||
+    isAssignedToPractice(data.practice_place, user) ||
     (user?.practice_id && data.practice_id === user.practice_id);
   const allowedStatuses = [
     VERIFICATION_STATUS.PENDING,
@@ -153,7 +170,7 @@ export const canVerifyKehamilan = (user) => {
 // Check if user can edit persalinan data
 export const canEditPersalinan = (user, data) => {
   const isOwner =
-    data.practice_place?.user_id === user?.user_id ||
+    isAssignedToPractice(data.practice_place, user) ||
     (user?.practice_id && data.practice_id === user.practice_id);
 
   return data.status_verifikasi === VERIFICATION_STATUS.REJECTED && isOwner;
@@ -162,7 +179,7 @@ export const canEditPersalinan = (user, data) => {
 // Check if user can delete persalinan data
 export const canDeletePersalinan = (user, data) => {
   const isOwner =
-    data.practice_place?.user_id === user?.user_id ||
+    isAssignedToPractice(data.practice_place, user) ||
     (user?.practice_id && data.practice_id === user.practice_id);
   const allowedStatuses = [
     VERIFICATION_STATUS.PENDING,
@@ -180,7 +197,7 @@ export const canVerifyPersalinan = (user) => {
 // Check if user can edit KB data
 export const canEditKB = (user, data) => {
   const isOwner =
-    data.practice_place?.user_id === user?.user_id ||
+    isAssignedToPractice(data.practice_place, user) ||
     (user?.practice_id && data.practice_id === user.practice_id);
 
   return data.status_verifikasi === VERIFICATION_STATUS.REJECTED && isOwner;
@@ -189,7 +206,7 @@ export const canEditKB = (user, data) => {
 // Check if user can delete KB data
 export const canDeleteKB = (user, data) => {
   const isOwner =
-    data.practice_place?.user_id === user?.user_id ||
+    isAssignedToPractice(data.practice_place, user) ||
     (user?.practice_id && data.practice_id === user.practice_id);
   const allowedStatuses = [
     VERIFICATION_STATUS.PENDING,
@@ -207,7 +224,7 @@ export const canVerifyKB = (user) => {
 // Check if user can edit Imunisasi data
 export const canEditImunisasi = (user, data) => {
   const isOwner =
-    data.practice_place?.user_id === user?.user_id ||
+    isAssignedToPractice(data.practice_place, user) ||
     (user?.practice_id && data.practice_id === user.practice_id);
 
   return data.status_verifikasi === VERIFICATION_STATUS.REJECTED && isOwner;
@@ -216,7 +233,7 @@ export const canEditImunisasi = (user, data) => {
 // Check if user can delete Imunisasi data
 export const canDeleteImunisasi = (user, data) => {
   const isOwner =
-    data.practice_place?.user_id === user?.user_id ||
+    isAssignedToPractice(data.practice_place, user) ||
     (user?.practice_id && data.practice_id === user.practice_id);
   const allowedStatuses = [
     VERIFICATION_STATUS.PENDING,

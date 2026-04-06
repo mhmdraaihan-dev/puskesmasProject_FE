@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   createPracticePlace,
@@ -9,6 +9,7 @@ import {
   getUsers,
 } from "../../services/api";
 import { POSITIONS } from "../../utils/roleHelpers";
+import CustomSelect from "../../components/CustomSelect";
 import "../../App.css";
 
 const PracticePlaceForm = () => {
@@ -19,12 +20,18 @@ const PracticePlaceForm = () => {
     handleSubmit,
     formState: { errors },
     setValue,
+    control,
   } = useForm();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [villages, setVillages] = useState([]);
   const [bidanPraktik, setBidanPraktik] = useState([]);
+  const bidanPraktikOptions = bidanPraktik.map((user) => ({
+    value: user.user_id,
+    label: user.full_name,
+    email: user.email,
+  }));
 
   useEffect(() => {
     fetchData();
@@ -63,10 +70,16 @@ const PracticePlaceForm = () => {
     try {
       const response = await getPracticePlaceById(practiceId);
       const place = response.data;
+      const assignedUserIds = Array.isArray(place.users)
+        ? place.users.map((practiceUser) => practiceUser.user_id)
+        : place.user_id
+          ? [place.user_id]
+          : [];
+
       setValue("nama_praktik", place.nama_praktik);
       setValue("village_id", place.village_id);
       setValue("alamat", place.alamat);
-      setValue("user_id", place.user_id);
+      setValue("user_ids", assignedUserIds);
     } catch (err) {
       setError("Gagal memuat data tempat praktik");
       console.error(err);
@@ -78,11 +91,18 @@ const PracticePlaceForm = () => {
     setLoading(true);
 
     try {
+      const payload = {
+        ...data,
+        user_ids: Array.isArray(data.user_ids)
+          ? data.user_ids.filter(Boolean)
+          : [data.user_ids].filter(Boolean),
+      };
+
       if (isEditMode) {
-        await updatePracticePlace(practiceId, data);
+        await updatePracticePlace(practiceId, payload);
         alert("Tempat praktik berhasil diupdate!");
       } else {
-        await createPracticePlace(data);
+        await createPracticePlace(payload);
         alert("Tempat praktik berhasil ditambahkan!");
       }
       navigate("/practice-places");
@@ -159,26 +179,58 @@ const PracticePlaceForm = () => {
           </div>
 
           <div className="form-group">
-            <label className="form-label" htmlFor="user_id">
+            <label className="form-label" htmlFor="user_ids">
               Bidan Praktik *
             </label>
-            <select
-              id="user_id"
-              className="form-input"
-              {...register("user_id", {
-                required: "Bidan praktik wajib dipilih",
-              })}
-            >
-              <option value="">Pilih Bidan Praktik</option>
-              {bidanPraktik.map((user) => (
-                <option key={user.user_id} value={user.user_id}>
-                  {user.full_name} - {user.email}
-                </option>
-              ))}
-            </select>
-            {errors.user_id && (
-              <span className="error-message">{errors.user_id.message}</span>
+            <Controller
+              name="user_ids"
+              control={control}
+              rules={{
+                validate: (value) =>
+                  Array.isArray(value) && value.length > 0
+                    ? true
+                    : "Bidan praktik wajib dipilih",
+              }}
+              render={({ field }) => (
+                <CustomSelect
+                  inputId="user_ids"
+                  isMulti
+                  closeMenuOnSelect={false}
+                  hideSelectedOptions={false}
+                  placeholder="Cari dan pilih bidan praktik..."
+                  options={bidanPraktikOptions}
+                  value={bidanPraktikOptions.filter((option) =>
+                    (field.value || []).includes(option.value),
+                  )}
+                  onChange={(selectedOptions) =>
+                    field.onChange(
+                      (selectedOptions || []).map((option) => option.value),
+                    )
+                  }
+                  formatOptionLabel={(option) => (
+                    <div>
+                      <div style={{ fontWeight: 600 }}>{option.label}</div>
+                      <div
+                        style={{
+                          fontSize: "0.75rem",
+                          color: "rgba(255, 255, 255, 0.7)",
+                        }}
+                      >
+                        {option.email}
+                      </div>
+                    </div>
+                  )}
+                  noOptionsMessage={() => "Tidak ada bidan praktik"}
+                />
+              )}
+            />
+            {errors.user_ids && (
+              <span className="error-message">{errors.user_ids.message}</span>
             )}
+            <small className="text-muted" style={{ fontSize: "0.75rem" }}>
+              Bisa pilih lebih dari satu bidan, cari nama/email, lalu hapus tag
+              jika salah pilih.
+            </small>
           </div>
 
           <div className="form-group">

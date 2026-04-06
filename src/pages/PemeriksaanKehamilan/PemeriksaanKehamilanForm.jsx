@@ -1,68 +1,80 @@
-import { useState, useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useEffect, useMemo, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
+import CustomSelect from "../../components/CustomSelect";
+import { useAuth } from "../../context/AuthContext";
+import "../../App.css";
 import {
   createKehamilan,
-  updateKehamilan,
   getKehamilanDetail,
-  getPracticePlaces,
   getPasienList,
+  getPracticePlaces,
+  updateKehamilan,
 } from "../../services/api";
-import { useAuth } from "../../context/AuthContext";
-import CustomSelect from "../../components/CustomSelect";
-import "../../App.css";
+import {
+  isAssignedToPractice,
+  isBidanPraktik,
+} from "../../utils/roleHelpers";
 
 const PemeriksaanKehamilanForm = () => {
   const { id } = useParams();
-  const isEditMode = !!id;
+  const isEditMode = Boolean(id);
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
     control,
+    watch,
   } = useForm();
-  const navigate = useNavigate();
-  const { user } = useAuth();
+
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
   const [error, setError] = useState("");
-
-  // Dropdown data
   const [patients, setPatients] = useState([]);
   const [practices, setPractices] = useState([]);
 
+  const selectedPatientId = watch("pasien_id");
+  const selectedPatient = useMemo(
+    () => patients.find((patient) => patient.pasien_id === selectedPatientId),
+    [patients, selectedPatientId],
+  );
+
+  const patientOptions = useMemo(
+    () =>
+      patients.map((patient) => ({
+        value: patient.pasien_id,
+        label: `${patient.nama} (${patient.nik})`,
+      })),
+    [patients],
+  );
+
   useEffect(() => {
+    if (!isBidanPraktik(user)) {
+      navigate("/pemeriksaan-kehamilan");
+      return;
+    }
+
     loadDropdowns();
     if (isEditMode) {
       fetchData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, user]);
 
   const loadDropdowns = async () => {
     try {
-      // Fetch potential patients (all users for now, ideally filter by role if API supports)
-      // Filter only patients if possible. Assuming 'user' role or similar.
-      // If getPracticePlaces returns all, we might need to filter by current user's village or assume list is small.
-      // Fetch patients from Master Pasien
-      const activeParams = { limit: 1000 }; // Fetch ample amount for dropdown
-      const pasienRes = await getPasienList(activeParams);
+      const pasienRes = await getPasienList({ limit: 1000 });
       setPatients(pasienRes.data || []);
 
-      // Fetch practices logic
-      // If user is Bidan Praktik, should see their practices.
-      // If API returns all, we filter by user_id if that field exists in practice place.
-      // Or just show all if that's the logic.
       const practicesRes = await getPracticePlaces();
-
-      // Filter practices owned by current user (Bidan Praktik)
-      const myPractices = (practicesRes.data || []).filter(
-        (p) => p.user_id === user.user_id,
+      const myPractices = (practicesRes.data || []).filter((practice) =>
+        isAssignedToPractice(practice, user),
       );
       setPractices(myPractices);
 
-      // Auto-select if only one practice
       if (myPractices.length === 1) {
         setValue("practice_id", myPractices[0].practice_id);
       }
@@ -78,7 +90,6 @@ const PemeriksaanKehamilanForm = () => {
       const response = await getKehamilanDetail(id);
       const data = response.data;
 
-      // Set Form Values
       const fields = [
         "practice_id",
         "pasien_id",
@@ -96,7 +107,6 @@ const PemeriksaanKehamilanForm = () => {
 
       fields.forEach((field) => setValue(field, data[field]));
 
-      // Nested report
       if (data.ceklab_report) {
         setValue("ceklab_report.hiv", data.ceklab_report.hiv);
         setValue("ceklab_report.hbsag", data.ceklab_report.hbsag);
@@ -108,7 +118,6 @@ const PemeriksaanKehamilanForm = () => {
         );
       }
 
-      // Format Date
       if (data.tanggal) {
         setValue("tanggal", new Date(data.tanggal).toISOString().split("T")[0]);
       }
@@ -125,17 +134,15 @@ const PemeriksaanKehamilanForm = () => {
     setLoading(true);
 
     try {
-      // Convert types per spec
       const payload = {
         ...data,
         tanggal: new Date(data.tanggal).toISOString(),
-        umur_kehamilan: parseInt(data.umur_kehamilan),
-        lila: parseFloat(data.lila),
-        bb: parseFloat(data.bb),
+        umur_kehamilan: parseInt(data.umur_kehamilan, 10),
+        lila: data.lila ? parseFloat(data.lila) : null,
+        bb: data.bb ? parseFloat(data.bb) : null,
         ceklab_report: {
           ...data.ceklab_report,
           hb: data.ceklab_report?.hb ? parseFloat(data.ceklab_report.hb) : null,
-          // Boolean conversion if they come as strings from select/radio
           hiv:
             data.ceklab_report?.hiv === "true" ||
             data.ceklab_report?.hiv === true,
@@ -148,13 +155,7 @@ const PemeriksaanKehamilanForm = () => {
         },
       };
 
-      // Remove practice_id as it's handled by BE automatically
       delete payload.practice_id;
-
-      // Clean empty checklab if optional
-      if (!payload.ceklab_report.golongan_darah && !payload.ceklab_report.hb) {
-        // Keep minimal structure or logic
-      }
 
       if (isEditMode) {
         await updateKehamilan(id, payload);
@@ -163,6 +164,7 @@ const PemeriksaanKehamilanForm = () => {
         await createKehamilan(payload);
         alert("Data berhasil ditambahkan!");
       }
+
       navigate("/pemeriksaan-kehamilan");
     } catch (err) {
       console.error(err);
@@ -172,329 +174,347 @@ const PemeriksaanKehamilanForm = () => {
     }
   };
 
-  if (fetching)
+  if (fetching) {
     return (
-      <div style={{ padding: "3rem", textAlign: "center" }}>Memuat data...</div>
+      <div style={{ padding: "3rem", textAlign: "center" }}>
+        Memuat data pemeriksaan...
+      </div>
     );
+  }
 
   return (
     <div className="dashboard">
-      <div className="dashboard-header">
+      <div className="dashboard-header" style={styles.header}>
         <div>
-          <h2>{isEditMode ? "Edit Pemeriksaan" : "Input Pemeriksaan Baru"}</h2>
-          <p className="text-muted">
+          <h2 style={styles.pageTitle}>
+            {isEditMode ? "Edit Pemeriksaan Kehamilan" : "Input Pemeriksaan Kehamilan"}
+          </h2>
+          <p className="text-muted" style={styles.pageSubtitle}>
             {isEditMode
-              ? "Perbarui data yang ditolak"
-              : "Masukkan data pemeriksaan kehamilan baru"}
+              ? "Perbarui data pemeriksaan yang perlu diperbaiki"
+              : "Masukkan data pemeriksaan kehamilan baru dengan struktur yang rapi"}
           </p>
         </div>
+        <button
+          type="button"
+          onClick={() => navigate("/pemeriksaan-kehamilan")}
+          className="btn-primary"
+          style={styles.secondaryButton}
+        >
+          Kembali ke List
+        </button>
       </div>
 
-      <div
-        className="auth-card"
-        style={{ maxWidth: "800px", margin: "0 auto" }}
-      >
-        {error && (
-          <div className="error-alert" style={{ marginBottom: "1rem" }}>
-            {error}
+      {error ? (
+        <div className="error-alert" style={{ marginBottom: "1rem" }}>
+          {error}
+        </div>
+      ) : null}
+
+      <div className="auth-card" style={styles.formCard}>
+        <div style={styles.formIntro}>
+          <div>
+            <h3 style={styles.sectionTitle}>Ringkasan Input</h3>
+            <p className="text-muted" style={styles.sectionSubtitle}>
+              Pilih pasien, lengkapi data utama, lalu isi pemeriksaan fisik dan cek
+              laboratorium bila tersedia.
+            </p>
+          </div>
+          <div style={styles.infoPills}>
+            <span style={styles.infoPill}>
+              Pasien tersedia: {patients.length}
+            </span>
+            <span style={styles.infoPill}>
+              Praktik aktif: {practices.length || 0}
+            </span>
+          </div>
+        </div>
+
+        {practices.length > 0 ? (
+          <div style={styles.noticeBox}>
+            Tempat praktik aktif akan mengikuti akun bidan praktik yang sedang
+            login.
+          </div>
+        ) : (
+          <div style={{ ...styles.noticeBox, ...styles.noticeWarning }}>
+            Tempat praktik belum terdeteksi. Pastikan akun Anda sudah terhubung ke
+            tempat praktik.
           </div>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          {/* Primary Info */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-              gap: "1rem",
-              marginBottom: "1.5rem",
-            }}
-          >
-            <div className="form-group">
-              <label className="form-label">Pasien *</label>
-              <Controller
-                name="pasien_id"
-                control={control}
-                rules={{ required: "Pasien wajib dipilih" }}
-                render={({ field }) => (
-                  <CustomSelect
-                    {...field}
-                    options={patients.map((p) => ({
-                      value: p.pasien_id,
-                      label: `${p.nama} (${p.nik})`,
-                    }))}
-                    onChange={(val) => field.onChange(val?.value)}
-                    value={
-                      patients.find((p) => p.pasien_id === field.value)
-                        ? {
-                            value: field.value,
-                            label: `${
-                              patients.find((p) => p.pasien_id === field.value)
-                                .nama
-                            } (${
-                              patients.find((p) => p.pasien_id === field.value)
-                                .nik
-                            })`,
-                          }
-                        : null
-                    }
-                    placeholder="Cari Pasien..."
-                  />
-                )}
-              />
-              {errors.pasien_id && (
-                <span className="error-message">
-                  {errors.pasien_id.message}
-                </span>
-              )}
+        <form onSubmit={handleSubmit(onSubmit)} style={styles.formLayout}>
+          <div style={styles.sectionCard}>
+            <div style={styles.sectionHeader}>
+              <h3 style={styles.sectionTitle}>Data Utama</h3>
+              <p className="text-muted" style={styles.sectionSubtitle}>
+                Informasi inti pemeriksaan dan identitas kunjungan
+              </p>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Tanggal Periksa *</label>
-              <input
-                type="date"
-                className="form-input"
-                {...register("tanggal", { required: "Tanggal wajib diisi" })}
-              />
-              {errors.tanggal && (
-                <span className="error-message">{errors.tanggal.message}</span>
-              )}
-            </div>
+            <div style={styles.inputGrid}>
+              <div className="form-group" style={{ marginBottom: 0, gridColumn: "1 / -1" }}>
+                <label className="form-label">Pasien *</label>
+                <Controller
+                  name="pasien_id"
+                  control={control}
+                  rules={{ required: "Pasien wajib dipilih" }}
+                  render={({ field }) => (
+                    <CustomSelect
+                      {...field}
+                      options={patientOptions}
+                      onChange={(option) => field.onChange(option?.value)}
+                      value={
+                        patientOptions.find((option) => option.value === field.value) ||
+                        null
+                      }
+                      placeholder="Cari pasien berdasarkan nama atau NIK..."
+                    />
+                  )}
+                />
+                {errors.pasien_id ? (
+                  <span className="error-message">{errors.pasien_id.message}</span>
+                ) : null}
+                {selectedPatient ? (
+                  <div style={styles.inlinePatientInfo}>
+                    <span>NIK: {selectedPatient.nik}</span>
+                    <span>Alamat: {selectedPatient.alamat_lengkap || "-"}</span>
+                  </div>
+                ) : null}
+              </div>
 
-            <div className="form-group">
-              <label className="form-label">
-                GPA (Gravida Partus Abortus) *
-              </label>
-              <input
-                type="text"
-                className="form-input"
-                placeholder="G2P1A0"
-                {...register("gpa", { required: "GPA wajib diisi" })}
-              />
-              {errors.gpa && (
-                <span className="error-message">{errors.gpa.message}</span>
-              )}
-            </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Tanggal Periksa *</label>
+                <input
+                  type="date"
+                  className="form-input"
+                  {...register("tanggal", { required: "Tanggal wajib diisi" })}
+                />
+                {errors.tanggal ? (
+                  <span className="error-message">{errors.tanggal.message}</span>
+                ) : null}
+              </div>
 
-            <div className="form-group">
-              <label className="form-label">Umur Kehamilan (Minggu) *</label>
-              <input
-                type="number"
-                className="form-input"
-                {...register("umur_kehamilan", {
-                  required: "Umur kehamilan wajib diisi",
-                  min: 0,
-                  max: 45,
-                })}
-              />
-              {errors.umur_kehamilan && (
-                <span className="error-message">
-                  {errors.umur_kehamilan.message}
-                </span>
-              )}
-            </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Jenis Kunjungan *</label>
+                <select
+                  className="form-input"
+                  {...register("jenis_kunjungan", { required: "Jenis kunjungan wajib dipilih" })}
+                >
+                  <option value="">Pilih jenis kunjungan</option>
+                  <option value="K1">K1</option>
+                  <option value="K2">K2</option>
+                  <option value="K3">K3</option>
+                  <option value="K4">K4</option>
+                  <option value="K5">K5</option>
+                  <option value="K6">K6</option>
+                </select>
+                {errors.jenis_kunjungan ? (
+                  <span className="error-message">
+                    {errors.jenis_kunjungan.message}
+                  </span>
+                ) : null}
+              </div>
 
-            <div className="form-group">
-              <label className="form-label">Jenis Kunjungan *</label>
-              <select
-                className="form-input"
-                {...register("jenis_kunjungan", { required: "Wajib dipilih" })}
-              >
-                <option value="">Pilih Jenis</option>
-                <option value="K1">K1</option>
-                <option value="K2">K2</option>
-                <option value="K3">K3</option>
-                <option value="K4">K4</option>
-                <option value="K5">K5</option>
-                <option value="K6">K6</option>
-              </select>
-              {errors.jenis_kunjungan && (
-                <span className="error-message">
-                  {errors.jenis_kunjungan.message}
-                </span>
-              )}
-            </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">GPA *</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="Contoh: G2P1A0"
+                  {...register("gpa", { required: "GPA wajib diisi" })}
+                />
+                {errors.gpa ? (
+                  <span className="error-message">{errors.gpa.message}</span>
+                ) : null}
+              </div>
 
-            <div className="form-group">
-              <label className="form-label">
-                Status TT (Tetanus Toksoid) *
-              </label>
-              <select
-                className="form-input"
-                {...register("status_tt", {
-                  required: "Status TT wajib dipilih",
-                })}
-              >
-                <option value="">Pilih Status</option>
-                <option value="TT1">TT1</option>
-                <option value="TT2">TT2</option>
-                <option value="TT3">TT3</option>
-                <option value="TT4">TT4</option>
-                <option value="TT5">TT5</option>
-              </select>
-              {errors.status_tt && (
-                <span className="error-message">
-                  {errors.status_tt.message}
-                </span>
-              )}
-            </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Umur Kehamilan (minggu) *</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  {...register("umur_kehamilan", {
+                    required: "Umur kehamilan wajib diisi",
+                    min: {
+                      value: 0,
+                      message: "Umur kehamilan tidak boleh kurang dari 0",
+                    },
+                    max: {
+                      value: 45,
+                      message: "Umur kehamilan tidak boleh lebih dari 45 minggu",
+                    },
+                  })}
+                />
+                {errors.umur_kehamilan ? (
+                  <span className="error-message">
+                    {errors.umur_kehamilan.message}
+                  </span>
+                ) : null}
+              </div>
 
-            <div className="form-group">
-              <label className="form-label">Resiko Tinggi *</label>
-              <select
-                className="form-input"
-                {...register("resti", {
-                  required: "Resiko Tinggi wajib dipilih",
-                })}
-              >
-                <option value="">Pilih Resiko</option>
-                <option value="RENDAH">Rendah</option>
-                <option value="SEDANG">Sedang</option>
-                <option value="TINGGI">Tinggi</option>
-              </select>
-              {errors.resti && (
-                <span className="error-message">{errors.resti.message}</span>
-              )}
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Status TT *</label>
+                <select
+                  className="form-input"
+                  {...register("status_tt", { required: "Status TT wajib dipilih" })}
+                >
+                  <option value="">Pilih status TT</option>
+                  <option value="TT1">TT1</option>
+                  <option value="TT2">TT2</option>
+                  <option value="TT3">TT3</option>
+                  <option value="TT4">TT4</option>
+                  <option value="TT5">TT5</option>
+                </select>
+                {errors.status_tt ? (
+                  <span className="error-message">{errors.status_tt.message}</span>
+                ) : null}
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Risiko Tinggi *</label>
+                <select
+                  className="form-input"
+                  {...register("resti", { required: "Risiko wajib dipilih" })}
+                >
+                  <option value="">Pilih tingkat risiko</option>
+                  <option value="RENDAH">Rendah</option>
+                  <option value="SEDANG">Sedang</option>
+                  <option value="TINGGI">Tinggi</option>
+                </select>
+                {errors.resti ? (
+                  <span className="error-message">{errors.resti.message}</span>
+                ) : null}
+              </div>
             </div>
           </div>
 
-          {/* Physical Check */}
-          <h3
-            style={{
-              fontSize: "1.1rem",
-              marginBottom: "1rem",
-              borderBottom: "1px solid rgba(255,255,255,0.1)",
-              paddingBottom: "0.5rem",
-            }}
-          >
-            Pemeriksaan Fisik
-          </h3>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-              gap: "1rem",
-              marginBottom: "1.5rem",
-            }}
-          >
-            <div className="form-group">
-              <label className="form-label">Tekanan Darah (mmHg) *</label>
-              <input
-                type="text"
-                className="form-input"
-                placeholder="120/80"
-                {...register("td", {
-                  required: "Wajib diisi",
-                  pattern: {
-                    value: /^\d+\/\d+$/,
-                    message: "Format harus Sistolik/Diastolik (contoh: 120/80)",
-                  },
-                })}
-              />
-              {errors.td && (
-                <span className="error-message">{errors.td.message}</span>
-              )}
+          <div style={styles.sectionCard}>
+            <div style={styles.sectionHeader}>
+              <h3 style={styles.sectionTitle}>Pemeriksaan Fisik</h3>
+              <p className="text-muted" style={styles.sectionSubtitle}>
+                Isi temuan pemeriksaan dasar yang dilakukan saat kunjungan
+              </p>
             </div>
-            <div className="form-group">
-              <label className="form-label">LILA (cm)</label>
-              <input
-                type="number"
-                step="0.1"
-                className="form-input"
-                {...register("lila")}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Berat Badan (kg)</label>
-              <input
-                type="number"
-                step="0.1"
-                className="form-input"
-                {...register("bb")}
-              />
+
+            <div style={styles.inputGrid}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Tekanan Darah (mmHg) *</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="Contoh: 120/80"
+                  {...register("td", {
+                    required: "Tekanan darah wajib diisi",
+                    pattern: {
+                      value: /^\d+\/\d+$/,
+                      message: "Format harus Sistolik/Diastolik, contoh 120/80",
+                    },
+                  })}
+                />
+                {errors.td ? (
+                  <span className="error-message">{errors.td.message}</span>
+                ) : null}
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">LILA (cm)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  className="form-input"
+                  placeholder="Contoh: 25.5"
+                  {...register("lila")}
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Berat Badan (kg)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  className="form-input"
+                  placeholder="Contoh: 55.2"
+                  {...register("bb")}
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0, gridColumn: "1 / -1" }}>
+                <label className="form-label">Catatan</label>
+                <textarea
+                  className="form-input"
+                  rows="4"
+                  placeholder="Tuliskan catatan penting pemeriksaan bila ada..."
+                  {...register("catatan")}
+                />
+              </div>
             </div>
           </div>
 
-          <div className="form-group" style={{ marginBottom: "1.5rem" }}>
-            <label className="form-label">Catatan</label>
-            <textarea
-              className="form-input"
-              rows="3"
-              {...register("catatan")}
-            ></textarea>
-          </div>
+          <div style={styles.sectionCard}>
+            <div style={styles.sectionHeader}>
+              <h3 style={styles.sectionTitle}>Cek Laboratorium</h3>
+              <p className="text-muted" style={styles.sectionSubtitle}>
+                Bagian ini opsional dan dapat diisi bila hasil lab tersedia
+              </p>
+            </div>
 
-          {/* Lab Report */}
-          <div
-            style={{
-              backgroundColor: "rgba(255,255,255,0.03)",
-              padding: "1rem",
-              borderRadius: "0.5rem",
-            }}
-          >
-            <h3 style={{ fontSize: "1.1rem", marginBottom: "1rem" }}>
-              Data Cek Lab (Opsional)
-            </h3>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                gap: "1rem",
-              }}
-            >
-              <div className="form-group">
+            <div style={styles.inputGrid}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Golongan Darah</label>
                 <select
                   className="form-input"
                   {...register("ceklab_report.golongan_darah")}
                 >
-                  <option value="">-</option>
+                  <option value="">Pilih golongan darah</option>
                   <option value="A">A</option>
                   <option value="B">B</option>
                   <option value="AB">AB</option>
                   <option value="O">O</option>
                 </select>
               </div>
-              <div className="form-group">
-                <label className="form-label">Hemoglobin (Hb) g/dL</label>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Hemoglobin (Hb)</label>
                 <input
                   type="number"
                   step="0.1"
                   className="form-input"
+                  placeholder="Contoh: 11.5"
                   {...register("ceklab_report.hb")}
                 />
               </div>
 
-              {/* Boolean Selects */}
-              <div className="form-group">
+              <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">HIV</label>
                 <select
                   className="form-input"
                   {...register("ceklab_report.hiv")}
                 >
-                  <option value="">-</option>
+                  <option value="">Belum diisi</option>
                   <option value="false">Negatif</option>
                   <option value="true">Positif</option>
                 </select>
               </div>
-              <div className="form-group">
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">HBsAg</label>
                 <select
                   className="form-input"
                   {...register("ceklab_report.hbsag")}
                 >
-                  <option value="">-</option>
+                  <option value="">Belum diisi</option>
                   <option value="false">Negatif</option>
                   <option value="true">Positif</option>
                 </select>
               </div>
-              <div className="form-group">
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Sifilis</label>
                 <select
                   className="form-input"
                   {...register("ceklab_report.sifilis")}
                 >
-                  <option value="">-</option>
+                  <option value="">Belum diisi</option>
                   <option value="false">Negatif</option>
                   <option value="true">Positif</option>
                 </select>
@@ -502,23 +522,12 @@ const PemeriksaanKehamilanForm = () => {
             </div>
           </div>
 
-          <div
-            style={{
-              marginTop: "2rem",
-              display: "flex",
-              justifyContent: "end",
-              gap: "1rem",
-            }}
-          >
+          <div style={styles.formActions}>
             <button
               type="button"
               onClick={() => navigate("/pemeriksaan-kehamilan")}
               className="btn-primary"
-              style={{
-                backgroundColor: "transparent",
-                border: "1px solid var(--glass-border)",
-                minWidth: "150px",
-              }}
+              style={styles.secondaryButton}
             >
               Batal
             </button>
@@ -526,7 +535,7 @@ const PemeriksaanKehamilanForm = () => {
               type="submit"
               className="btn-primary"
               disabled={loading}
-              style={{ minWidth: "150px" }}
+              style={styles.primaryButton}
             >
               {loading
                 ? "Menyimpan..."
@@ -539,6 +548,113 @@ const PemeriksaanKehamilanForm = () => {
       </div>
     </div>
   );
+};
+
+const styles = {
+  header: {
+    gap: "1rem",
+    flexWrap: "wrap",
+  },
+  pageTitle: {
+    marginBottom: "0.35rem",
+  },
+  pageSubtitle: {
+    margin: 0,
+  },
+  formCard: {
+    maxWidth: "none",
+    margin: 0,
+    padding: "1.75rem",
+  },
+  formIntro: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: "1rem",
+    flexWrap: "wrap",
+    marginBottom: "1rem",
+  },
+  infoPills: {
+    display: "flex",
+    gap: "0.75rem",
+    flexWrap: "wrap",
+  },
+  infoPill: {
+    display: "inline-flex",
+    alignItems: "center",
+    padding: "0.5rem 0.85rem",
+    borderRadius: "999px",
+    background: "rgba(255,255,255,0.04)",
+    border: "1px solid rgba(255,255,255,0.07)",
+    color: "var(--color-text-muted)",
+    fontSize: "0.85rem",
+  },
+  noticeBox: {
+    marginBottom: "1.25rem",
+    padding: "0.9rem 1rem",
+    borderRadius: "14px",
+    background: "rgba(59,130,246,0.12)",
+    border: "1px solid rgba(96,165,250,0.25)",
+    color: "#bfdbfe",
+    lineHeight: 1.5,
+  },
+  noticeWarning: {
+    background: "rgba(251,191,36,0.12)",
+    border: "1px solid rgba(251,191,36,0.28)",
+    color: "#fde68a",
+  },
+  formLayout: {
+    display: "grid",
+    gap: "1rem",
+  },
+  sectionCard: {
+    padding: "1.25rem",
+    borderRadius: "18px",
+    background: "rgba(255,255,255,0.03)",
+    border: "1px solid rgba(255,255,255,0.06)",
+  },
+  sectionHeader: {
+    marginBottom: "1rem",
+  },
+  sectionTitle: {
+    marginBottom: "0.35rem",
+    fontSize: "1.1rem",
+  },
+  sectionSubtitle: {
+    margin: 0,
+  },
+  inputGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: "1rem",
+  },
+  inlinePatientInfo: {
+    marginTop: "0.75rem",
+    display: "flex",
+    gap: "0.75rem",
+    flexWrap: "wrap",
+    fontSize: "0.85rem",
+    color: "var(--color-text-muted)",
+  },
+  formActions: {
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: "0.75rem",
+    flexWrap: "wrap",
+    marginTop: "0.5rem",
+  },
+  primaryButton: {
+    width: "auto",
+    minWidth: "150px",
+    paddingInline: "1rem",
+  },
+  secondaryButton: {
+    width: "auto",
+    minWidth: "150px",
+    paddingInline: "1rem",
+    backgroundColor: "transparent",
+    border: "1px solid var(--glass-border)",
+  },
 };
 
 export default PemeriksaanKehamilanForm;

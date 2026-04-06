@@ -1,20 +1,26 @@
-import { useState, useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useEffect, useMemo, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
+import CustomSelect from "../../components/CustomSelect";
+import { useAuth } from "../../context/AuthContext";
+import "../../App.css";
 import {
   createPersalinan,
-  updatePersalinan,
+  getPasienList,
   getPersalinanDetail,
   getPracticePlaces,
-  getPasienList,
+  updatePersalinan,
 } from "../../services/api";
-import { useAuth } from "../../context/AuthContext";
-import CustomSelect from "../../components/CustomSelect";
-import "../../App.css";
+import {
+  isAssignedToPractice,
+  isBidanPraktik,
+} from "../../utils/roleHelpers";
 
 const PersalinanForm = () => {
   const { id } = useParams();
-  const isEditMode = !!id;
+  const isEditMode = Boolean(id);
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const {
     register,
     handleSubmit,
@@ -43,26 +49,51 @@ const PersalinanForm = () => {
       vit_a_bufas: false,
     },
   });
-  const navigate = useNavigate();
-  const { user } = useAuth();
+
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
   const [error, setError] = useState("");
-
-  // Dropdown data
   const [patients, setPatients] = useState([]);
   const [practices, setPractices] = useState([]);
 
-  // Watch for conditional validation
+  const selectedPatientId = watch("pasien_id");
   const cacatBawaan = watch("keadaan_bayi.cacat_bawaan");
 
+  const selectedPatient = useMemo(
+    () => patients.find((patient) => patient.pasien_id === selectedPatientId),
+    [patients, selectedPatientId],
+  );
+
+  const patientOptions = useMemo(
+    () =>
+      patients.map((patient) => ({
+        value: patient.pasien_id,
+        label: `${patient.nama} (${patient.nik})`,
+      })),
+    [patients],
+  );
+
+  const practiceOptions = useMemo(
+    () =>
+      practices.map((practice) => ({
+        value: practice.practice_id,
+        label: practice.nama_praktik,
+      })),
+    [practices],
+  );
+
   useEffect(() => {
+    if (!isBidanPraktik(user)) {
+      navigate("/persalinan");
+      return;
+    }
+
     loadDropdowns();
     if (isEditMode) {
       fetchData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, user]);
 
   const loadDropdowns = async () => {
     try {
@@ -70,8 +101,8 @@ const PersalinanForm = () => {
       setPatients(pasienRes.data || []);
 
       const practicesRes = await getPracticePlaces();
-      const myPractices = (practicesRes.data || []).filter(
-        (p) => p.user_id === user.user_id,
+      const myPractices = (practicesRes.data || []).filter((practice) =>
+        isAssignedToPractice(practice, user),
       );
       setPractices(myPractices);
 
@@ -90,17 +121,14 @@ const PersalinanForm = () => {
       const response = await getPersalinanDetail(id);
       const data = response.data;
 
-      // Map API response to form structure
-      // Note: API returns keadaan_ibu_persalinan, but create payload expects keadaan_ibu
-      // We need to map it carefully.
-
       setValue("practice_id", data.practice_id);
       setValue("pasien_id", data.pasien_id);
-      if (data.tanggal_partus)
+      if (data.tanggal_partus) {
         setValue(
           "tanggal_partus",
           new Date(data.tanggal_partus).toISOString().split("T")[0],
         );
+      }
       setValue("gravida", data.gravida);
       setValue("para", data.para);
       setValue("abortus", data.abortus);
@@ -147,10 +175,9 @@ const PersalinanForm = () => {
       const payload = {
         ...data,
         tanggal_partus: new Date(data.tanggal_partus).toISOString(),
-        gravida: parseInt(data.gravida),
-        para: parseInt(data.para),
-        abortus: parseInt(data.abortus),
-
+        gravida: parseInt(data.gravida, 10),
+        para: parseInt(data.para, 10),
+        abortus: parseInt(data.abortus, 10),
         keadaan_bayi: {
           ...data.keadaan_bayi,
           pb: parseFloat(data.keadaan_bayi.pb),
@@ -176,428 +203,365 @@ const PersalinanForm = () => {
     }
   };
 
-  if (fetching)
+  if (fetching) {
     return (
-      <div style={{ padding: "3rem", textAlign: "center" }}>Memuat data...</div>
+      <div style={{ padding: "3rem", textAlign: "center" }}>
+        Memuat data persalinan...
+      </div>
     );
+  }
 
   return (
     <div className="dashboard">
-      <div className="dashboard-header">
+      <div className="dashboard-header" style={styles.header}>
         <div>
-          <h2>
-            {isEditMode ? "Edit Data Persalinan" : "Input Persalinan Baru"}
+          <h2 style={styles.pageTitle}>
+            {isEditMode ? "Edit Data Persalinan" : "Input Data Persalinan"}
           </h2>
-          <p className="text-muted">
+          <p className="text-muted" style={styles.pageSubtitle}>
             {isEditMode
-              ? "Perbaiki data yang ditolak"
-              : "Masukkan data persalinan baru"}
+              ? "Perbarui data persalinan yang perlu diperbaiki"
+              : "Masukkan data persalinan baru dengan struktur yang lebih rapi"}
           </p>
         </div>
+        <button
+          type="button"
+          onClick={() => navigate("/persalinan")}
+          className="btn-primary"
+          style={styles.secondaryButton}
+        >
+          Kembali ke List
+        </button>
       </div>
 
-      <div
-        className="auth-card"
-        style={{ maxWidth: "900px", margin: "0 auto" }}
-      >
-        {error && (
-          <div className="error-alert" style={{ marginBottom: "1rem" }}>
-            {error}
+      {error ? (
+        <div className="error-alert" style={{ marginBottom: "1rem" }}>
+          {error}
+        </div>
+      ) : null}
+
+      <div className="auth-card" style={styles.formCard}>
+        <div style={styles.formIntro}>
+          <div>
+            <h3 style={styles.sectionTitle}>Ringkasan Input</h3>
+            <p className="text-muted" style={styles.sectionSubtitle}>
+              Lengkapi data umum, kondisi ibu, kondisi bayi, lalu tambahkan
+              catatan persalinan bila diperlukan.
+            </p>
           </div>
-        )}
+          <div style={styles.infoPills}>
+            <span style={styles.infoPill}>Pasien tersedia: {patients.length}</span>
+            <span style={styles.infoPill}>
+              Praktik aktif: {practices.length || 0}
+            </span>
+          </div>
+        </div>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          {/* Section 1: Data Umum */}
-          <div style={{ marginBottom: "2rem" }}>
-            <h3
-              style={{
-                fontSize: "1.1rem",
-                marginBottom: "1rem",
-                borderBottom: "1px solid rgba(255,255,255,0.1)",
-                paddingBottom: "0.5rem",
-              }}
-            >
-              1. Data Umum & Ibu
-            </h3>
+        <form onSubmit={handleSubmit(onSubmit)} style={styles.formLayout}>
+          <div style={styles.sectionCard}>
+            <div style={styles.sectionHeader}>
+              <h3 style={styles.sectionTitle}>Data Umum</h3>
+              <p className="text-muted" style={styles.sectionSubtitle}>
+                Informasi utama persalinan dan pasien
+              </p>
+            </div>
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                gap: "1rem",
-              }}
-            >
-              <div className="form-group">
+            <div style={styles.inputGrid}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Tempat Praktik *</label>
                 <Controller
                   name="practice_id"
                   control={control}
-                  rules={{ required: "Wajib dipilih" }}
+                  rules={{ required: "Tempat praktik wajib dipilih" }}
                   render={({ field }) => (
                     <CustomSelect
                       {...field}
-                      options={practices.map((p) => ({
-                        value: p.practice_id,
-                        label: p.nama_praktik,
-                      }))}
-                      onChange={(val) => field.onChange(val?.value)}
+                      options={practiceOptions}
+                      onChange={(option) => field.onChange(option?.value)}
                       value={
-                        practices.find((p) => p.practice_id === field.value)
-                          ? {
-                              value: field.value,
-                              label: practices.find(
-                                (p) => p.practice_id === field.value,
-                              ).nama_praktik,
-                            }
-                          : null
+                        practiceOptions.find((option) => option.value === field.value) ||
+                        null
                       }
-                      placeholder="Pilih Tempat Praktik"
+                      placeholder="Pilih tempat praktik"
                     />
                   )}
                 />
-                {errors.practice_id && (
-                  <span className="error-message">
-                    {errors.practice_id.message}
-                  </span>
-                )}
+                {errors.practice_id ? (
+                  <span className="error-message">{errors.practice_id.message}</span>
+                ) : null}
               </div>
 
-              <div className="form-group">
+              <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Pasien *</label>
                 <Controller
                   name="pasien_id"
                   control={control}
-                  rules={{ required: "Wajib dipilih" }}
+                  rules={{ required: "Pasien wajib dipilih" }}
                   render={({ field }) => (
                     <CustomSelect
                       {...field}
-                      options={patients.map((p) => ({
-                        value: p.pasien_id,
-                        label: `${p.nama} (${p.nik})`,
-                      }))}
-                      onChange={(val) => field.onChange(val?.value)}
+                      options={patientOptions}
+                      onChange={(option) => field.onChange(option?.value)}
                       value={
-                        patients.find((p) => p.pasien_id === field.value)
-                          ? {
-                              value: field.value,
-                              label: `${
-                                patients.find(
-                                  (p) => p.pasien_id === field.value,
-                                ).nama
-                              } (${
-                                patients.find(
-                                  (p) => p.pasien_id === field.value,
-                                ).nik
-                              })`,
-                            }
-                          : null
+                        patientOptions.find((option) => option.value === field.value) ||
+                        null
                       }
-                      placeholder="Cari Pasien..."
+                      placeholder="Cari pasien berdasarkan nama atau NIK..."
                     />
                   )}
                 />
-                {errors.pasien_id && (
-                  <span className="error-message">
-                    {errors.pasien_id.message}
-                  </span>
-                )}
+                {errors.pasien_id ? (
+                  <span className="error-message">{errors.pasien_id.message}</span>
+                ) : null}
+                {selectedPatient ? (
+                  <div style={styles.inlinePatientInfo}>
+                    <span>NIK: {selectedPatient.nik}</span>
+                    <span>Alamat: {selectedPatient.alamat_lengkap || "-"}</span>
+                  </div>
+                ) : null}
               </div>
 
-              <div className="form-group">
+              <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Tanggal Partus *</label>
                 <input
                   type="date"
                   className="form-input"
-                  {...register("tanggal_partus", { required: "Wajib diisi" })}
+                  {...register("tanggal_partus", {
+                    required: "Tanggal partus wajib diisi",
+                  })}
                 />
-                {errors.tanggal_partus && (
+                {errors.tanggal_partus ? (
                   <span className="error-message">
                     {errors.tanggal_partus.message}
                   </span>
-                )}
+                ) : null}
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Gravida *</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  {...register("gravida", {
+                    required: "Gravida wajib diisi",
+                    min: { value: 1, message: "Minimal 1" },
+                  })}
+                />
+                {errors.gravida ? (
+                  <span className="error-message">{errors.gravida.message}</span>
+                ) : null}
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Para *</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  {...register("para", {
+                    required: "Para wajib diisi",
+                    min: { value: 0, message: "Minimal 0" },
+                  })}
+                />
+                {errors.para ? (
+                  <span className="error-message">{errors.para.message}</span>
+                ) : null}
+              </div>
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label">Abortus *</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  {...register("abortus", {
+                    required: "Abortus wajib diisi",
+                    min: { value: 0, message: "Minimal 0" },
+                  })}
+                />
+                {errors.abortus ? (
+                  <span className="error-message">{errors.abortus.message}</span>
+                ) : null}
               </div>
             </div>
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: "1rem",
-                marginTop: "1rem",
-              }}
-            >
-              <div className="form-group">
-                <label className="form-label">Gravida (Kehamilan Ke-)</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  {...register("gravida", { required: true, min: 1 })}
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Para (Melahirkan Ke-)</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  {...register("para", { required: true, min: 0 })}
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Abortus (Keguguran)</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  {...register("abortus", { required: true, min: 0 })}
-                />
-              </div>
-            </div>
-
-            <div
-              style={{
-                marginTop: "1rem",
-                display: "flex",
-                gap: "2rem",
-                flexWrap: "wrap",
-              }}
-            >
-              <label
-                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-              >
-                <input type="checkbox" {...register("vit_k")} /> Vitamin K
+            <div style={styles.checklistRow}>
+              <label style={styles.checkboxItem}>
+                <input type="checkbox" {...register("vit_k")} />
+                Vitamin K
               </label>
-              <label
-                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-              >
-                <input type="checkbox" {...register("hb_0")} /> Hepatitis B 0
+              <label style={styles.checkboxItem}>
+                <input type="checkbox" {...register("hb_0")} />
+                Hepatitis B0
               </label>
-              <label
-                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-              >
-                <input type="checkbox" {...register("vit_a_bufas")} /> Vitamin A
-                (Ibu Nifas)
+              <label style={styles.checkboxItem}>
+                <input type="checkbox" {...register("vit_a_bufas")} />
+                Vitamin A Ibu Nifas
               </label>
             </div>
           </div>
 
-          {/* Section 2: Keadaan Ibu */}
-          <div
-            style={{
-              marginBottom: "2rem",
-              backgroundColor: "rgba(255,255,255,0.03)",
-              padding: "1rem",
-              borderRadius: "0.5rem",
-            }}
-          >
-            <h3 style={{ fontSize: "1.1rem", marginBottom: "1rem" }}>
-              2. Kondisi Ibu
-            </h3>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                gap: "1rem",
-              }}
-            >
-              <label
-                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-              >
-                <input type="checkbox" {...register("keadaan_ibu.hidup")} /> Ibu
-                Hidup
+          <div style={styles.sectionCard}>
+            <div style={styles.sectionHeader}>
+              <h3 style={styles.sectionTitle}>Kondisi Ibu</h3>
+              <p className="text-muted" style={styles.sectionSubtitle}>
+                Tandai kondisi ibu saat persalinan berlangsung
+              </p>
+            </div>
+
+            <div style={styles.checkboxGrid}>
+              <label style={styles.checkboxCard}>
+                <input type="checkbox" {...register("keadaan_ibu.hidup")} />
+                Ibu hidup
               </label>
-              <label
-                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-              >
-                <input type="checkbox" {...register("keadaan_ibu.baik")} />{" "}
-                Kondisi Sehat/Baik
+              <label style={styles.checkboxCard}>
+                <input type="checkbox" {...register("keadaan_ibu.baik")} />
+                Kondisi sehat / baik
               </label>
-              <label
-                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-              >
-                <input type="checkbox" {...register("keadaan_ibu.hap")} />{" "}
+              <label style={styles.checkboxCard}>
+                <input type="checkbox" {...register("keadaan_ibu.hap")} />
                 Pendarahan (HAP)
               </label>
-              <label
-                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-              >
-                <input
-                  type="checkbox"
-                  {...register("keadaan_ibu.partus_lama")}
-                />{" "}
-                Partus Lama
+              <label style={styles.checkboxCard}>
+                <input type="checkbox" {...register("keadaan_ibu.partus_lama")} />
+                Partus lama
               </label>
-              <label
-                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-              >
-                <input
-                  type="checkbox"
-                  {...register("keadaan_ibu.pre_eklamsi")}
-                />{" "}
-                Pre-Eklamsi
+              <label style={styles.checkboxCard}>
+                <input type="checkbox" {...register("keadaan_ibu.pre_eklamsi")} />
+                Pre-eklamsi
               </label>
             </div>
           </div>
 
-          {/* Section 3: Keadaan Bayi */}
-          <div style={{ marginBottom: "2rem" }}>
-            <h3
-              style={{
-                fontSize: "1.1rem",
-                marginBottom: "1rem",
-                borderBottom: "1px solid rgba(255,255,255,0.1)",
-                paddingBottom: "0.5rem",
-              }}
-            >
-              3. Data Bayi
-            </h3>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                gap: "1rem",
-              }}
-            >
-              <div className="form-group">
+          <div style={styles.sectionCard}>
+            <div style={styles.sectionHeader}>
+              <h3 style={styles.sectionTitle}>Kondisi Bayi</h3>
+              <p className="text-muted" style={styles.sectionSubtitle}>
+                Lengkapi data bayi dan kondisi saat lahir
+              </p>
+            </div>
+
+            <div style={styles.inputGrid}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Berat Badan (gram) *</label>
                 <input
                   type="number"
                   className="form-input"
                   {...register("keadaan_bayi.bb", {
-                    required: "BB Wajib diisi",
+                    required: "Berat badan wajib diisi",
                   })}
                 />
-                {errors.keadaan_bayi?.bb && (
+                {errors.keadaan_bayi?.bb ? (
                   <span className="error-message">
                     {errors.keadaan_bayi.bb.message}
                   </span>
-                )}
+                ) : null}
               </div>
-              <div className="form-group">
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Panjang Badan (cm) *</label>
                 <input
                   type="number"
                   step="0.1"
                   className="form-input"
                   {...register("keadaan_bayi.pb", {
-                    required: "PB Wajib diisi",
+                    required: "Panjang badan wajib diisi",
                   })}
                 />
-                {errors.keadaan_bayi?.pb && (
+                {errors.keadaan_bayi?.pb ? (
                   <span className="error-message">
                     {errors.keadaan_bayi.pb.message}
                   </span>
-                )}
+                ) : null}
               </div>
-              <div className="form-group">
+
+              <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Jenis Kelamin *</label>
                 <select
                   className="form-input"
                   {...register("keadaan_bayi.jenis_kelamin", {
-                    required: "Wajib dipilih",
+                    required: "Jenis kelamin wajib dipilih",
                   })}
                 >
-                  <option value="">Pilih</option>
+                  <option value="">Pilih jenis kelamin</option>
                   <option value="LAKI_LAKI">Laki-laki</option>
                   <option value="PEREMPUAN">Perempuan</option>
                 </select>
-                {errors.keadaan_bayi?.jenis_kelamin && (
+                {errors.keadaan_bayi?.jenis_kelamin ? (
                   <span className="error-message">
                     {errors.keadaan_bayi.jenis_kelamin.message}
                   </span>
-                )}
+                ) : null}
               </div>
             </div>
 
-            <div
-              style={{
-                marginTop: "1rem",
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                gap: "1rem",
-              }}
-            >
-              <label
-                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-              >
-                <input type="checkbox" {...register("keadaan_bayi.hidup")} />{" "}
-                Bayi Lahir Hidup
+            <div style={styles.checkboxGrid}>
+              <label style={styles.checkboxCard}>
+                <input type="checkbox" {...register("keadaan_bayi.hidup")} />
+                Bayi lahir hidup
               </label>
-              <label
-                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-              >
-                <input type="checkbox" {...register("keadaan_bayi.asfiksia")} />{" "}
+              <label style={styles.checkboxCard}>
+                <input type="checkbox" {...register("keadaan_bayi.asfiksia")} />
                 Asfiksia
               </label>
-              <label
-                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-              >
-                <input type="checkbox" {...register("keadaan_bayi.rds")} />{" "}
-                Gangguan Nafas (RDS)
+              <label style={styles.checkboxCard}>
+                <input type="checkbox" {...register("keadaan_bayi.rds")} />
+                Gangguan nafas (RDS)
               </label>
-            </div>
-
-            <div
-              style={{
-                marginTop: "1rem",
-                backgroundColor: "rgba(255,255,255,0.03)",
-                padding: "1rem",
-                borderRadius: "0.5rem",
-              }}
-            >
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  marginBottom: "1rem",
-                  fontWeight: "bold",
-                }}
-              >
+              <label style={styles.checkboxCard}>
                 <input
                   type="checkbox"
                   {...register("keadaan_bayi.cacat_bawaan")}
-                />{" "}
-                Cacat Bawaan
+                />
+                Cacat bawaan
               </label>
-              {cacatBawaan && (
-                <div className="form-group">
+            </div>
+
+            {cacatBawaan ? (
+              <div style={styles.alertBox}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
                   <label className="form-label">Keterangan Cacat *</label>
                   <input
                     type="text"
                     className="form-input"
+                    placeholder="Jelaskan kelainan atau temuan yang terjadi..."
                     {...register("keadaan_bayi.keterangan_cacat", {
-                      required: "Wajib diisi jika cacat bawaan",
+                      required: "Wajib diisi jika cacat bawaan dicentang",
                     })}
-                    placeholder="Jelaskan kelainan..."
                   />
-                  {errors.keadaan_bayi?.keterangan_cacat && (
+                  {errors.keadaan_bayi?.keterangan_cacat ? (
                     <span className="error-message">
                       {errors.keadaan_bayi.keterangan_cacat.message}
                     </span>
-                  )}
+                  ) : null}
                 </div>
-              )}
+              </div>
+            ) : null}
+          </div>
+
+          <div style={styles.sectionCard}>
+            <div style={styles.sectionHeader}>
+              <h3 style={styles.sectionTitle}>Catatan Tambahan</h3>
+              <p className="text-muted" style={styles.sectionSubtitle}>
+                Isi catatan penting yang perlu disimpan bersama data persalinan
+              </p>
+            </div>
+
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Catatan</label>
+              <textarea
+                className="form-input"
+                rows="4"
+                placeholder="Tuliskan catatan tambahan bila ada..."
+                {...register("catatan")}
+              />
             </div>
           </div>
 
-          <div className="form-group" style={{ marginBottom: "2rem" }}>
-            <label className="form-label">Catatan Tambahan</label>
-            <textarea
-              className="form-input"
-              rows="3"
-              {...register("catatan")}
-            ></textarea>
-          </div>
-
-          <div style={{ display: "flex", justifyContent: "end", gap: "1rem" }}>
+          <div style={styles.formActions}>
             <button
               type="button"
               onClick={() => navigate("/persalinan")}
               className="btn-primary"
-              style={{
-                backgroundColor: "transparent",
-                border: "1px solid var(--glass-border)",
-                minWidth: "150px",
-              }}
+              style={styles.secondaryButton}
             >
               Batal
             </button>
@@ -605,7 +569,7 @@ const PersalinanForm = () => {
               type="submit"
               className="btn-primary"
               disabled={loading}
-              style={{ minWidth: "150px" }}
+              style={styles.primaryButton}
             >
               {loading
                 ? "Menyimpan..."
@@ -618,6 +582,135 @@ const PersalinanForm = () => {
       </div>
     </div>
   );
+};
+
+const styles = {
+  header: {
+    gap: "1rem",
+    flexWrap: "wrap",
+  },
+  pageTitle: {
+    marginBottom: "0.35rem",
+  },
+  pageSubtitle: {
+    margin: 0,
+  },
+  formCard: {
+    maxWidth: "none",
+    margin: 0,
+    padding: "1.75rem",
+  },
+  formIntro: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: "1rem",
+    flexWrap: "wrap",
+    marginBottom: "1rem",
+  },
+  infoPills: {
+    display: "flex",
+    gap: "0.75rem",
+    flexWrap: "wrap",
+  },
+  infoPill: {
+    display: "inline-flex",
+    alignItems: "center",
+    padding: "0.5rem 0.85rem",
+    borderRadius: "999px",
+    background: "rgba(255,255,255,0.04)",
+    border: "1px solid rgba(255,255,255,0.07)",
+    color: "var(--color-text-muted)",
+    fontSize: "0.85rem",
+  },
+  formLayout: {
+    display: "grid",
+    gap: "1rem",
+  },
+  sectionCard: {
+    padding: "1.25rem",
+    borderRadius: "18px",
+    background: "rgba(255,255,255,0.03)",
+    border: "1px solid rgba(255,255,255,0.06)",
+  },
+  sectionHeader: {
+    marginBottom: "1rem",
+  },
+  sectionTitle: {
+    marginBottom: "0.35rem",
+    fontSize: "1.1rem",
+  },
+  sectionSubtitle: {
+    margin: 0,
+  },
+  inputGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: "1rem",
+  },
+  inlinePatientInfo: {
+    marginTop: "0.75rem",
+    display: "flex",
+    gap: "0.75rem",
+    flexWrap: "wrap",
+    fontSize: "0.85rem",
+    color: "var(--color-text-muted)",
+  },
+  checklistRow: {
+    marginTop: "1rem",
+    display: "flex",
+    gap: "0.75rem",
+    flexWrap: "wrap",
+  },
+  checkboxItem: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "0.5rem",
+    padding: "0.65rem 0.9rem",
+    borderRadius: "12px",
+    background: "rgba(255,255,255,0.03)",
+    border: "1px solid rgba(255,255,255,0.06)",
+  },
+  checkboxGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: "0.85rem",
+  },
+  checkboxCard: {
+    display: "flex",
+    alignItems: "center",
+    gap: "0.6rem",
+    padding: "0.9rem 1rem",
+    borderRadius: "14px",
+    background: "rgba(255,255,255,0.03)",
+    border: "1px solid rgba(255,255,255,0.06)",
+  },
+  alertBox: {
+    marginTop: "1rem",
+    padding: "1rem",
+    borderRadius: "16px",
+    background: "rgba(239, 68, 68, 0.12)",
+    border: "1px solid rgba(248, 113, 113, 0.24)",
+  },
+  formActions: {
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: "0.75rem",
+    flexWrap: "wrap",
+    marginTop: "0.5rem",
+  },
+  primaryButton: {
+    width: "auto",
+    minWidth: "150px",
+    paddingInline: "1rem",
+  },
+  secondaryButton: {
+    width: "auto",
+    minWidth: "150px",
+    paddingInline: "1rem",
+    backgroundColor: "transparent",
+    border: "1px solid var(--glass-border)",
+  },
 };
 
 export default PersalinanForm;

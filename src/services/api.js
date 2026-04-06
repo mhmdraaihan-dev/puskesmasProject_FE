@@ -64,61 +64,61 @@ export const resetPasswordByAdmin = async (userId, newPassword) => {
 
 // ==================== VILLAGE API ====================
 export const createVillage = async (villageData) => {
-  const response = await api.post("/village", villageData);
+  const response = await api.post("/villages", villageData);
   return response.data;
 };
 
 export const getVillages = async () => {
-  const response = await api.get("/village");
+  const response = await api.get("/villages");
   return response.data;
 };
 
 export const getVillageById = async (villageId) => {
-  const response = await api.get(`/village/${villageId}`);
+  const response = await api.get(`/villages/${villageId}`);
   return response.data;
 };
 
 export const updateVillage = async (villageId, villageData) => {
-  const response = await api.put(`/village/${villageId}`, villageData);
+  const response = await api.put(`/villages/${villageId}`, villageData);
   return response.data;
 };
 
 export const deleteVillage = async (villageId) => {
-  const response = await api.delete(`/village/${villageId}`);
+  const response = await api.delete(`/villages/${villageId}`);
   return response.data;
 };
 
 // ==================== PRACTICE PLACE API ====================
 export const createPracticePlace = async (practicePlaceData) => {
-  const response = await api.post("/practice-place", practicePlaceData);
+  const response = await api.post("/practice-places", practicePlaceData);
   return response.data;
 };
 
 export const getPracticePlaces = async () => {
-  const response = await api.get("/practice-place");
+  const response = await api.get("/practice-places");
   return response.data;
 };
 
 export const getPracticePlacesByVillage = async (villageId) => {
-  const response = await api.get(`/practice-place/village/${villageId}`);
+  const response = await api.get(`/practice-places?village_id=${villageId}`);
   return response.data;
 };
 
 export const getPracticePlaceById = async (practiceId) => {
-  const response = await api.get(`/practice-place/${practiceId}`);
+  const response = await api.get(`/practice-places/${practiceId}`);
   return response.data;
 };
 
 export const updatePracticePlace = async (practiceId, practicePlaceData) => {
   const response = await api.put(
-    `/practice-place/${practiceId}`,
+    `/practice-places/${practiceId}`,
     practicePlaceData,
   );
   return response.data;
 };
 
 export const deletePracticePlace = async (practiceId) => {
-  const response = await api.delete(`/practice-place/${practiceId}`);
+  const response = await api.delete(`/practice-places/${practiceId}`);
   return response.data;
 };
 
