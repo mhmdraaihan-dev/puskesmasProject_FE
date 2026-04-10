@@ -35,6 +35,11 @@ export const getUsers = async () => {
   return response.data;
 };
 
+export const getUserById = async (userId) => {
+  const response = await api.get(`/users/${userId}`);
+  return response.data;
+};
+
 export const updateUserStatus = async (userId, status) => {
   const response = await api.patch(`/users/${userId}/status`, {
     status_user: status,
@@ -331,6 +336,39 @@ export const updatePasien = async (id, data) => {
 
 export const deletePasien = async (id) => {
   const response = await api.delete(`/pasien/${id}`);
+  return response.data;
+};
+
+// ==================== LEAVE MANAGEMENT API ====================
+export const getLeaveBalance = async (staffId, year) => {
+  const response = await api.get(`/staff/${staffId}/leave-balance`, {
+    params: { year },
+  });
+  return response.data;
+};
+
+export const updateLeaveBalance = async (staffId, payload) => {
+  const response = await api.put(`/staff/${staffId}/leave-balance`, payload);
+  return response.data;
+};
+
+export const getStaffLeaves = async (staffId, params = {}) => {
+  const response = await api.get(`/staff/${staffId}/leaves`, { params });
+  return response.data;
+};
+
+export const createStaffLeave = async (staffId, payload) => {
+  const response = await api.post(`/staff/${staffId}/leaves`, payload);
+  return response.data;
+};
+
+export const approveStaffLeave = async (leaveId) => {
+  const response = await api.patch(`/staff/leaves/${leaveId}/approve`);
+  return response.data;
+};
+
+export const rejectStaffLeave = async (leaveId) => {
+  const response = await api.patch(`/staff/leaves/${leaveId}/reject`);
   return response.data;
 };
 

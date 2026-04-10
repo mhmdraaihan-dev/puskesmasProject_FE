@@ -192,6 +192,12 @@ const UserList = () => {
                       <td>
                         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
                           <button
+                            onClick={() => navigate(`/users/${user.user_id}/leaves`)}
+                            className="action-icon-btn"
+                          >
+                            Cuti
+                          </button>
+                          <button
                             onClick={() => navigate(`/edit-user/${user.user_id}`)}
                             className="action-icon-btn"
                           >

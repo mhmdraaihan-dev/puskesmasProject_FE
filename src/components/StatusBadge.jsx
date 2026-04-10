@@ -5,18 +5,21 @@ const StatusBadge = ({ status }) => {
     const getStatusStyle = () => {
         switch (status) {
             case 'PENDING':
+            case 'pending':
                 return {
                     backgroundColor: 'rgba(251, 191, 36, 0.2)',
                     border: '1px solid rgba(251, 191, 36, 0.4)',
                     color: '#fbbf24'
                 };
             case 'APPROVED':
+            case 'approved':
                 return {
                     backgroundColor: 'rgba(16, 185, 129, 0.2)',
                     border: '1px solid rgba(16, 185, 129, 0.4)',
                     color: '#10b981'
                 };
             case 'REJECTED':
+            case 'rejected':
                 return {
                     backgroundColor: 'rgba(239, 68, 68, 0.2)',
                     border: '1px solid rgba(239, 68, 68, 0.4)',
@@ -46,10 +49,13 @@ const StatusBadge = ({ status }) => {
     const getStatusLabel = () => {
         switch (status) {
             case 'PENDING':
+            case 'pending':
                 return 'Menunggu Verifikasi';
             case 'APPROVED':
+            case 'approved':
                 return 'Disetujui';
             case 'REJECTED':
+            case 'rejected':
                 return 'Ditolak';
             case 'ACTIVE':
                 return 'Aktif';
