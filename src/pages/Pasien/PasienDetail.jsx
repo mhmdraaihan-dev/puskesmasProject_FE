@@ -199,7 +199,7 @@ const PasienDetail = () => {
         <div>
           <h2 style={styles.pageTitle}>Detail Pasien</h2>
           <p className="text-muted" style={styles.pageSubtitle}>
-            Profil pasien dan ringkasan riwayat pelayanan
+            Profil pasien dan ringkasan riwayat pelayanan sesuai cakupan akses akun
           </p>
         </div>
         <button

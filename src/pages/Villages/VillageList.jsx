@@ -7,6 +7,21 @@ import "../../App.css";
 import { deleteVillage, getVillages } from "../../services/api";
 import { isAdmin } from "../../utils/roleHelpers";
 
+const getVillageMidwifeTotal = (village) => {
+  if (typeof village?.total_bidan_wilayah === "number") {
+    return village.total_bidan_wilayah;
+  }
+
+  if (
+    typeof village?.total_bidan_desa === "number" ||
+    typeof village?.total_bidan_praktik === "number"
+  ) {
+    return (village?.total_bidan_desa || 0) + (village?.total_bidan_praktik || 0);
+  }
+
+  return village?._count?.users || 0;
+};
+
 const VillageList = () => {
   const [villages, setVillages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,13 +40,12 @@ const VillageList = () => {
       return;
     }
     fetchVillages();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, navigate]);
 
   const summary = useMemo(() => {
     const totalVillages = villages.length;
     const totalMidwives = villages.reduce(
-      (sum, village) => sum + (village._count?.users || 0),
+      (sum, village) => sum + getVillageMidwifeTotal(village),
       0,
     );
     const totalPractices = villages.reduce(
@@ -156,7 +170,9 @@ const VillageList = () => {
               <div style={styles.metaGrid}>
                 <div style={styles.metaCard}>
                   <span style={styles.metaLabel}>Total Bidan</span>
-                  <span style={styles.metaValue}>{village._count?.users || 0}</span>
+                  <span style={styles.metaValue}>
+                    {getVillageMidwifeTotal(village)}
+                  </span>
                 </div>
                 <div style={styles.metaCard}>
                   <span style={styles.metaLabel}>Tempat Praktik</span>

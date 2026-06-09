@@ -177,6 +177,22 @@ export const rejectHealthData = async (dataId, alasanPenolakan) => {
   return response.data;
 };
 
+// ==================== DASHBOARD API ====================
+export const getDashboardPendingTasks = async (params = {}) => {
+  const response = await api.get("/dashboard/pending-tasks", { params });
+  return response.data;
+};
+
+export const getDashboardHistory = async (params = {}) => {
+  const response = await api.get("/dashboard/history", { params });
+  return response.data;
+};
+
+export const getDashboardApprovedFeed = async (params = {}) => {
+  const response = await api.get("/dashboard/approved-feed", { params });
+  return response.data;
+};
+
 // ==================== PEMERIKSAAN KEHAMILAN API ====================
 export const getKehamilanList = async (params = {}) => {
   const response = await api.get("/pemeriksaan-kehamilan", { params });

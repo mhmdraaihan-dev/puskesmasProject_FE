@@ -98,7 +98,7 @@ const PasienList = () => {
         <div>
           <h2 style={styles.pageTitle}>Data Pasien</h2>
           <p className="text-muted" style={styles.pageSubtitle}>
-            Master data pasien dan pintu masuk ke seluruh riwayat pelayanan
+            Data pasien yang tampil mengikuti akses akun dan relasi practice place
           </p>
         </div>
         <div style={styles.headerActions}>

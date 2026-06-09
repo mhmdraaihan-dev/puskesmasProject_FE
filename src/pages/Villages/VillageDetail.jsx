@@ -5,12 +5,45 @@ import "../../App.css";
 import { getVillageById } from "../../services/api";
 import { getPositionLabel } from "../../utils/roleHelpers";
 
+const getVillageMidwifeSummary = (village) => {
+  const totalBidanDesa =
+    typeof village?.total_bidan_desa === "number" ? village.total_bidan_desa : null;
+  const totalBidanPraktik =
+    typeof village?.total_bidan_praktik === "number"
+      ? village.total_bidan_praktik
+      : null;
+  const totalBidanWilayah =
+    typeof village?.total_bidan_wilayah === "number"
+      ? village.total_bidan_wilayah
+      : null;
+
+  if (
+    totalBidanDesa !== null ||
+    totalBidanPraktik !== null ||
+    totalBidanWilayah !== null
+  ) {
+    return {
+      totalBidanDesa: totalBidanDesa || 0,
+      totalBidanPraktik: totalBidanPraktik || 0,
+      totalBidanWilayah:
+        totalBidanWilayah ?? (totalBidanDesa || 0) + (totalBidanPraktik || 0),
+    };
+  }
+
+  return {
+    totalBidanDesa: village?.users?.length || 0,
+    totalBidanPraktik: 0,
+    totalBidanWilayah: village?.users?.length || 0,
+  };
+};
+
 const VillageDetail = () => {
   const { villageId } = useParams();
   const navigate = useNavigate();
   const [village, setVillage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const midwifeSummary = getVillageMidwifeSummary(village);
 
   useEffect(() => {
     fetchVillage();
@@ -98,8 +131,16 @@ const VillageDetail = () => {
 
         <div style={styles.summaryGrid}>
           <div style={styles.summaryItem}>
-            <span style={styles.summaryLabel}>Total Bidan</span>
-            <span style={styles.summaryValue}>{village.users?.length || 0}</span>
+            <span style={styles.summaryLabel}>Total Bidan Wilayah</span>
+            <span style={styles.summaryValue}>{midwifeSummary.totalBidanWilayah}</span>
+          </div>
+          <div style={styles.summaryItem}>
+            <span style={styles.summaryLabel}>Bidan Desa</span>
+            <span style={styles.summaryValue}>{midwifeSummary.totalBidanDesa}</span>
+          </div>
+          <div style={styles.summaryItem}>
+            <span style={styles.summaryLabel}>Bidan Praktik</span>
+            <span style={styles.summaryValue}>{midwifeSummary.totalBidanPraktik}</span>
           </div>
           <div style={styles.summaryItem}>
             <span style={styles.summaryLabel}>Tempat Praktik</span>

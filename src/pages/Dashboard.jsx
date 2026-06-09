@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  getDashboardApprovedFeed,
+  getDashboardHistory,
+  getDashboardPendingTasks,
   getUsers,
   updateUserStatus,
   getKehamilanList,
@@ -22,6 +25,123 @@ import {
 import { formatDate } from "../utils/dateFormatter";
 import ConfirmDialog from "../components/ConfirmDialog";
 import "../App.css";
+
+const MODULE_META = {
+  kehamilan: {
+    label: "Kehamilan",
+    routePrefix: "/pemeriksaan-kehamilan",
+  },
+  persalinan: {
+    label: "Persalinan",
+    routePrefix: "/persalinan",
+  },
+  "keluarga-berencana": {
+    label: "KB",
+    routePrefix: "/keluarga-berencana",
+  },
+  imunisasi: {
+    label: "Imunisasi",
+    routePrefix: "/imunisasi",
+  },
+};
+
+const normalizeModuleKey = (value) => {
+  const normalized = String(value || "").trim().toLowerCase();
+
+  switch (normalized) {
+    case "kehamilan":
+    case "pemeriksaan_kehamilan":
+    case "pemeriksaan-kehamilan":
+      return "kehamilan";
+    case "persalinan":
+      return "persalinan";
+    case "kb":
+    case "keluarga_berencana":
+    case "keluarga-berencana":
+      return "keluarga-berencana";
+    case "imunisasi":
+      return "imunisasi";
+    default:
+      return normalized;
+  }
+};
+
+const getModuleLabel = (moduleKey) =>
+  MODULE_META[moduleKey]?.label || moduleKey || "Laporan";
+
+const getModuleRoute = (moduleKey, id) => {
+  if (!MODULE_META[moduleKey]?.routePrefix || !id) {
+    return null;
+  }
+
+  return `${MODULE_META[moduleKey].routePrefix}/${id}`;
+};
+
+const getSummaryModuleCount = (summary, moduleKey, rows) => {
+  const summaryModules = summary?.modules || {};
+  const summaryValue =
+    summaryModules[moduleKey] ?? summaryModules[moduleKey.replace(/-/g, "_")];
+
+  if (typeof summaryValue === "number") {
+    return summaryValue;
+  }
+
+  return rows.filter((row) => row.moduleKey === moduleKey).length;
+};
+
+const countStatuses = (rows) =>
+  rows.reduce(
+    (acc, row) => {
+      const key = row.status || "UNKNOWN";
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    },
+    { APPROVED: 0, REJECTED: 0 },
+  );
+
+const normalizeDashboardRows = (items = []) =>
+  items
+    .map((item) => {
+      const moduleKey = normalizeModuleKey(
+        item.module || item.type || item.jenis_data || item.jenis_layanan,
+      );
+      const id = item.id || item.data_id || item.record_id;
+      const date =
+        item.service_date ||
+        item.tanggal ||
+        item.tanggal_partus ||
+        item.tanggal_kunjungan ||
+        item.tgl_imunisasi ||
+        item.created_at ||
+        item.updated_at;
+
+      return {
+        id,
+        moduleKey,
+        module: getModuleLabel(moduleKey),
+        patientName:
+          item.pasien?.nama ||
+          item.pasien_nama ||
+          item.patient_name ||
+          item.nama_pasien ||
+          "-",
+        date,
+        village:
+          item.practice_place?.village?.nama_desa ||
+          item.village?.nama_desa ||
+          item.village_name ||
+          item.lokasi_desa ||
+          "-",
+        practice:
+          item.practice_place?.nama_praktik ||
+          item.practice_place_name ||
+          item.practice_name ||
+          "-",
+        status: item.status_verifikasi || item.status || "-",
+        route: getModuleRoute(moduleKey, id),
+      };
+    })
+    .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
 
 const normalizeModuleRows = (responses) => {
   const [kehamilan, persalinan, kb, imunisasi] = responses;
@@ -73,8 +193,15 @@ const normalizeModuleRows = (responses) => {
 const Dashboard = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [verificationRows, setVerificationRows] = useState([]);
-  const [verificationLoading, setVerificationLoading] = useState(false);
+  const [desaPendingRows, setDesaPendingRows] = useState([]);
+  const [desaPendingSummary, setDesaPendingSummary] = useState(null);
+  const [desaPendingLoading, setDesaPendingLoading] = useState(false);
+  const [desaHistoryRows, setDesaHistoryRows] = useState([]);
+  const [desaHistorySummary, setDesaHistorySummary] = useState(null);
+  const [desaHistoryLoading, setDesaHistoryLoading] = useState(false);
+  const [approvedFeedRows, setApprovedFeedRows] = useState([]);
+  const [approvedFeedSummary, setApprovedFeedSummary] = useState(null);
+  const [approvedFeedLoading, setApprovedFeedLoading] = useState(false);
   const [praktikRows, setPraktikRows] = useState([]);
   const [praktikLoading, setPraktikLoading] = useState(false);
   const [adminStats, setAdminStats] = useState({
@@ -98,8 +225,8 @@ const Dashboard = () => {
   const isPraktik = isBidanPraktik(user);
 
   const verifierRole = isKoord || isDesa;
-  const canSeePasienCard = isPraktik || isKoord;
-  const canSeePelayananCards = isPraktik || isKoord;
+  const canSeePasienCard = isPraktik;
+  const canSeePelayananCards = isPraktik;
 
   useEffect(() => {
     fetchDashboardData();
@@ -116,8 +243,12 @@ const Dashboard = () => {
         tasks.push(fetchAdminStats());
       }
 
-      if (verifierRole) {
-        tasks.push(fetchVerificationRows());
+      if (isDesa) {
+        tasks.push(fetchDesaDashboard());
+      }
+
+      if (isKoord) {
+        tasks.push(fetchApprovedFeed());
       }
 
       if (isPraktik) {
@@ -155,24 +286,55 @@ const Dashboard = () => {
     }
   };
 
-  const fetchVerificationRows = async () => {
-    setVerificationLoading(true);
+  const fetchDesaDashboard = async () => {
+    await Promise.all([fetchDesaPendingRows(), fetchDesaHistoryRows()]);
+  };
+
+  const fetchDesaPendingRows = async () => {
+    setDesaPendingLoading(true);
 
     try {
-      const params = { status_verifikasi: "PENDING" };
-      const responses = await Promise.all([
-        getKehamilanList(params),
-        getPersalinanList(params),
-        getKBList(params),
-        getImunisasiList(params),
-      ]);
-
-      setVerificationRows(normalizeModuleRows(responses));
+      const response = await getDashboardPendingTasks();
+      setDesaPendingRows(normalizeDashboardRows(response.data || []));
+      setDesaPendingSummary(response.summary || null);
     } catch (error) {
-      console.error("Verification Fetch Error:", error);
-      setVerificationRows([]);
+      console.error("Dashboard Pending Tasks Fetch Error:", error);
+      setDesaPendingRows([]);
+      setDesaPendingSummary(null);
     } finally {
-      setVerificationLoading(false);
+      setDesaPendingLoading(false);
+    }
+  };
+
+  const fetchDesaHistoryRows = async () => {
+    setDesaHistoryLoading(true);
+
+    try {
+      const response = await getDashboardHistory();
+      setDesaHistoryRows(normalizeDashboardRows(response.data || []));
+      setDesaHistorySummary(response.summary || null);
+    } catch (error) {
+      console.error("Dashboard History Fetch Error:", error);
+      setDesaHistoryRows([]);
+      setDesaHistorySummary(null);
+    } finally {
+      setDesaHistoryLoading(false);
+    }
+  };
+
+  const fetchApprovedFeed = async () => {
+    setApprovedFeedLoading(true);
+
+    try {
+      const response = await getDashboardApprovedFeed();
+      setApprovedFeedRows(normalizeDashboardRows(response.data || []));
+      setApprovedFeedSummary(response.summary || null);
+    } catch (error) {
+      console.error("Dashboard Approved Feed Fetch Error:", error);
+      setApprovedFeedRows([]);
+      setApprovedFeedSummary(null);
+    } finally {
+      setApprovedFeedLoading(false);
     }
   };
 
@@ -227,6 +389,11 @@ const Dashboard = () => {
     await logout();
   };
 
+  const desaHistoryStatusCounts = useMemo(
+    () => countStatuses(desaHistoryRows),
+    [desaHistoryRows],
+  );
+
   const summaryCards = useMemo(() => {
     if (adminRole) {
       const activeUsers = users.filter((item) => item.status_user === "ACTIVE").length;
@@ -242,29 +409,66 @@ const Dashboard = () => {
       ];
     }
 
-    if (verifierRole) {
+    if (isDesa) {
       return [
         {
           label: "Perlu Verifikasi",
-          value: verificationRows.length,
-          note: isKoord ? "lintas desa" : "antrian aktif",
+          value: desaPendingSummary?.total ?? desaPendingRows.length,
+          note: "antrean desa aktif",
+        },
+        {
+          label: "Histori Keputusan",
+          value: desaHistorySummary?.total ?? desaHistoryRows.length,
+          note: "approved + rejected",
+        },
+        {
+          label: "Approved",
+          value: desaHistoryStatusCounts.APPROVED || 0,
+          note: "keputusan diterima",
+        },
+        {
+          label: "Rejected",
+          value: desaHistoryStatusCounts.REJECTED || 0,
+          note: "butuh tindak lanjut",
+        },
+      ];
+    }
+
+    if (isKoord) {
+      return [
+        {
+          label: "Total Approved",
+          value: approvedFeedSummary?.total ?? approvedFeedRows.length,
+          note: "seluruh desa",
         },
         {
           label: "Kehamilan",
-          value: verificationRows.filter((row) => row.module === "Kehamilan").length,
-          note: "data pending",
+          value: getSummaryModuleCount(
+            approvedFeedSummary,
+            "kehamilan",
+            approvedFeedRows,
+          ),
+          note: "data disetujui",
         },
         {
           label: "Persalinan",
-          value: verificationRows.filter((row) => row.module === "Persalinan").length,
-          note: "data pending",
+          value: getSummaryModuleCount(
+            approvedFeedSummary,
+            "persalinan",
+            approvedFeedRows,
+          ),
+          note: "data disetujui",
         },
         {
           label: "KB + Imunisasi",
-          value: verificationRows.filter(
-            (row) => row.module === "KB" || row.module === "Imunisasi",
-          ).length,
-          note: "perlu review",
+          value:
+            getSummaryModuleCount(
+              approvedFeedSummary,
+              "keluarga-berencana",
+              approvedFeedRows,
+            ) +
+            getSummaryModuleCount(approvedFeedSummary, "imunisasi", approvedFeedRows),
+          note: "feed persetujuan",
         },
       ];
     }
@@ -291,7 +495,24 @@ const Dashboard = () => {
     }
 
     return [];
-  }, [adminRole, adminStats.practicePlaces, adminStats.villages, isKoord, isPraktik, users, verificationRows, verifierRole, praktikStats]);
+  }, [
+    adminRole,
+    adminStats.practicePlaces,
+    adminStats.villages,
+    approvedFeedRows,
+    approvedFeedSummary,
+    desaHistoryRows,
+    desaHistoryStatusCounts.APPROVED,
+    desaHistoryStatusCounts.REJECTED,
+    desaHistorySummary,
+    desaPendingRows,
+    desaPendingSummary,
+    isDesa,
+    isKoord,
+    isPraktik,
+    praktikStats,
+    users,
+  ]);
 
   return (
     <div className="dashboard" style={{ maxWidth: "1280px", paddingBottom: "3rem" }}>
@@ -427,7 +648,7 @@ const Dashboard = () => {
             >
               <div className="icon">Data</div>
               <h4>Data Pasien</h4>
-              <p>Master & Riwayat Medis</p>
+              <p>Pasien sesuai cakupan praktik Anda</p>
             </button>
           )}
 
@@ -460,7 +681,7 @@ const Dashboard = () => {
               >
                 <div className="icon">ANC</div>
                 <h4>Kehamilan</h4>
-                <p>{isPraktik ? "Input & List Kehamilan" : "Lihat Data Kehamilan"}</p>
+                <p>Input & List Kehamilan</p>
               </button>
               <button
                 onClick={() => navigate("/persalinan")}
@@ -468,7 +689,7 @@ const Dashboard = () => {
               >
                 <div className="icon">Lahir</div>
                 <h4>Persalinan</h4>
-                <p>{isPraktik ? "Input & List Persalinan" : "Lihat Data Persalinan"}</p>
+                <p>Input & List Persalinan</p>
               </button>
               <button
                 onClick={() => navigate("/keluarga-berencana")}
@@ -476,7 +697,7 @@ const Dashboard = () => {
               >
                 <div className="icon">KB</div>
                 <h4>KB</h4>
-                <p>{isPraktik ? "Input & List KB" : "Lihat Data KB"}</p>
+                <p>Input & List KB</p>
               </button>
               <button
                 onClick={() => navigate("/imunisasi")}
@@ -484,7 +705,7 @@ const Dashboard = () => {
               >
                 <div className="icon">Imun</div>
                 <h4>Imunisasi</h4>
-                <p>{isPraktik ? "Input & List Imunisasi" : "Lihat Data Imunisasi"}</p>
+                <p>Input & List Imunisasi</p>
               </button>
             </>
           )}
@@ -525,7 +746,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {verifierRole && (
+      {isDesa && (
         <div className="admin-section" style={{ marginTop: "2.5rem" }}>
           <div
             style={{
@@ -543,7 +764,7 @@ const Dashboard = () => {
                 className="text-muted"
                 style={{ margin: 0, fontSize: "0.92rem" }}
               >
-                Preview data `PENDING` terbaru dari empat modul pelayanan.
+                Data `PENDING` untuk desa yang di-assign pada akun Anda.
               </p>
             </div>
             <button
@@ -574,26 +795,193 @@ const Dashboard = () => {
                   <th style={{ textAlign: "left" }}>Pasien</th>
                   <th>Modul</th>
                   <th>Tanggal</th>
-                  <th>Desa</th>
                   <th>Tempat Praktik</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody>
-                {verificationLoading ? (
+                {desaPendingLoading ? (
                   <tr>
                     <td colSpan="5" style={{ textAlign: "center", padding: "2rem" }}>
                       Memuat data verifikasi...
                     </td>
                   </tr>
-                ) : verificationRows.length === 0 ? (
+                ) : desaPendingRows.length === 0 ? (
                   <tr>
                     <td colSpan="5" style={{ textAlign: "center", padding: "2rem" }}>
                       Belum ada data yang menunggu verifikasi
                     </td>
                   </tr>
                 ) : (
-                  verificationRows.slice(0, 8).map((row) => (
-                    <tr key={`${row.module}-${row.id}`}>
+                  desaPendingRows.slice(0, 8).map((row) => (
+                    <tr
+                      key={`${row.module}-${row.id}`}
+                      style={{ cursor: row.route ? "pointer" : "default" }}
+                      onClick={() => row.route && navigate(row.route)}
+                    >
+                      <td style={{ textAlign: "left" }}>{row.patientName}</td>
+                      <td>{row.module}</td>
+                      <td>{formatDate(row.date)}</td>
+                      <td>{row.practice}</td>
+                      <td>{row.status}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {isDesa && (
+        <div className="admin-section" style={{ marginTop: "1.5rem" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: "1rem",
+              flexWrap: "wrap",
+              marginBottom: "1rem",
+            }}
+          >
+            <div>
+              <h3 style={{ marginBottom: "0.35rem" }}>Histori Keputusan</h3>
+              <p
+                className="text-muted"
+                style={{ margin: 0, fontSize: "0.92rem" }}
+              >
+                Riwayat APPROVED dan REJECTED dari bidan praktik di desa yang sama.
+              </p>
+            </div>
+          </div>
+          <div
+            className="auth-card"
+            style={{
+              padding: 0,
+              overflowX: "auto",
+              maxWidth: "none",
+              borderRadius: "20px",
+              boxShadow: "0 14px 38px rgba(0, 0, 0, 0.18)",
+            }}
+          >
+            <table className="dashboard-table">
+              <thead>
+                <tr>
+                  <th style={{ textAlign: "left" }}>Pasien</th>
+                  <th>Modul</th>
+                  <th>Status</th>
+                  <th>Tanggal</th>
+                  <th>Tempat Praktik</th>
+                </tr>
+              </thead>
+              <tbody>
+                {desaHistoryLoading ? (
+                  <tr>
+                    <td colSpan="5" style={{ textAlign: "center", padding: "2rem" }}>
+                      Memuat histori keputusan...
+                    </td>
+                  </tr>
+                ) : desaHistoryRows.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" style={{ textAlign: "center", padding: "2rem" }}>
+                      Belum ada histori keputusan untuk ditampilkan
+                    </td>
+                  </tr>
+                ) : (
+                  desaHistoryRows.slice(0, 8).map((row) => (
+                    <tr
+                      key={`history-${row.module}-${row.id}`}
+                      style={{ cursor: row.route ? "pointer" : "default" }}
+                      onClick={() => row.route && navigate(row.route)}
+                    >
+                      <td style={{ textAlign: "left" }}>{row.patientName}</td>
+                      <td>{row.module}</td>
+                      <td>{row.status}</td>
+                      <td>{formatDate(row.date)}</td>
+                      <td>{row.practice}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {isKoord && (
+        <div className="admin-section" style={{ marginTop: "2.5rem" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: "1rem",
+              flexWrap: "wrap",
+              marginBottom: "1rem",
+            }}
+          >
+            <div>
+              <h3 style={{ marginBottom: "0.35rem" }}>Feed Persetujuan</h3>
+              <p
+                className="text-muted"
+                style={{ margin: 0, fontSize: "0.92rem" }}
+              >
+                Default menampilkan data APPROVED lintas desa dari endpoint approved feed.
+              </p>
+            </div>
+            <button
+              onClick={() => navigate("/rekapitulasi")}
+              className="btn-primary"
+              style={{
+                width: "auto",
+                padding: "0.5rem 1rem",
+                fontSize: "0.8rem",
+              }}
+            >
+              Buka Rekapitulasi
+            </button>
+          </div>
+          <div
+            className="auth-card"
+            style={{
+              padding: 0,
+              overflowX: "auto",
+              maxWidth: "none",
+              borderRadius: "20px",
+              boxShadow: "0 14px 38px rgba(0, 0, 0, 0.18)",
+            }}
+          >
+            <table className="dashboard-table">
+              <thead>
+                <tr>
+                  <th style={{ textAlign: "left" }}>Pasien</th>
+                  <th>Modul</th>
+                  <th>Tanggal</th>
+                  <th>Desa</th>
+                  <th>Tempat Praktik</th>
+                </tr>
+              </thead>
+              <tbody>
+                {approvedFeedLoading ? (
+                  <tr>
+                    <td colSpan="5" style={{ textAlign: "center", padding: "2rem" }}>
+                      Memuat feed persetujuan...
+                    </td>
+                  </tr>
+                ) : approvedFeedRows.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" style={{ textAlign: "center", padding: "2rem" }}>
+                      Belum ada data APPROVED untuk ditampilkan
+                    </td>
+                  </tr>
+                ) : (
+                  approvedFeedRows.slice(0, 8).map((row) => (
+                    <tr
+                      key={`approved-${row.module}-${row.id}`}
+                      style={{ cursor: row.route ? "pointer" : "default" }}
+                      onClick={() => row.route && navigate(row.route)}
+                    >
                       <td style={{ textAlign: "left" }}>{row.patientName}</td>
                       <td>{row.module}</td>
                       <td>{formatDate(row.date)}</td>
@@ -1023,4 +1411,3 @@ const praktikTimelineButtonStyle = {
 };
 
 export default Dashboard;
-
