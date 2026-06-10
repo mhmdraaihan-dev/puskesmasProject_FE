@@ -463,10 +463,7 @@ function App() {
             path="/verification/pending"
             element={
               <ProtectedRoute
-                allowedPositions={[
-                  POSITIONS.BIDAN_DESA,
-                  POSITIONS.BIDAN_KOORDINATOR,
-                ]}
+                allowedPositions={[POSITIONS.BIDAN_DESA]}
               >
                 <PendingDataList />
               </ProtectedRoute>

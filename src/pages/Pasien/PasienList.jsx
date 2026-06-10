@@ -93,18 +93,19 @@ const PasienList = () => {
   };
 
   return (
-    <div className="dashboard">
+    <div className="dashboard page-shell" style={styles.page}>
       <div className="dashboard-header" style={styles.header}>
-        <div>
-          <h2 style={styles.pageTitle}>Data Pasien</h2>
-          <p className="text-muted" style={styles.pageSubtitle}>
+        <div className="page-intro">
+          <div className="page-kicker">Patient Records</div>
+          <h2 className="page-title" style={styles.pageTitle}>Data Pasien</h2>
+          <p className="page-subtitle" style={styles.pageSubtitle}>
             Data pasien yang tampil mengikuti akses akun dan relasi practice place
           </p>
         </div>
-        <div style={styles.headerActions}>
+        <div className="page-actions" style={styles.headerActions}>
           <button
             onClick={() => navigate("/")}
-            className="btn-primary"
+            className="btn-secondary"
             style={styles.secondaryButton}
           >
             Kembali
@@ -122,15 +123,15 @@ const PasienList = () => {
       </div>
 
       <div style={styles.summaryGrid}>
-        <div className="auth-card" style={styles.summaryCard}>
+        <div className="stat-card" style={styles.summaryCard}>
           <span style={styles.summaryLabel}>Total Pasien</span>
           <strong style={styles.summaryValue}>{stats.totalPatients}</strong>
         </div>
-        <div className="auth-card" style={styles.summaryCard}>
+        <div className="stat-card" style={styles.summaryCard}>
           <span style={styles.summaryLabel}>Data Alamat Terisi</span>
           <strong style={styles.summaryValue}>{stats.patientsWithAddress}</strong>
         </div>
-        <div className="auth-card" style={styles.summaryCard}>
+        <div className="stat-card" style={styles.summaryCard}>
           <span style={styles.summaryLabel}>Filter Aktif</span>
           <strong style={styles.summaryValue}>
             {filter.search ? "Pencarian Manual" : "Semua Data"}
@@ -139,7 +140,7 @@ const PasienList = () => {
             {filter.search || "Belum ada kata kunci"}
           </span>
         </div>
-        <div className="auth-card" style={styles.summaryCard}>
+        <div className="stat-card" style={styles.summaryCard}>
           <span style={styles.summaryLabel}>Referensi Tanggal</span>
           <strong style={styles.summaryValue}>
             {stats.latestPatient ? formatDate(stats.latestPatient) : "-"}
@@ -150,7 +151,7 @@ const PasienList = () => {
         </div>
       </div>
 
-      <div className="auth-card" style={styles.filterCard}>
+      <div className="content-card-light" style={styles.filterCard}>
         <div style={styles.filterHeader}>
           <div>
             <h3 style={styles.sectionTitle}>Pencarian Pasien</h3>
@@ -177,7 +178,7 @@ const PasienList = () => {
             </button>
             <button
               type="button"
-              className="btn-primary"
+              className="btn-secondary"
               style={styles.secondaryButton}
               onClick={handleReset}
             >
@@ -198,7 +199,7 @@ const PasienList = () => {
           <p>Memuat data pasien...</p>
         </div>
       ) : dataList.length === 0 ? (
-        <div className="auth-card" style={styles.emptyCard}>
+        <div className="content-card-light" style={styles.emptyCard}>
           <h3 style={styles.emptyTitle}>Belum ada data pasien</h3>
           <p className="text-muted" style={styles.emptySubtitle}>
             {canManage
@@ -218,7 +219,11 @@ const PasienList = () => {
       ) : (
         <div style={styles.cardGrid}>
           {dataList.map((item) => (
-            <div key={item.pasien_id} className="auth-card" style={styles.patientCard}>
+            <div
+              key={item.pasien_id}
+              className="content-card-light"
+              style={styles.patientCard}
+            >
               <div style={styles.cardHeader}>
                 <div style={styles.identityWrap}>
                   <div style={styles.avatar}>
@@ -297,20 +302,25 @@ const PasienList = () => {
           setDeleteDialog({ isOpen: false, dataId: null, patientName: "" })
         }
         onConfirm={handleDelete}
-        title="HAPUS DATA PASIEN?"
-        message={`PERINGATAN: Menghapus pasien "${deleteDialog.patientName}" akan MENGHAPUS SELURUH RIWAYAT MEDIS (Kehamilan, Persalinan, KB, Imunisasi) terkait pasien ini. Tindakan ini tidak dapat dibatalkan.`}
-        confirmText="Ya, Hapus Semua Data"
+        title="Hapus Data Pasien"
+        message={`Menghapus pasien "${deleteDialog.patientName}" juga akan menghapus riwayat layanan yang terhubung. Pastikan data ini memang sudah tidak diperlukan.`}
+        confirmText="Hapus Data"
         cancelText="Batal"
-        type="danger"
+        type="warning"
       />
     </div>
   );
 };
 
 const styles = {
+  page: {
+    maxWidth: "1240px",
+    paddingBottom: "3rem",
+  },
   header: {
     gap: "1rem",
     flexWrap: "wrap",
+    alignItems: "flex-start",
   },
   pageTitle: {
     marginBottom: "0.35rem",
@@ -332,8 +342,6 @@ const styles = {
     width: "auto",
     minWidth: "130px",
     paddingInline: "1rem",
-    backgroundColor: "transparent",
-    border: "1px solid var(--glass-border)",
   },
   summaryGrid: {
     display: "grid",
@@ -409,6 +417,7 @@ const styles = {
   patientCard: {
     maxWidth: "none",
     margin: 0,
+    padding: "1rem 1.1rem",
   },
   cardHeader: {
     display: "flex",
@@ -425,9 +434,9 @@ const styles = {
     flexWrap: "wrap",
   },
   avatar: {
-    width: "58px",
-    height: "58px",
-    borderRadius: "18px",
+    width: "48px",
+    height: "48px",
+    borderRadius: "16px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -435,12 +444,12 @@ const styles = {
       "linear-gradient(135deg, rgba(99,102,241,0.95), rgba(59,130,246,0.7))",
     color: "#fff",
     fontWeight: "700",
-    fontSize: "1.5rem",
+    fontSize: "1.2rem",
     flexShrink: 0,
   },
   patientName: {
-    fontSize: "1.2rem",
-    marginBottom: "0.25rem",
+    fontSize: "1.05rem",
+    marginBottom: "0.2rem",
   },
   identityMeta: {
     margin: 0,
@@ -461,10 +470,10 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: "0.35rem",
-    padding: "0.95rem 1rem",
+    padding: "0.8rem 0.9rem",
     borderRadius: "14px",
-    background: "rgba(255,255,255,0.03)",
-    border: "1px solid rgba(255,255,255,0.06)",
+    background: "rgba(255,255,255,0.62)",
+    border: "1px solid rgba(73, 62, 50, 0.1)",
   },
   metaLabel: {
     fontSize: "0.78rem",
@@ -477,31 +486,33 @@ const styles = {
     fontWeight: "600",
   },
   cardFooter: {
-    marginTop: "1rem",
-    paddingTop: "1rem",
-    borderTop: "1px solid rgba(255,255,255,0.08)",
+    marginTop: "0.9rem",
+    paddingTop: "0.9rem",
+    borderTop: "1px solid rgba(73, 62, 50, 0.08)",
     display: "flex",
     gap: "0.75rem",
     flexWrap: "wrap",
   },
   inlinePrimaryAction: {
     width: "auto",
-    minWidth: "180px",
+    minWidth: "160px",
     paddingInline: "1rem",
   },
   inlineSecondaryAction: {
     width: "auto",
     minWidth: "110px",
     paddingInline: "1rem",
-    backgroundColor: "rgba(168, 85, 247, 0.22)",
-    border: "1px solid rgba(168, 85, 247, 0.45)",
+    backgroundColor: "rgba(232, 165, 90, 0.16)",
+    border: "1px solid rgba(212, 160, 23, 0.28)",
+    color: "#8d6119",
   },
   inlineDangerAction: {
     width: "auto",
     minWidth: "110px",
     paddingInline: "1rem",
-    backgroundColor: "rgba(239, 68, 68, 0.2)",
-    border: "1px solid rgba(248, 113, 113, 0.45)",
+    backgroundColor: "rgba(198, 69, 69, 0.12)",
+    border: "1px solid rgba(198, 69, 69, 0.24)",
+    color: "#a13a3a",
   },
 };
 

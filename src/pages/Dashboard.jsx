@@ -89,6 +89,21 @@ const getSummaryModuleCount = (summary, moduleKey, rows) => {
   return rows.filter((row) => row.moduleKey === moduleKey).length;
 };
 
+const dashboardCardSurface = {
+  background: "linear-gradient(180deg, rgba(255,255,255,0.82), rgba(239,233,222,0.96))",
+  border: "1px solid rgba(73, 62, 50, 0.1)",
+  boxShadow: "0 18px 40px rgba(76, 63, 48, 0.12)",
+  color: "var(--color-text-main)",
+};
+
+const dashboardTableShellStyle = {
+  ...dashboardCardSurface,
+  padding: 0,
+  overflowX: "auto",
+  maxWidth: "none",
+  borderRadius: "20px",
+};
+
 const countStatuses = (rows) =>
   rows.reduce(
     (acc, row) => {
@@ -215,6 +230,7 @@ const Dashboard = () => {
     totalPelayanan: 0,
   });
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -224,7 +240,7 @@ const Dashboard = () => {
   const isDesa = isBidanDesa(user);
   const isPraktik = isBidanPraktik(user);
 
-  const verifierRole = isKoord || isDesa;
+  const verifierRole = isDesa;
   const canSeePasienCard = isPraktik;
   const canSeePelayananCards = isPraktik;
 
@@ -385,7 +401,7 @@ const Dashboard = () => {
   };
 
   const handleLogoutConfirm = async () => {
-    setShowLogoutConfirm(false);
+    setIsLoggingOut(true);
     await logout();
   };
 
@@ -555,8 +571,9 @@ const Dashboard = () => {
             onClick={() => setShowLogoutConfirm(true)}
             className="btn-primary"
             style={{
-              backgroundColor: "rgba(255,255,255,0.04)",
-              border: "1px solid var(--glass-border)",
+              backgroundColor: "var(--color-canvas-soft)",
+              color: "var(--color-text-main)",
+              border: "1px solid rgba(73, 62, 50, 0.12)",
               width: "auto",
               padding: "0.8rem 1.1rem",
               boxShadow: "none",
@@ -588,11 +605,9 @@ const Dashboard = () => {
               <div
                 key={card.label}
                 style={{
-                  background: "rgba(255,255,255,0.03)",
-                  border: "1px solid rgba(255,255,255,0.06)",
+                  ...dashboardCardSurface,
                   borderRadius: "18px",
                   padding: "1.25rem",
-                  boxShadow: "0 12px 32px rgba(0, 0, 0, 0.18)",
                 }}
               >
                 <div
@@ -781,13 +796,7 @@ const Dashboard = () => {
           </div>
           <div
             className="auth-card"
-            style={{
-              padding: 0,
-              overflowX: "auto",
-              maxWidth: "none",
-              borderRadius: "20px",
-              boxShadow: "0 14px 38px rgba(0, 0, 0, 0.18)",
-            }}
+            style={dashboardTableShellStyle}
           >
             <table className="dashboard-table">
               <thead>
@@ -857,13 +866,7 @@ const Dashboard = () => {
           </div>
           <div
             className="auth-card"
-            style={{
-              padding: 0,
-              overflowX: "auto",
-              maxWidth: "none",
-              borderRadius: "20px",
-              boxShadow: "0 14px 38px rgba(0, 0, 0, 0.18)",
-            }}
+            style={dashboardTableShellStyle}
           >
             <table className="dashboard-table">
               <thead>
@@ -944,13 +947,7 @@ const Dashboard = () => {
           </div>
           <div
             className="auth-card"
-            style={{
-              padding: 0,
-              overflowX: "auto",
-              maxWidth: "none",
-              borderRadius: "20px",
-              boxShadow: "0 14px 38px rgba(0, 0, 0, 0.18)",
-            }}
+            style={dashboardTableShellStyle}
           >
             <table className="dashboard-table">
               <thead>
@@ -1026,18 +1023,12 @@ const Dashboard = () => {
                 fontSize: "0.8rem",
               }}
             >
-              + Add User
+              + Tambah User
             </button>
           </div>
           <div
             className="auth-card"
-            style={{
-              padding: 0,
-              overflowX: "auto",
-              maxWidth: "none",
-              borderRadius: "20px",
-              boxShadow: "0 14px 38px rgba(0, 0, 0, 0.18)",
-            }}
+            style={dashboardTableShellStyle}
           >
             {loading ? (
               <div style={{ padding: "2rem", textAlign: "center" }}>
@@ -1147,9 +1138,9 @@ const Dashboard = () => {
             <div
               className="auth-card"
               style={{
+                ...dashboardCardSurface,
                 maxWidth: "none",
                 borderRadius: "20px",
-                boxShadow: "0 14px 38px rgba(0, 0, 0, 0.18)",
               }}
             >
               <div
@@ -1196,9 +1187,9 @@ const Dashboard = () => {
             <div
               className="auth-card"
               style={{
+                ...dashboardCardSurface,
                 maxWidth: "none",
                 borderRadius: "20px",
-                boxShadow: "0 14px 38px rgba(0, 0, 0, 0.18)",
               }}
             >
               <div
@@ -1272,14 +1263,14 @@ const Dashboard = () => {
           flex-direction: column;
           justify-content: space-between;
           gap: 0.25rem;
-          border: 1px solid rgba(255,255,255,0.05);
-          background: rgba(255,255,255,0.03);
-          box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+          border: 1px solid rgba(73, 62, 50, 0.1);
+          background: linear-gradient(180deg, rgba(255,255,255,0.82), rgba(239,233,222,0.96));
+          box-shadow: 0 18px 40px rgba(76, 63, 48, 0.12);
         }
         .dashboard-nav-card:hover {
           transform: translateY(-4px);
-          background: rgba(255,255,255,0.05);
-          border-color: rgba(255,255,255,0.16);
+          background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(245,240,232,1));
+          border-color: rgba(204, 120, 92, 0.24);
         }
         .dashboard-nav-card .icon {
           font-size: 0.8rem;
@@ -1323,38 +1314,41 @@ const Dashboard = () => {
           border-collapse: collapse;
           font-size: 0.85rem;
           min-width: 800px;
+          background: transparent;
+          color: var(--color-text-main);
         }
         .dashboard-table th {
-          background: rgba(255,255,255,0.05);
+          background: rgba(232, 224, 210, 0.82);
           padding: 1rem;
           color: var(--color-text-muted);
-          font-weight: 500;
+          font-weight: 600;
           text-align: left;
         }
         .dashboard-table td {
           padding: 1rem;
           text-align: left;
-          border-bottom: 1px solid rgba(255,255,255,0.05);
+          border-bottom: 1px solid rgba(73, 62, 50, 0.08);
           vertical-align: middle;
         }
         .dashboard-table tr:last-child td { border-bottom: none; }
-        .dashboard-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .dashboard-table tbody tr:hover td { background: rgba(204, 120, 92, 0.06); }
 
         .action-icon-btn {
-          background: transparent;
-          border: 1px solid rgba(255,255,255,0.1);
+          background: rgba(255,255,255,0.42);
+          border: 1px solid rgba(73, 62, 50, 0.12);
           cursor: pointer;
           font-size: 0.8rem;
           padding: 0.35rem 0.6rem;
-          border-radius: 6px;
-          transition: background 0.2s;
-          color: white;
+          border-radius: 8px;
+          transition: background 0.2s, border-color 0.2s;
+          color: var(--color-text-main);
           box-shadow: none;
         }
         .action-icon-btn:hover {
-          background: rgba(255,255,255,0.08);
-          border-color: rgba(255,255,255,0.18);
+          background: rgba(204, 120, 92, 0.1);
+          border-color: rgba(204, 120, 92, 0.2);
           transform: none;
+          filter: none;
         }
 
         @media (max-width: 900px) {
@@ -1372,13 +1366,18 @@ const Dashboard = () => {
 
       <ConfirmDialog
         isOpen={showLogoutConfirm}
-        onClose={() => setShowLogoutConfirm(false)}
+        onClose={() => {
+          if (!isLoggingOut) {
+            setShowLogoutConfirm(false);
+          }
+        }}
         onConfirm={handleLogoutConfirm}
         title="Konfirmasi Logout"
         message="Yakin ingin keluar dari sesi sekarang?"
-        confirmText="Logout"
+        confirmText={isLoggingOut ? "Memproses..." : "Logout"}
         cancelText="Batal"
         type="warning"
+        isProcessing={isLoggingOut}
       />
     </div>
   );

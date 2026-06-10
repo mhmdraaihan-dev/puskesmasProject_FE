@@ -1,33 +1,70 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap');
 
 :root {
-  /* Color Palette - HSL for easy manipulation */
-  --primary-hue: 250;
-  --primary-sat: 80%;
-  --primary-light: 60%;
-  
-  --color-primary: hsl(var(--primary-hue), var(--primary-sat), var(--primary-light));
-  --color-primary-dark: hsl(var(--primary-hue), var(--primary-sat), 40%);
-  --color-primary-light: hsl(var(--primary-hue), var(--primary-sat), 75%);
-  
-  --color-bg-dark: hsl(220, 20%, 10%);
-  --color-bg-card: hsl(220, 20%, 14%);
-  --color-text-main: hsl(220, 10%, 95%);
-  --color-text-muted: hsl(220, 10%, 70%);
-  
-  --gradient-main: linear-gradient(135deg, var(--color-primary), #a855f7);
-  
+  /* Claude-inspired warm canvas palette */
+  --color-primary: #cc785c;
+  --color-primary-dark: #a9583e;
+  --color-primary-light: #df9b82;
+  --color-primary-soft: rgba(204, 120, 92, 0.14);
+
+  --color-bg-dark: #faf9f5;
+  --color-bg-card: #1c2433;
+  --color-bg-card-strong: #171f2c;
+  --color-bg-card-soft: rgba(28, 36, 51, 0.94);
+  --color-canvas-soft: #f5f0e8;
+  --color-canvas-card: #efe9de;
+  --color-canvas-strong: #e8e0d2;
+  --color-text-main: #252523;
+  --color-text-strong: #141413;
+  --color-text-muted: #6c6a64;
+  --color-text-soft: rgba(61, 61, 58, 0.76);
+  --color-on-dark: #faf9f5;
+  --color-on-dark-soft: #c5c1b8;
+  --color-border-strong: rgba(73, 62, 50, 0.16);
+  --color-border-soft: rgba(73, 62, 50, 0.1);
+  --color-success: #5db872;
+  --color-danger: #c64545;
+  --color-warning: #d4a017;
+
+  --gradient-main: linear-gradient(135deg, #b7674b 0%, #cc785c 55%, #e8a55a 100%);
+  --gradient-surface: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.01));
+  --gradient-auth: radial-gradient(circle at top left, rgba(204, 120, 92, 0.16), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(232, 165, 90, 0.14), transparent 26%),
+    radial-gradient(circle at center top, rgba(93, 184, 166, 0.08), transparent 22%);
+
+  /* Typography */
+  --font-sans: "Manrope", "Avenir Next", "Segoe UI", sans-serif;
+  --font-display: "Newsreader", "Iowan Old Style", "Palatino Linotype", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-size-display: clamp(2.8rem, 4.4vw, 4.25rem);
+  --font-size-title: 1.25rem;
+  --font-size-body: 1rem;
+  --font-size-caption: 0.82rem;
+
   /* Spacing */
   --spacing-xs: 0.5rem;
   --spacing-sm: 1rem;
   --spacing-md: 1.5rem;
   --spacing-lg: 2rem;
   --spacing-xl: 3rem;
-  
-  /* Bridges & Glassmorphism */
+
+  /* Radius */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+
+  /* Surfaces */
   --glass-bg: rgba(255, 255, 255, 0.05);
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --surface-elevated: rgba(17, 24, 39, 0.78);
+  --surface-raised: rgba(255, 255, 255, 0.5);
+  --surface-muted: rgba(255, 255, 255, 0.32);
+  --surface-highlight: rgba(204, 120, 92, 0.08);
+  --shadow-card: 0 20px 50px rgba(76, 63, 48, 0.16);
+  --shadow-soft: 0 12px 28px rgba(76, 63, 48, 0.12);
+  --shadow-focus: 0 0 0 4px rgba(204, 120, 92, 0.14);
 }
 
 * {
@@ -37,12 +74,18 @@
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
   background-color: var(--color-bg-dark);
+  background-image:
+    radial-gradient(circle at top, rgba(204, 120, 92, 0.12), transparent 25%),
+    radial-gradient(circle at bottom right, rgba(93, 184, 166, 0.08), transparent 22%),
+    linear-gradient(180deg, #faf9f5 0%, #f5f0e8 100%);
+  background-attachment: fixed;
   color: var(--color-text-main);
   line-height: 1.6;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 #root {
@@ -57,33 +100,60 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   margin-bottom: var(--spacing-sm);
   letter-spacing: -0.02em;
+  color: var(--color-text-strong);
 }
 
 h1 {
-  font-size: 3rem;
+  font-family: var(--font-display);
+  font-size: var(--font-size-display);
+  font-weight: 600;
   background: var(--gradient-main);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+h4,
+h5,
+h6 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+}
+
 button {
   cursor: pointer;
   border: none;
   background: var(--color-primary);
-  color: white;
+  color: #ffffff;
+  font-family: var(--font-sans);
   padding: 0.8rem 1.6rem;
-  border-radius: 8px;
+  border-radius: 12px;
   font-weight: 600;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  font-size: 0.96rem;
+  letter-spacing: -0.01em;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+  box-shadow: var(--shadow-soft);
 }
 
 button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-card);
   filter: brightness(1.1);
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
 }
 
 a {
@@ -101,7 +171,41 @@ a:hover {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border);
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   box-shadow: var(--glass-shadow);
   padding: var(--spacing-lg);
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+::selection {
+  background: rgba(204, 120, 92, 0.22);
+  color: var(--color-text-strong);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(210, 201, 188, 0.45);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(204, 120, 92, 0.28);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(204, 120, 92, 0.42);
 }

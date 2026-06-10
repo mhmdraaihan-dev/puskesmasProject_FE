@@ -66,7 +66,7 @@ const VillageDetail = () => {
 
   if (loading) {
     return (
-      <div className="dashboard">
+      <div className="dashboard page-shell">
         <div style={{ textAlign: "center", padding: "3rem" }}>
           <p>Memuat data desa...</p>
         </div>
@@ -76,7 +76,7 @@ const VillageDetail = () => {
 
   if (error || !village) {
     return (
-      <div className="dashboard">
+      <div className="dashboard page-shell">
         <div className="error-alert">{error || "Data desa tidak ditemukan"}</div>
         <button
           onClick={() => navigate("/villages")}
@@ -90,18 +90,19 @@ const VillageDetail = () => {
   }
 
   return (
-    <div className="dashboard">
+    <div className="dashboard page-shell">
       <div className="dashboard-header" style={styles.header}>
-        <div>
-          <h2 style={styles.pageTitle}>{village.nama_desa}</h2>
-          <p className="text-muted" style={styles.pageSubtitle}>
+        <div className="page-intro">
+          <div className="page-kicker">Village Detail</div>
+          <h2 className="page-title" style={styles.pageTitle}>{village.nama_desa}</h2>
+          <p className="page-subtitle" style={styles.pageSubtitle}>
             Ringkasan bidan dan tempat praktik di wilayah ini
           </p>
         </div>
-        <div style={styles.headerActions}>
+        <div className="page-actions" style={styles.headerActions}>
           <button
             onClick={() => navigate("/villages")}
-            className="btn-primary"
+            className="btn-secondary"
             style={styles.secondaryButton}
           >
             Kembali
@@ -118,7 +119,7 @@ const VillageDetail = () => {
         </div>
       </div>
 
-      <div className="auth-card" style={styles.heroCard}>
+      <div className="content-card-light" style={styles.heroCard}>
         <div style={styles.heroTop}>
           <div>
             <div style={styles.badge}>Wilayah Desa</div>
@@ -152,7 +153,7 @@ const VillageDetail = () => {
       </div>
 
       <div style={styles.contentGrid}>
-        <div className="auth-card" style={styles.sectionCard}>
+        <div className="content-card-light" style={styles.sectionCard}>
           <div style={styles.sectionHeader}>
             <h3 style={styles.sectionTitle}>Daftar Bidan</h3>
             <p className="text-muted" style={styles.sectionSubtitle}>
@@ -194,7 +195,7 @@ const VillageDetail = () => {
           )}
         </div>
 
-        <div className="auth-card" style={styles.sectionCard}>
+        <div className="content-card-light" style={styles.sectionCard}>
           <div style={styles.sectionHeader}>
             <h3 style={styles.sectionTitle}>Tempat Praktik</h3>
             <p className="text-muted" style={styles.sectionSubtitle}>
@@ -248,8 +249,6 @@ const styles = {
     width: "auto",
     minWidth: "120px",
     paddingInline: "1rem",
-    backgroundColor: "transparent",
-    border: "1px solid var(--glass-border)",
   },
   heroCard: { maxWidth: "none", margin: "0 0 1.5rem", padding: "1.75rem" },
   heroTop: { marginBottom: "1.25rem" },
@@ -258,9 +257,9 @@ const styles = {
     alignItems: "center",
     padding: "0.4rem 0.8rem",
     borderRadius: "999px",
-    background: "rgba(59,130,246,0.16)",
-    border: "1px solid rgba(96,165,250,0.35)",
-    color: "#93c5fd",
+    background: "rgba(204,120,92,0.14)",
+    border: "1px solid rgba(204,120,92,0.24)",
+    color: "var(--color-primary-dark)",
     fontSize: "0.8rem",
     fontWeight: "700",
     marginBottom: "0.75rem",
@@ -277,8 +276,8 @@ const styles = {
     gap: "0.35rem",
     padding: "1rem",
     borderRadius: "14px",
-    background: "rgba(255,255,255,0.03)",
-    border: "1px solid rgba(255,255,255,0.06)",
+    background: "rgba(255,255,255,0.6)",
+    border: "1px solid rgba(73, 62, 50, 0.1)",
   },
   summaryLabel: {
     fontSize: "0.78rem",
@@ -301,13 +300,13 @@ const styles = {
   tableHead: {
     padding: "0.85rem 0.75rem",
     textAlign: "left",
-    borderBottom: "1px solid rgba(255,255,255,0.1)",
+    borderBottom: "1px solid rgba(73, 62, 50, 0.1)",
     color: "var(--color-text-muted)",
     fontSize: "0.8rem",
     textTransform: "uppercase",
     letterSpacing: "0.05em",
   },
-  tableRow: { borderBottom: "1px solid rgba(255,255,255,0.06)" },
+  tableRow: { borderBottom: "1px solid rgba(73, 62, 50, 0.06)" },
   tableCell: { padding: "0.85rem 0.75rem" },
   tableCellStrong: { padding: "0.85rem 0.75rem", fontWeight: "700" },
   tableCellMuted: {
@@ -317,9 +316,9 @@ const styles = {
   practiceGrid: { display: "grid", gap: "1rem" },
   practiceCard: {
     padding: "1rem",
-    background: "rgba(255,255,255,0.03)",
+    background: "rgba(255,255,255,0.6)",
     borderRadius: "14px",
-    border: "1px solid rgba(255,255,255,0.06)",
+    border: "1px solid rgba(73, 62, 50, 0.1)",
   },
   practiceTitle: { marginBottom: "0.35rem" },
   practiceMeta: { margin: "0 0 0.6rem" },
@@ -331,8 +330,8 @@ const styles = {
     justifyContent: "center",
     textAlign: "center",
     borderRadius: "14px",
-    border: "1px dashed rgba(255,255,255,0.08)",
-    background: "rgba(255,255,255,0.02)",
+    border: "1px dashed rgba(73, 62, 50, 0.12)",
+    background: "rgba(255,255,255,0.45)",
     padding: "1rem",
   },
 };

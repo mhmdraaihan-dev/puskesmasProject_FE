@@ -1,8 +1,17 @@
-import { useState } from 'prop-types';
 import PropTypes from 'prop-types';
 import '../App.css';
 
-const ConfirmDialog = ({ isOpen, onClose, onConfirm, title, message, confirmText = 'Confirm', cancelText = 'Cancel', type = 'danger' }) => {
+const ConfirmDialog = ({
+    isOpen,
+    onClose,
+    onConfirm,
+    title,
+    message,
+    confirmText = 'Confirm',
+    cancelText = 'Cancel',
+    type = 'danger',
+    isProcessing = false
+}) => {
     if (!isOpen) return null;
 
     const getButtonStyle = () => {
@@ -35,37 +44,24 @@ const ConfirmDialog = ({ isOpen, onClose, onConfirm, title, message, confirmText
     };
 
     return (
-        <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000
-        }}>
-            <div className="auth-card" style={{ maxWidth: '400px', margin: '1rem' }}>
+        <div className="dialog-overlay">
+            <div className="content-card-light dialog-card">
+                <div className="auth-eyebrow">Confirmation</div>
                 <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>{title}</h3>
-                <p style={{ marginBottom: '1.5rem', color: 'var(--text-muted)' }}>{message}</p>
+                <p className="dialog-message">{message}</p>
 
-                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                <div className="dialog-actions">
                     <button
                         onClick={onClose}
-                        className="btn-primary"
-                        style={{
-                            backgroundColor: 'transparent',
-                            border: '1px solid var(--glass-border)',
-                            padding: '0.5rem 1rem'
-                        }}
+                        className="btn-secondary"
+                        disabled={isProcessing}
                     >
                         {cancelText}
                     </button>
                     <button
                         onClick={onConfirm}
                         className="btn-primary"
+                        disabled={isProcessing}
                         style={{
                             ...getButtonStyle(),
                             padding: '0.5rem 1rem'
@@ -87,7 +83,8 @@ ConfirmDialog.propTypes = {
     message: PropTypes.string.isRequired,
     confirmText: PropTypes.string,
     cancelText: PropTypes.string,
-    type: PropTypes.oneOf(['danger', 'success', 'warning', 'info'])
+    type: PropTypes.oneOf(['danger', 'success', 'warning', 'info']),
+    isProcessing: PropTypes.bool
 };
 
 export default ConfirmDialog;

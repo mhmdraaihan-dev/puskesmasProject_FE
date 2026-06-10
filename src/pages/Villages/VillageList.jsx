@@ -84,18 +84,19 @@ const VillageList = () => {
   };
 
   return (
-    <div className="dashboard">
+    <div className="dashboard page-shell">
       <div className="dashboard-header" style={styles.header}>
-        <div>
-          <h2 style={styles.pageTitle}>Manajemen Desa</h2>
-          <p className="text-muted" style={styles.pageSubtitle}>
+        <div className="page-intro">
+          <div className="page-kicker">Village Management</div>
+          <h2 className="page-title" style={styles.pageTitle}>Manajemen Desa</h2>
+          <p className="page-subtitle" style={styles.pageSubtitle}>
             Kelola desa, ringkasan bidan, dan relasi tempat praktik
           </p>
         </div>
-        <div style={styles.headerActions}>
+        <div className="page-actions" style={styles.headerActions}>
           <button
             onClick={() => navigate("/")}
-            className="btn-primary"
+            className="btn-secondary"
             style={styles.secondaryButton}
           >
             Kembali
@@ -113,15 +114,15 @@ const VillageList = () => {
       </div>
 
       <div style={styles.summaryGrid}>
-        <div className="auth-card" style={styles.summaryCard}>
+        <div className="stat-card" style={styles.summaryCard}>
           <span style={styles.summaryLabel}>Total Desa</span>
           <strong style={styles.summaryValue}>{summary.totalVillages}</strong>
         </div>
-        <div className="auth-card" style={styles.summaryCard}>
+        <div className="stat-card" style={styles.summaryCard}>
           <span style={styles.summaryLabel}>Total Bidan</span>
           <strong style={styles.summaryValue}>{summary.totalMidwives}</strong>
         </div>
-        <div className="auth-card" style={styles.summaryCard}>
+        <div className="stat-card" style={styles.summaryCard}>
           <span style={styles.summaryLabel}>Tempat Praktik</span>
           <strong style={styles.summaryValue}>{summary.totalPractices}</strong>
         </div>
@@ -138,7 +139,7 @@ const VillageList = () => {
           <p>Memuat data desa...</p>
         </div>
       ) : villages.length === 0 ? (
-        <div className="auth-card" style={styles.emptyCard}>
+        <div className="content-card-light" style={styles.emptyCard}>
           <h3 style={styles.emptyTitle}>Belum ada data desa</h3>
           <p className="text-muted" style={styles.emptySubtitle}>
             Tambahkan desa pertama untuk mulai mengelola wilayah dan praktik.
@@ -156,7 +157,7 @@ const VillageList = () => {
       ) : (
         <div style={styles.cardGrid}>
           {villages.map((village) => (
-            <div key={village.village_id} className="auth-card" style={styles.villageCard}>
+            <div key={village.village_id} className="content-card-light" style={styles.villageCard}>
               <div style={styles.cardHeader}>
                 <div>
                   <h3 style={styles.cardTitle}>{village.nama_desa}</h3>
@@ -244,8 +245,6 @@ const styles = {
     width: "auto",
     minWidth: "120px",
     paddingInline: "1rem",
-    backgroundColor: "transparent",
-    border: "1px solid var(--glass-border)",
   },
   summaryGrid: {
     display: "grid",
@@ -297,9 +296,9 @@ const styles = {
     alignItems: "center",
     padding: "0.4rem 0.8rem",
     borderRadius: "999px",
-    background: "rgba(59, 130, 246, 0.16)",
-    border: "1px solid rgba(96, 165, 250, 0.35)",
-    color: "#93c5fd",
+    background: "rgba(204, 120, 92, 0.14)",
+    border: "1px solid rgba(204, 120, 92, 0.24)",
+    color: "var(--color-primary-dark)",
     fontSize: "0.8rem",
     fontWeight: "700",
   },
@@ -314,8 +313,8 @@ const styles = {
     gap: "0.35rem",
     padding: "1rem",
     borderRadius: "14px",
-    background: "rgba(255,255,255,0.03)",
-    border: "1px solid rgba(255,255,255,0.06)",
+    background: "rgba(255,255,255,0.6)",
+    border: "1px solid rgba(73, 62, 50, 0.1)",
   },
   metaLabel: {
     fontSize: "0.78rem",
@@ -327,7 +326,7 @@ const styles = {
   cardFooter: {
     marginTop: "1rem",
     paddingTop: "1rem",
-    borderTop: "1px solid rgba(255,255,255,0.08)",
+    borderTop: "1px solid rgba(73, 62, 50, 0.08)",
     display: "flex",
     gap: "0.75rem",
     flexWrap: "wrap",
@@ -336,22 +335,25 @@ const styles = {
     width: "auto",
     minWidth: "110px",
     paddingInline: "1rem",
-    backgroundColor: "rgba(59,130,246,0.22)",
-    border: "1px solid rgba(96,165,250,0.45)",
+    backgroundColor: "rgba(93, 184, 166, 0.16)",
+    border: "1px solid rgba(93, 184, 166, 0.3)",
+    color: "#236b5d",
   },
   editButton: {
     width: "auto",
     minWidth: "110px",
     paddingInline: "1rem",
-    backgroundColor: "rgba(168,85,247,0.22)",
-    border: "1px solid rgba(168,85,247,0.45)",
+    backgroundColor: "rgba(232, 165, 90, 0.16)",
+    border: "1px solid rgba(212, 160, 23, 0.28)",
+    color: "#8d6119",
   },
   deleteButton: {
     width: "auto",
     minWidth: "110px",
     paddingInline: "1rem",
-    backgroundColor: "rgba(239,68,68,0.2)",
-    border: "1px solid rgba(248,113,113,0.45)",
+    backgroundColor: "rgba(198, 69, 69, 0.12)",
+    border: "1px solid rgba(198, 69, 69, 0.24)",
+    color: "#a13a3a",
   },
 };
 

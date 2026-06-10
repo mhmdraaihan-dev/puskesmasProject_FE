@@ -1,5 +1,20 @@
 import axios from "axios";
 
+const ACCESS_TOKEN_KEY = "accessToken";
+const USER_STORAGE_KEY = "user";
+const SESSION_END_PATTERNS = [
+  "token sudah logout",
+  "silakan login kembali",
+  "token expired",
+  "token invalid",
+  "invalid token",
+  "jwt expired",
+  "unauthorized",
+];
+
+let authFailureHandler = null;
+let hasHandledAuthFailure = false;
+
 const api = axios.create({
   baseURL: "/api", // This will be proxied by Vite
   headers: {
@@ -7,9 +22,71 @@ const api = axios.create({
   },
 });
 
+const getErrorMessage = (error) =>
+  String(error?.response?.data?.message || error?.message || "");
+
+const isAuthFlowRequest = (url = "") =>
+  ["/login", "/register", "/logout"].some((path) => String(url).includes(path));
+
+export const getStoredAccessToken = () =>
+  localStorage.getItem(ACCESS_TOKEN_KEY) ||
+  sessionStorage.getItem(ACCESS_TOKEN_KEY);
+
+export const getStoredUser = () => {
+  const rawUser =
+    localStorage.getItem(USER_STORAGE_KEY) ||
+    sessionStorage.getItem(USER_STORAGE_KEY);
+
+  if (!rawUser) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(rawUser);
+  } catch {
+    return null;
+  }
+};
+
+export const saveAuthSession = (token, user) => {
+  resetAuthFailureState();
+  localStorage.setItem(ACCESS_TOKEN_KEY, token);
+  localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+  sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+  sessionStorage.removeItem(USER_STORAGE_KEY);
+};
+
+export const clearAuthSession = () => {
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(USER_STORAGE_KEY);
+  sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+  sessionStorage.removeItem(USER_STORAGE_KEY);
+};
+
+export const resetAuthFailureState = () => {
+  hasHandledAuthFailure = false;
+};
+
+export const setAuthFailureHandler = (handler) => {
+  authFailureHandler = handler;
+};
+
+export const isSessionTerminationError = (error) => {
+  const status = error?.response?.status;
+
+  if (![401, 403].includes(status)) {
+    return false;
+  }
+
+  const normalizedMessage = getErrorMessage(error).toLowerCase();
+  return SESSION_END_PATTERNS.some((pattern) =>
+    normalizedMessage.includes(pattern),
+  );
+};
+
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("accessToken");
+    const token = getStoredAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -20,8 +97,30 @@ api.interceptors.request.use(
   },
 );
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (
+      authFailureHandler &&
+      !hasHandledAuthFailure &&
+      isSessionTerminationError(error) &&
+      !isAuthFlowRequest(error.config?.url)
+    ) {
+      hasHandledAuthFailure = true;
+      authFailureHandler(getErrorMessage(error));
+    }
+
+    return Promise.reject(error);
+  },
+);
+
 export const loginUser = async (credentials) => {
   const response = await api.post("/login", credentials);
+  return response.data;
+};
+
+export const logoutUser = async () => {
+  const response = await api.post("/logout");
   return response.data;
 };
 

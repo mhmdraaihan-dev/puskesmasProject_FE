@@ -1,34 +1,86 @@
-import { createContext, useState, useContext, useEffect } from "react";
-import { loginUser } from "../services/api";
+/* eslint-disable react-refresh/only-export-components */
+import {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  useCallback,
+} from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  loginUser,
+  logoutUser,
+  getStoredAccessToken,
+  getStoredUser,
+  saveAuthSession,
+  clearAuthSession,
+  resetAuthFailureState,
+  setAuthFailureHandler,
+  isSessionTerminationError,
+} from "../services/api";
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Load user from local storage on initial render
+  const clearClientAuth = useCallback(() => {
+    clearAuthSession();
+    setUser(null);
+  }, []);
+
+  const redirectToLogin = useCallback(
+    (sessionMessage) => {
+      navigate("/login", {
+        replace: true,
+        state: sessionMessage ? { sessionMessage } : undefined,
+      });
+    },
+    [navigate],
+  );
+
   useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    const token = localStorage.getItem("accessToken");
+    const savedUser = getStoredUser();
+    const token = getStoredAccessToken();
+
     if (savedUser && token) {
-      setUser(JSON.parse(savedUser));
+      setUser(savedUser);
+    } else {
+      clearAuthSession();
     }
+
     setLoading(false);
   }, []);
 
+  useEffect(() => {
+    setAuthFailureHandler((sessionMessage) => {
+      clearClientAuth();
+      redirectToLogin(sessionMessage || "Sesi berakhir. Silakan login kembali.");
+    });
+
+    return () => {
+      setAuthFailureHandler(null);
+    };
+  }, [clearClientAuth, redirectToLogin]);
+
   const login = async (credentials) => {
+    resetAuthFailureState();
+    clearAuthSession();
+
     try {
       const response = await loginUser(credentials);
+
       // Backend response structure: { success: true, data: { token: "...", user: {...} } }
       if (response.success && response.data?.token && response.data?.user) {
-        localStorage.setItem("accessToken", response.data.token);
-        localStorage.setItem("user", JSON.stringify(response.data.user));
+        saveAuthSession(response.data.token, response.data.user);
         setUser(response.data.user);
         return { success: true };
       }
+
       return {
         success: false,
         error: response.message || "Invalid response from server",
@@ -44,10 +96,23 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("user");
-    setUser(null);
+  const logout = async () => {
+    resetAuthFailureState();
+
+    try {
+      if (getStoredAccessToken()) {
+        await logoutUser();
+      }
+    } catch (error) {
+      if (!isSessionTerminationError(error)) {
+        console.error("Logout failed:", error);
+      }
+    } finally {
+      clearClientAuth();
+      redirectToLogin("Logout berhasil.");
+    }
+
+    return { success: true };
   };
 
   const value = {
@@ -55,7 +120,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     login,
     logout,
-    isAuthenticated: !!user,
+    isAuthenticated: !!user && !!getStoredAccessToken(),
   };
 
   if (loading) {
@@ -66,7 +131,7 @@ export const AuthProvider = ({ children }) => {
           justifyContent: "center",
           alignItems: "center",
           height: "100vh",
-          color: "white",
+          color: "var(--color-text-main)",
         }}
       >
         Loading Application...

@@ -25,53 +25,61 @@ const EditUser = () => {
   // Watch form values for conditional rendering
   const watchRole = watch("role");
   const watchPosition = watch("position_user");
+  const noteItems = ["Hanya field yang diisi akan diupdate."];
+
+  if (watchRole === "ADMIN") {
+    noteItems.push("ADMIN tidak memerlukan position dan village.");
+  }
+
+  if (watchPosition === "bidan_desa") {
+    noteItems.push("Bidan Desa wajib di-assign ke desa yang sesuai.");
+  }
 
   useEffect(() => {
+    const loadFormData = async () => {
+      try {
+        const [villageResponse, usersResponse] = await Promise.all([
+          getVillages(),
+          getUsers(),
+        ]);
+
+        setVillages(
+          villageResponse.success && Array.isArray(villageResponse.data)
+            ? villageResponse.data
+            : [],
+        );
+
+        const users =
+          usersResponse.success && Array.isArray(usersResponse.data)
+            ? usersResponse.data
+            : [];
+        const selectedUser = users.find((item) => item.user_id === userId);
+
+        if (selectedUser) {
+          setValue("full_name", selectedUser.full_name);
+          setValue("email", selectedUser.email);
+          setValue("address", selectedUser.address);
+          setValue("phone_number", selectedUser.phone_number || "");
+          setValue("position_user", selectedUser.position_user || "");
+          setValue("village_id", selectedUser.village_id || "");
+          setValue("role", selectedUser.role);
+        } else {
+          setError("User tidak ditemukan");
+        }
+      } catch {
+        setError("Gagal memuat data user");
+      } finally {
+        setLoadingUser(false);
+      }
+    };
+
     if (!isAdmin(user)) {
       alert("Akses ditolak. Halaman ini hanya untuk Admin.");
       navigate("/");
       return;
     }
-    fetchVillages();
-    fetchUser();
-  }, [userId, user, navigate]);
-
-  const fetchVillages = async () => {
-    try {
-      const response = await getVillages();
-      setVillages(
-        response.success && Array.isArray(response.data) ? response.data : [],
-      );
-    } catch (err) {
-      console.error("Failed to fetch villages:", err);
-    }
-  };
-
-  const fetchUser = async () => {
-    try {
-      const response = await getUsers();
-      // Backend response structure: { success: true, data: [...] }
-      const users =
-        response.success && Array.isArray(response.data) ? response.data : [];
-      const user = users.find((u) => u.user_id === userId);
-
-      if (user) {
-        setValue("full_name", user.full_name);
-        setValue("email", user.email);
-        setValue("address", user.address);
-        setValue("phone_number", user.phone_number || "");
-        setValue("position_user", user.position_user || "");
-        setValue("village_id", user.village_id || "");
-        setValue("role", user.role);
-      } else {
-        setError("User tidak ditemukan");
-      }
-    } catch (err) {
-      setError("Gagal memuat data user");
-    } finally {
-      setLoadingUser(false);
-    }
-  };
+    loadFormData();
+  }, [userId, user, navigate, setValue]);
 
   const onSubmit = async (data) => {
     setError("");
@@ -119,194 +127,187 @@ const EditUser = () => {
 
   if (loadingUser) {
     return (
-      <div className="dashboard">
-        <p>Memuat data user...</p>
+      <div className="dashboard page-shell">
+        <div className="page-intro">
+          <div className="page-kicker">User Setup</div>
+          <h2 className="page-title">Memuat Data User</h2>
+          <p className="page-subtitle">Menyiapkan formulir edit user.</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="dashboard">
-      <div className="dashboard-header">
-        <div>
-          <h2>Edit User</h2>
-          <p className="text-muted">Update informasi user.</p>
+    <div className="dashboard page-shell">
+      <div
+        className="dashboard-header"
+        style={{ alignItems: "flex-start", gap: "1rem" }}
+      >
+        <div className="page-intro">
+          <div className="page-kicker">User Setup</div>
+          <h2 className="page-title" style={{ marginBottom: "0.15rem" }}>
+            Edit User
+          </h2>
+          <p className="page-subtitle">Update informasi user yang sudah ada.</p>
         </div>
-        <div>
+        <div className="page-actions">
           <button
             onClick={() => navigate("/")}
-            className="btn-primary"
-            style={{
-              backgroundColor: "transparent",
-              border: "1px solid var(--glass-border)",
-            }}
+            className="btn-secondary"
           >
             Batal
           </button>
         </div>
       </div>
 
-      <div
-        className="auth-card"
-        style={{ maxWidth: "800px", margin: "0 auto" }}
-      >
-        {error && <div className="error-alert">{error}</div>}
+      <div className="page-form-shell">
+        <div className="content-card-light">
+          {error && <div className="error-alert">{error}</div>}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="user-grid">
-          {/* Left Column */}
-          <div>
-            <div className="form-group">
-              <label className="form-label" htmlFor="full_name">
-                Nama Lengkap
-              </label>
-              <input
-                id="full_name"
-                className="form-input"
-                {...register("full_name")}
-              />
+          <form onSubmit={handleSubmit(onSubmit)} className="user-grid">
+            {/* Left Column */}
+            <div>
+              <div className="form-group">
+                <label className="form-label" htmlFor="full_name">
+                  Nama Lengkap
+                </label>
+                <input
+                  id="full_name"
+                  className="form-input"
+                  {...register("full_name")}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label" htmlFor="email">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  className="form-input"
+                  {...register("email", {
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "Format email tidak valid",
+                    },
+                  })}
+                />
+                {errors.email && (
+                  <span className="error-message">{errors.email.message}</span>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label className="form-label" htmlFor="phone_number">
+                  Nomor Telepon
+                </label>
+                <input
+                  id="phone_number"
+                  className="form-input"
+                  {...register("phone_number")}
+                />
+              </div>
             </div>
 
-            <div className="form-group">
-              <label className="form-label" htmlFor="email">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                className="form-input"
-                {...register("email", {
-                  pattern: {
-                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: "Format email tidak valid",
-                  },
-                })}
-              />
-              {errors.email && (
-                <span className="error-message">{errors.email.message}</span>
+            {/* Right Column */}
+            <div>
+              <div className="form-group">
+                <label className="form-label" htmlFor="address">
+                  Alamat
+                </label>
+                <textarea
+                  id="address"
+                  className="form-input"
+                  style={{ height: "120px", resize: "none" }}
+                  {...register("address")}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label" htmlFor="role">
+                  Role
+                </label>
+                <select id="role" className="form-input" {...register("role")}>
+                  <option value="USER">USER</option>
+                  <option value="ADMIN">ADMIN</option>
+                </select>
+              </div>
+
+              {/* Conditional: Position (only for USER role) */}
+              {watchRole === "USER" && (
+                <div className="form-group">
+                  <label className="form-label" htmlFor="position_user">
+                    Position
+                  </label>
+                  <select
+                    id="position_user"
+                    className="form-input"
+                    {...register("position_user")}
+                  >
+                    <option value="">Pilih Position</option>
+                    <option value="bidan_praktik">Bidan Praktik</option>
+                    <option value="bidan_desa">Bidan Desa</option>
+                    <option value="bidan_koordinator">Bidan Koordinator</option>
+                  </select>
+                  <small className="form-helper">
+                    Position wajib untuk role USER.
+                  </small>
+                </div>
+              )}
+
+              {/* Conditional: Village (only for bidan_desa) */}
+              {watchPosition === "bidan_desa" && (
+                <div className="form-group">
+                  <label className="form-label" htmlFor="village_id">
+                    Desa
+                  </label>
+                  <select
+                    id="village_id"
+                    className="form-input"
+                    {...register("village_id")}
+                  >
+                    <option value="">Pilih Desa</option>
+                    {villages.map((village) => (
+                      <option
+                        key={village.village_id}
+                        value={village.village_id}
+                      >
+                        {village.nama_desa}
+                      </option>
+                    ))}
+                  </select>
+                  <small className="form-helper">
+                    Desa wajib untuk Bidan Desa.
+                  </small>
+                </div>
               )}
             </div>
 
-            <div className="form-group">
-              <label className="form-label" htmlFor="phone_number">
-                Nomor Telepon
-              </label>
-              <input
-                id="phone_number"
-                className="form-input"
-                {...register("phone_number")}
-              />
-            </div>
-          </div>
-
-          {/* Right Column */}
-          <div>
-            <div className="form-group">
-              <label className="form-label" htmlFor="address">
-                Alamat
-              </label>
-              <textarea
-                id="address"
-                className="form-input"
-                style={{ height: "120px", resize: "none" }}
-                {...register("address")}
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label" htmlFor="role">
-                Role
-              </label>
-              <select id="role" className="form-input" {...register("role")}>
-                <option value="USER">USER</option>
-                <option value="ADMIN">ADMIN</option>
-              </select>
-            </div>
-
-            {/* Conditional: Position (only for USER role) */}
-            {watchRole === "USER" && (
-              <div className="form-group">
-                <label className="form-label" htmlFor="position_user">
-                  Position
-                </label>
-                <select
-                  id="position_user"
-                  className="form-input"
-                  {...register("position_user")}
-                >
-                  <option value="">None (for ADMIN)</option>
-                  <option value="bidan_praktik">Bidan Praktik</option>
-                  <option value="bidan_desa">Bidan Desa</option>
-                  <option value="bidan_koordinator">Bidan Koordinator</option>
-                </select>
-                <small className="text-muted" style={{ fontSize: "0.75rem" }}>
-                  * Position wajib untuk role USER
-                </small>
-              </div>
-            )}
-
-            {/* Conditional: Village (only for bidan_desa) */}
-            {watchPosition === "bidan_desa" && (
-              <div className="form-group">
-                <label className="form-label" htmlFor="village_id">
-                  Desa
-                </label>
-                <select
-                  id="village_id"
-                  className="form-input"
-                  {...register("village_id")}
-                >
-                  <option value="">Pilih Desa</option>
-                  {villages.map((village) => (
-                    <option key={village.village_id} value={village.village_id}>
-                      {village.nama_desa}
-                    </option>
-                  ))}
-                </select>
-                <small className="text-muted" style={{ fontSize: "0.75rem" }}>
-                  * Desa wajib untuk Bidan Desa
-                </small>
-              </div>
-            )}
-          </div>
-
-          {/* Info Box */}
-          <div
-            style={{
-              gridColumn: "span 2",
-              marginTop: "1rem",
-              padding: "1rem",
-              background: "rgba(251, 191, 36, 0.1)",
-              borderRadius: "8px",
-              border: "1px solid rgba(251, 191, 36, 0.3)",
-            }}
-          >
-            <p style={{ fontSize: "0.875rem", margin: 0, color: "#fbbf24" }}>
-              <strong>⚠️ Perhatian:</strong>
-            </p>
-            <ul
+            <div
+              className="page-note"
               style={{
-                fontSize: "0.875rem",
-                marginTop: "0.5rem",
-                paddingLeft: "1.5rem",
-                color: "#fbbf24",
+                gridColumn: "span 2",
+                marginTop: "1rem",
               }}
             >
-              <li>Hanya field yang diisi akan diupdate</li>
-              {watchRole === "ADMIN" && (
-                <li>ADMIN tidak memerlukan position dan village</li>
-              )}
-              {watchPosition === "bidan_desa" && (
-                <li>Bidan Desa wajib di-assign ke desa</li>
-              )}
-            </ul>
-          </div>
+              <p className="page-note-title">
+                <strong>Perhatian</strong>
+              </p>
+              <ul className="page-note-list">
+                {noteItems.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
 
-          <div style={{ gridColumn: "span 2", marginTop: "1rem" }}>
-            <button type="submit" disabled={loading} className="btn-primary">
-              {loading ? "Mengupdate User..." : "Update User"}
-            </button>
-          </div>
-        </form>
+            <div style={{ gridColumn: "span 2", marginTop: "1rem" }}>
+              <button type="submit" disabled={loading} className="btn-primary">
+                {loading ? "Mengupdate User..." : "Update User"}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

@@ -13,7 +13,6 @@ import {
   verifyPersalinan,
 } from "../../services/api";
 import {
-  isBidanKoordinator,
   isBidanDesa,
   VERIFICATION_STATUS,
 } from "../../utils/roleHelpers";
@@ -93,13 +92,11 @@ const PendingDataList = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    const isVerifier = isBidanKoordinator(user) || isBidanDesa(user);
-    if (!isVerifier) {
+    if (!isBidanDesa(user)) {
       navigate("/");
       return;
     }
     fetchPendingData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, navigate]);
 
   const fetchPendingData = async () => {
@@ -268,18 +265,19 @@ const PendingDataList = () => {
   };
 
   return (
-    <div className="dashboard">
+    <div className="dashboard page-shell">
       <div className="dashboard-header" style={styles.header}>
-        <div>
-          <h2 style={styles.pageTitle}>Verifikasi Data Kesehatan</h2>
-          <p className="text-muted" style={styles.pageSubtitle}>
+        <div className="page-intro">
+          <div className="page-kicker">Verification Queue</div>
+          <h2 className="page-title" style={styles.pageTitle}>Verifikasi Data Kesehatan</h2>
+          <p className="page-subtitle" style={styles.pageSubtitle}>
             Daftar pelayanan yang menunggu persetujuan verifier
           </p>
         </div>
-        <div style={styles.headerActions}>
+        <div className="page-actions" style={styles.headerActions}>
           <button
             onClick={() => navigate("/")}
-            className="btn-primary"
+            className="btn-secondary"
             style={styles.secondaryButton}
           >
             Kembali
@@ -288,19 +286,19 @@ const PendingDataList = () => {
       </div>
 
       <div style={styles.summaryGrid}>
-        <div className="auth-card" style={styles.summaryCard}>
+        <div className="stat-card" style={styles.summaryCard}>
           <span style={styles.summaryLabel}>Total Pending</span>
           <strong style={styles.summaryValue}>{stats.total}</strong>
         </div>
-        <div className="auth-card" style={styles.summaryCard}>
+        <div className="stat-card" style={styles.summaryCard}>
           <span style={styles.summaryLabel}>Kehamilan</span>
           <strong style={styles.summaryValue}>{stats.kehamilan}</strong>
         </div>
-        <div className="auth-card" style={styles.summaryCard}>
+        <div className="stat-card" style={styles.summaryCard}>
           <span style={styles.summaryLabel}>Persalinan</span>
           <strong style={styles.summaryValue}>{stats.persalinan}</strong>
         </div>
-        <div className="auth-card" style={styles.summaryCard}>
+        <div className="stat-card" style={styles.summaryCard}>
           <span style={styles.summaryLabel}>KB / Imunisasi</span>
           <strong style={styles.summaryValue}>
             {stats.kb} / {stats.imunisasi}
@@ -308,7 +306,7 @@ const PendingDataList = () => {
         </div>
       </div>
 
-      <div className="auth-card" style={styles.filterCard}>
+      <div className="content-card-light" style={styles.filterCard}>
         <div style={styles.filterHeader}>
           <div>
             <h3 style={styles.sectionTitle}>Filter Verifikasi</h3>
@@ -362,7 +360,7 @@ const PendingDataList = () => {
         </div>
       ) : null}
 
-      <div className="auth-card" style={styles.tableCard}>
+      <div className="content-card-light" style={styles.tableCard}>
         <div style={styles.tableHeader}>
           <div>
             <h3 style={styles.sectionTitle}>Antrean Verifikasi</h3>
@@ -463,7 +461,7 @@ const PendingDataList = () => {
 
       {rejectDialog.isOpen ? (
         <div style={styles.modalOverlay}>
-          <div className="auth-card" style={styles.modalCard}>
+          <div className="content-card-light" style={styles.modalCard}>
             <h3 style={styles.modalTitle}>Tolak Data Kesehatan</h3>
             <p className="text-muted" style={styles.modalText}>
               Pasien: <strong>{rejectDialog.patientName}</strong>
@@ -489,7 +487,7 @@ const PendingDataList = () => {
                   });
                   setRejectReason("");
                 }}
-                className="btn-primary"
+                className="btn-secondary"
                 style={styles.secondaryButton}
               >
                 Batal
@@ -530,8 +528,6 @@ const styles = {
     width: "auto",
     minWidth: "120px",
     paddingInline: "1rem",
-    backgroundColor: "transparent",
-    border: "1px solid var(--glass-border)",
   },
   summaryGrid: {
     display: "grid",
@@ -594,15 +590,15 @@ const styles = {
   tableHead: {
     padding: "0.9rem 0.85rem",
     textAlign: "left",
-    borderBottom: "1px solid rgba(255,255,255,0.1)",
+    borderBottom: "1px solid rgba(73, 62, 50, 0.1)",
     color: "var(--color-text-muted)",
     fontSize: "0.8rem",
     textTransform: "uppercase",
     letterSpacing: "0.05em",
-    background: "rgba(255,255,255,0.02)",
+    background: "rgba(255,255,255,0.56)",
   },
   tableRow: {
-    borderBottom: "1px solid rgba(255,255,255,0.06)",
+    borderBottom: "1px solid rgba(73, 62, 50, 0.06)",
   },
   tableCell: {
     padding: "1rem 0.85rem",
@@ -636,7 +632,7 @@ const styles = {
     padding: "0.35rem 0.7rem",
     background: "rgba(251, 191, 36, 0.18)",
     border: "1px solid rgba(251, 191, 36, 0.32)",
-    color: "#fcd34d",
+    color: "#8d6119",
     fontSize: "0.78rem",
     fontWeight: "700",
   },
@@ -644,22 +640,25 @@ const styles = {
     width: "auto",
     minWidth: "70px",
     paddingInline: "0.9rem",
-    backgroundColor: "rgba(59, 130, 246, 0.22)",
-    border: "1px solid rgba(96, 165, 250, 0.45)",
+    backgroundColor: "rgba(93, 184, 166, 0.16)",
+    border: "1px solid rgba(93, 184, 166, 0.3)",
+    color: "#236b5d",
   },
   approveButton: {
     width: "auto",
     minWidth: "86px",
     paddingInline: "0.9rem",
-    backgroundColor: "rgba(16, 185, 129, 0.22)",
-    border: "1px solid rgba(52, 211, 153, 0.45)",
+    backgroundColor: "rgba(93, 184, 114, 0.16)",
+    border: "1px solid rgba(93, 184, 114, 0.28)",
+    color: "#2f8c4b",
   },
   rejectButton: {
     width: "auto",
     minWidth: "78px",
     paddingInline: "0.9rem",
-    backgroundColor: "rgba(239, 68, 68, 0.2)",
-    border: "1px solid rgba(248, 113, 113, 0.45)",
+    backgroundColor: "rgba(198, 69, 69, 0.12)",
+    border: "1px solid rgba(198, 69, 69, 0.24)",
+    color: "#a13a3a",
   },
   emptyRow: {
     textAlign: "center",
@@ -669,7 +668,8 @@ const styles = {
   modalOverlay: {
     position: "fixed",
     inset: 0,
-    backgroundColor: "rgba(0,0,0,0.72)",
+    backgroundColor: "rgba(61, 61, 58, 0.3)",
+    backdropFilter: "blur(10px)",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",

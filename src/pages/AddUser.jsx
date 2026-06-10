@@ -27,6 +27,23 @@ const AddUser = () => {
   // Watch form values for conditional rendering
   const watchRole = watch("role");
   const watchPosition = watch("position_user");
+  const noteItems = [];
+
+  if (watchRole === "ADMIN") {
+    noteItems.push("ADMIN tidak memerlukan position dan village.");
+  }
+
+  if (watchPosition === "bidan_praktik") {
+    noteItems.push("Bidan Praktik harus dibuatkan tempat praktik setelah user dibuat.");
+  }
+
+  if (watchPosition === "bidan_desa") {
+    noteItems.push("Bidan Desa wajib di-assign ke desa tertentu.");
+  }
+
+  if (watchPosition === "bidan_koordinator") {
+    noteItems.push("Bidan Koordinator dapat melihat data lintas desa sesuai hak akses.");
+  }
 
   useEffect(() => {
     if (!isAdmin(user)) {
@@ -114,30 +131,25 @@ const AddUser = () => {
   };
 
   return (
-    <div className="dashboard">
-      <div className="dashboard-header">
-        <div>
-          <h2>Tambah User Baru</h2>
-          <p className="text-muted">Buat akun user baru untuk sistem.</p>
+    <div className="dashboard page-shell">
+      <div className="dashboard-header" style={{ alignItems: "flex-start", gap: "1rem" }}>
+        <div className="page-intro">
+          <div className="page-kicker">User Setup</div>
+          <h2 className="page-title" style={{ marginBottom: "0.15rem" }}>Tambah User Baru</h2>
+          <p className="page-subtitle">Buat akun user baru untuk sistem.</p>
         </div>
-        <div>
+        <div className="page-actions">
           <button
             onClick={() => navigate("/")}
-            className="btn-primary"
-            style={{
-              backgroundColor: "transparent",
-              border: "1px solid var(--glass-border)",
-            }}
+            className="btn-secondary"
           >
             Batal
           </button>
         </div>
       </div>
 
-      <div
-        className="auth-card"
-        style={{ maxWidth: "800px", margin: "0 auto" }}
-      >
+      <div className="page-form-shell">
+      <div className="content-card-light">
         {error && <div className="error-alert">{error}</div>}
 
         <form onSubmit={handleSubmit(onSubmit)} className="user-grid">
@@ -312,10 +324,7 @@ const AddUser = () => {
                   </span>
                 )}
                 {villages.length === 0 && (
-                  <small
-                    className="text-muted"
-                    style={{ fontSize: "0.75rem", color: "#fbbf24" }}
-                  >
+                  <small className="form-helper form-helper-warning">
                     ⚠️ Belum ada desa. Buat desa terlebih dahulu.
                   </small>
                 )}
@@ -346,42 +355,26 @@ const AddUser = () => {
 
           {/* Info Box */}
           <div
+            className="page-note"
             style={{
               gridColumn: "span 2",
               marginTop: "1rem",
-              padding: "1rem",
-              background: "rgba(59, 130, 246, 0.1)",
-              borderRadius: "8px",
-              border: "1px solid rgba(59, 130, 246, 0.3)",
             }}
           >
-            <p style={{ fontSize: "0.875rem", margin: 0, color: "#93c5fd" }}>
-              <strong>ℹ️ Catatan Penting:</strong>
+            <p className="page-note-title">
+              <strong>Catatan Penting</strong>
             </p>
-            <ul
-              style={{
-                fontSize: "0.875rem",
-                marginTop: "0.5rem",
-                paddingLeft: "1.5rem",
-                color: "#93c5fd",
-              }}
-            >
-              {watchRole === "ADMIN" && (
-                <li>ADMIN tidak memerlukan position dan village</li>
-              )}
-              {watchPosition === "bidan_praktik" && (
-                <li>
-                  Bidan Praktik harus dibuatkan tempat praktik setelah user
-                  dibuat
-                </li>
-              )}
-              {watchPosition === "bidan_desa" && (
-                <li>Bidan Desa wajib di-assign ke desa tertentu</li>
-              )}
-              {watchPosition === "bidan_koordinator" && (
-                <li>Bidan Koordinator dapat melihat semua data</li>
-              )}
-            </ul>
+            {noteItems.length > 0 ? (
+              <ul className="page-note-list">
+                {noteItems.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="page-note-hint">
+                Pilih role dan posisi user untuk melihat aturan tambahan yang berlaku.
+              </p>
+            )}
           </div>
 
           <div style={{ gridColumn: "span 2", marginTop: "1rem" }}>
@@ -390,6 +383,7 @@ const AddUser = () => {
             </button>
           </div>
         </form>
+      </div>
       </div>
     </div>
   );

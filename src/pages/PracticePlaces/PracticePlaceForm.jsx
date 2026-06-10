@@ -130,13 +130,14 @@ const PracticePlaceForm = () => {
   }
 
   return (
-    <div className="dashboard">
+    <div className="dashboard page-shell">
       <div className="dashboard-header" style={styles.header}>
-        <div>
-          <h2 style={styles.pageTitle}>
+        <div className="page-intro">
+          <div className="page-kicker">Practice Setup</div>
+          <h2 className="page-title" style={styles.pageTitle}>
             {isEditMode ? "Edit Tempat Praktik" : "Tambah Tempat Praktik Baru"}
           </h2>
-          <p className="text-muted" style={styles.pageSubtitle}>
+          <p className="page-subtitle" style={styles.pageSubtitle}>
             {isEditMode
               ? "Perbarui informasi praktik, desa, dan bidan terhubung"
               : "Tambahkan tempat praktik baru dan hubungkan dengan bidan praktik"}
@@ -145,7 +146,7 @@ const PracticePlaceForm = () => {
         <button
           onClick={() => navigate("/practice-places")}
           type="button"
-          className="btn-primary"
+          className="btn-secondary"
           style={styles.secondaryButton}
         >
           Kembali ke List
@@ -158,7 +159,7 @@ const PracticePlaceForm = () => {
         </div>
       ) : null}
 
-      <div className="auth-card" style={styles.formCard}>
+      <div className="content-card-light" style={styles.formCard}>
         <div style={styles.formIntro}>
           <div>
             <h3 style={styles.sectionTitle}>Informasi Tempat Praktik</h3>
@@ -248,7 +249,7 @@ const PracticePlaceForm = () => {
                           <div
                             style={{
                               fontSize: "0.75rem",
-                              color: "rgba(255, 255, 255, 0.7)",
+                              color: "var(--color-text-muted)",
                             }}
                           >
                             {option.email}
@@ -262,7 +263,7 @@ const PracticePlaceForm = () => {
                 {errors.user_ids ? (
                   <span className="error-message">{errors.user_ids.message}</span>
                 ) : null}
-                <small className="text-muted" style={styles.helperText}>
+                <small className="form-helper" style={styles.helperText}>
                   Bisa pilih lebih dari satu bidan. Cari nama atau email, lalu hapus
                   tag jika salah pilih.
                 </small>
@@ -290,7 +291,7 @@ const PracticePlaceForm = () => {
             <button
               onClick={() => navigate("/practice-places")}
               type="button"
-              className="btn-primary"
+              className="btn-secondary"
               style={styles.secondaryButton}
             >
               Batal
@@ -334,9 +335,9 @@ const styles = {
     alignItems: "center",
     padding: "0.4rem 0.8rem",
     borderRadius: "999px",
-    background: "rgba(59,130,246,0.16)",
-    border: "1px solid rgba(96,165,250,0.35)",
-    color: "#93c5fd",
+    background: "rgba(204,120,92,0.14)",
+    border: "1px solid rgba(204,120,92,0.24)",
+    color: "var(--color-primary-dark)",
     fontSize: "0.8rem",
     fontWeight: "700",
   },
@@ -344,8 +345,8 @@ const styles = {
   sectionCard: {
     padding: "1.25rem",
     borderRadius: "18px",
-    background: "rgba(255,255,255,0.03)",
-    border: "1px solid rgba(255,255,255,0.06)",
+    background: "rgba(255,255,255,0.6)",
+    border: "1px solid rgba(73, 62, 50, 0.1)",
   },
   inputGrid: {
     display: "grid",
@@ -364,8 +365,6 @@ const styles = {
     width: "auto",
     minWidth: "150px",
     paddingInline: "1rem",
-    backgroundColor: "transparent",
-    border: "1px solid var(--glass-border)",
   },
 };
 

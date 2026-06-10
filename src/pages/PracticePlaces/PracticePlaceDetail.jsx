@@ -39,7 +39,7 @@ const PracticePlaceDetail = () => {
 
   if (loading) {
     return (
-      <div className="dashboard">
+      <div className="dashboard page-shell">
         <div style={{ textAlign: "center", padding: "3rem" }}>
           <p>Memuat data tempat praktik...</p>
         </div>
@@ -49,7 +49,7 @@ const PracticePlaceDetail = () => {
 
   if (error || !place) {
     return (
-      <div className="dashboard">
+      <div className="dashboard page-shell">
         <div className="error-alert">
           {error || "Tempat praktik tidak ditemukan"}
         </div>
@@ -65,18 +65,19 @@ const PracticePlaceDetail = () => {
   }
 
   return (
-    <div className="dashboard">
+    <div className="dashboard page-shell">
       <div className="dashboard-header" style={styles.header}>
-        <div>
-          <h2 style={styles.pageTitle}>{place.nama_praktik}</h2>
-          <p className="text-muted" style={styles.pageSubtitle}>
+        <div className="page-intro">
+          <div className="page-kicker">Practice Detail</div>
+          <h2 className="page-title" style={styles.pageTitle}>{place.nama_praktik}</h2>
+          <p className="page-subtitle" style={styles.pageSubtitle}>
             Detail relasi praktik, desa, dan bidan terhubung
           </p>
         </div>
-        <div style={styles.headerActions}>
+        <div className="page-actions" style={styles.headerActions}>
           <button
             onClick={() => navigate("/practice-places")}
-            className="btn-primary"
+            className="btn-secondary"
             style={styles.secondaryButton}
           >
             Kembali
@@ -93,7 +94,7 @@ const PracticePlaceDetail = () => {
         </div>
       </div>
 
-      <div className="auth-card" style={styles.heroCard}>
+      <div className="content-card-light" style={styles.heroCard}>
         <div style={styles.heroTop}>
           <div>
             <div style={styles.badge}>Tempat Praktik</div>
@@ -117,7 +118,7 @@ const PracticePlaceDetail = () => {
       </div>
 
       <div style={styles.contentGrid}>
-        <div className="auth-card" style={styles.sectionCard}>
+        <div className="content-card-light" style={styles.sectionCard}>
           <div style={styles.sectionHeader}>
             <h3 style={styles.sectionTitle}>Informasi Utama</h3>
             <p className="text-muted" style={styles.sectionSubtitle}>
@@ -141,7 +142,7 @@ const PracticePlaceDetail = () => {
           </div>
         </div>
 
-        <div className="auth-card" style={styles.sectionCard}>
+        <div className="content-card-light" style={styles.sectionCard}>
           <div style={styles.sectionHeader}>
             <h3 style={styles.sectionTitle}>Bidan Praktik</h3>
             <p className="text-muted" style={styles.sectionSubtitle}>
@@ -170,7 +171,7 @@ const PracticePlaceDetail = () => {
         </div>
       </div>
 
-      <div className="auth-card" style={styles.sectionCard}>
+      <div className="content-card-light" style={styles.sectionCard}>
         <div style={styles.sectionHeader}>
           <h3 style={styles.sectionTitle}>Statistik Data</h3>
           <p className="text-muted" style={styles.sectionSubtitle}>
@@ -199,8 +200,6 @@ const styles = {
     width: "auto",
     minWidth: "120px",
     paddingInline: "1rem",
-    backgroundColor: "transparent",
-    border: "1px solid var(--glass-border)",
   },
   heroCard: { maxWidth: "none", margin: "0 0 1.5rem", padding: "1.75rem" },
   heroTop: { marginBottom: "1.25rem" },
@@ -209,9 +208,9 @@ const styles = {
     alignItems: "center",
     padding: "0.4rem 0.8rem",
     borderRadius: "999px",
-    background: "rgba(59,130,246,0.16)",
-    border: "1px solid rgba(96,165,250,0.35)",
-    color: "#93c5fd",
+    background: "rgba(204,120,92,0.14)",
+    border: "1px solid rgba(204,120,92,0.24)",
+    color: "var(--color-primary-dark)",
     fontSize: "0.8rem",
     fontWeight: "700",
     marginBottom: "0.75rem",
@@ -228,8 +227,8 @@ const styles = {
     gap: "0.35rem",
     padding: "1rem",
     borderRadius: "14px",
-    background: "rgba(255,255,255,0.03)",
-    border: "1px solid rgba(255,255,255,0.06)",
+    background: "rgba(255,255,255,0.6)",
+    border: "1px solid rgba(73, 62, 50, 0.1)",
   },
   summaryLabel: {
     fontSize: "0.78rem",
@@ -259,8 +258,8 @@ const styles = {
     gap: "0.35rem",
     padding: "1rem",
     borderRadius: "14px",
-    background: "rgba(255,255,255,0.03)",
-    border: "1px solid rgba(255,255,255,0.06)",
+    background: "rgba(255,255,255,0.6)",
+    border: "1px solid rgba(73, 62, 50, 0.1)",
   },
   detailLabel: {
     fontSize: "0.78rem",
@@ -273,8 +272,8 @@ const styles = {
   staffCard: {
     padding: "1rem",
     borderRadius: "14px",
-    background: "rgba(255,255,255,0.03)",
-    border: "1px solid rgba(255,255,255,0.06)",
+    background: "rgba(255,255,255,0.6)",
+    border: "1px solid rgba(73, 62, 50, 0.1)",
   },
   staffName: { marginBottom: "0.25rem" },
   staffMeta: { margin: 0 },
@@ -285,8 +284,8 @@ const styles = {
     justifyContent: "center",
     textAlign: "center",
     borderRadius: "14px",
-    border: "1px dashed rgba(255,255,255,0.08)",
-    background: "rgba(255,255,255,0.02)",
+    border: "1px dashed rgba(73, 62, 50, 0.12)",
+    background: "rgba(255,255,255,0.45)",
     padding: "1rem",
   },
 };

@@ -18,14 +18,30 @@ import {
 
 const methodOptions = [
   { value: "PIL", label: "PIL" },
-  { value: "SUNTIK_1_BULAN", label: "Suntik 1 Bulan" },
-  { value: "SUNTIK_3_BULAN", label: "Suntik 3 Bulan" },
+  { value: "SUNTIK", label: "Suntik" },
+  { value: "SUNTIK 1 BULAN", label: "Suntik 1 Bulan" },
+  { value: "SUNTIK 3 BULAN", label: "Suntik 3 Bulan" },
   { value: "IMPLANT", label: "Implant" },
   { value: "IUD", label: "IUD" },
   { value: "KONDOM", label: "Kondom" },
   { value: "MOW", label: "MOW" },
   { value: "MOP", label: "MOP" },
+  { value: "MAL", label: "MAL" },
 ];
+
+const normalizeMethodValue = (value) => {
+  const normalized = String(value || "").trim().toUpperCase();
+
+  if (normalized === "SUNTIK_1_BULAN") {
+    return "SUNTIK 1 BULAN";
+  }
+
+  if (normalized === "SUNTIK_3_BULAN") {
+    return "SUNTIK 3 BULAN";
+  }
+
+  return normalized;
+};
 
 const KBForm = () => {
   const { id } = useParams();
@@ -127,7 +143,7 @@ const KBForm = () => {
       setValue("jumlah_anak_laki", data.jumlah_anak_laki);
       setValue("jumlah_anak_perempuan", data.jumlah_anak_perempuan);
       setValue("at", data.at);
-      setValue("alat_kontrasepsi", data.alat_kontrasepsi);
+      setValue("alat_kontrasepsi", normalizeMethodValue(data.alat_kontrasepsi));
       setValue("keterangan", data.keterangan);
     } catch (err) {
       setError("Gagal memuat data untuk diedit");

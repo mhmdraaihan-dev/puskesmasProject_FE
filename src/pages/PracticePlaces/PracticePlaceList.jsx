@@ -4,7 +4,12 @@ import ConfirmDialog from "../../components/ConfirmDialog";
 import RoleGuard from "../../components/RoleGuard";
 import { useAuth } from "../../context/AuthContext";
 import "../../App.css";
-import { deletePracticePlace, getPracticePlaces } from "../../services/api";
+import {
+  deletePracticePlace,
+  getPracticePlaces,
+  getPracticePlacesByVillage,
+  getVillages,
+} from "../../services/api";
 import { isAdmin } from "../../utils/roleHelpers";
 
 const getAssignedMidwivesLabel = (place) => {
@@ -23,6 +28,8 @@ const PracticePlaceList = () => {
     practiceId: null,
     practiceName: "",
   });
+  const [villages, setVillages] = useState([]);
+  const [selectedVillage, setSelectedVillage] = useState("");
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -31,9 +38,17 @@ const PracticePlaceList = () => {
       navigate("/");
       return;
     }
-    fetchPracticePlaces();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    fetchVillages();
   }, [user, navigate]);
+
+  useEffect(() => {
+    if (!isAdmin(user)) {
+      return;
+    }
+
+    fetchPracticePlaces(selectedVillage);
+  }, [selectedVillage, user]);
 
   const summary = useMemo(() => {
     const totalPractices = practicePlaces.length;
@@ -43,18 +58,30 @@ const PracticePlaceList = () => {
       }
       return sum + (place.user ? 1 : 0);
     }, 0);
-    const totalHealthData = practicePlaces.reduce(
-      (sum, place) => sum + (place._count?.health_data || 0),
-      0,
-    );
+    const totalVisibleVillages = new Set(
+      practicePlaces
+        .map((place) => place.village?.village_id || place.village_id)
+        .filter(Boolean),
+    ).size;
 
-    return { totalPractices, totalMidwives, totalHealthData };
+    return { totalPractices, totalMidwives, totalVisibleVillages };
   }, [practicePlaces]);
 
-  const fetchPracticePlaces = async () => {
+  const fetchVillages = async () => {
+    try {
+      const response = await getVillages();
+      setVillages(response.success && Array.isArray(response.data) ? response.data : []);
+    } catch (err) {
+      console.error("Gagal memuat daftar desa:", err);
+    }
+  };
+
+  const fetchPracticePlaces = async (villageId = "") => {
     try {
       setLoading(true);
-      const response = await getPracticePlaces();
+      const response = villageId
+        ? await getPracticePlacesByVillage(villageId)
+        : await getPracticePlaces();
       setPracticePlaces(
         response.success && Array.isArray(response.data) ? response.data : [],
       );
@@ -79,18 +106,19 @@ const PracticePlaceList = () => {
   };
 
   return (
-    <div className="dashboard">
+    <div className="dashboard page-shell">
       <div className="dashboard-header" style={styles.header}>
-        <div>
-          <h2 style={styles.pageTitle}>Manajemen Tempat Praktik</h2>
-          <p className="text-muted" style={styles.pageSubtitle}>
+        <div className="page-intro">
+          <div className="page-kicker">Practice Places</div>
+          <h2 className="page-title" style={styles.pageTitle}>Manajemen Tempat Praktik</h2>
+          <p className="page-subtitle" style={styles.pageSubtitle}>
             Kelola praktik bidan, keterkaitan desa, dan penugasan bidan praktik
           </p>
         </div>
-        <div style={styles.headerActions}>
+        <div className="page-actions" style={styles.headerActions}>
           <button
             onClick={() => navigate("/")}
-            className="btn-primary"
+            className="btn-secondary"
             style={styles.secondaryButton}
           >
             Kembali
@@ -108,17 +136,54 @@ const PracticePlaceList = () => {
       </div>
 
       <div style={styles.summaryGrid}>
-        <div className="auth-card" style={styles.summaryCard}>
+        <div className="stat-card" style={styles.summaryCard}>
           <span style={styles.summaryLabel}>Total Praktik</span>
           <strong style={styles.summaryValue}>{summary.totalPractices}</strong>
         </div>
-        <div className="auth-card" style={styles.summaryCard}>
+        <div className="stat-card" style={styles.summaryCard}>
           <span style={styles.summaryLabel}>Bidan Terhubung</span>
           <strong style={styles.summaryValue}>{summary.totalMidwives}</strong>
         </div>
-        <div className="auth-card" style={styles.summaryCard}>
-          <span style={styles.summaryLabel}>Riwayat Data</span>
-          <strong style={styles.summaryValue}>{summary.totalHealthData}</strong>
+        <div className="stat-card" style={styles.summaryCard}>
+          <span style={styles.summaryLabel}>Cakupan Desa</span>
+          <strong style={styles.summaryValue}>{summary.totalVisibleVillages}</strong>
+        </div>
+      </div>
+
+      <div className="content-card-light" style={styles.filterCard}>
+        <div style={styles.filterHeader}>
+          <div>
+            <h3 style={styles.filterTitle}>Filter Desa</h3>
+            <p className="text-muted" style={styles.filterSubtitle}>
+              Rapikan daftar tempat praktik dengan memfilter berdasarkan desa.
+            </p>
+          </div>
+        </div>
+        <div style={styles.filterRow}>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Desa</label>
+            <select
+              className="form-input"
+              value={selectedVillage}
+              onChange={(event) => setSelectedVillage(event.target.value)}
+            >
+              <option value="">Semua desa</option>
+              {villages.map((village) => (
+                <option key={village.village_id} value={village.village_id}>
+                  {village.nama_desa}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            type="button"
+            className="btn-secondary"
+            style={styles.clearButton}
+            onClick={() => setSelectedVillage("")}
+            disabled={!selectedVillage}
+          >
+            Reset Filter
+          </button>
         </div>
       </div>
 
@@ -133,7 +198,7 @@ const PracticePlaceList = () => {
           <p>Memuat data tempat praktik...</p>
         </div>
       ) : practicePlaces.length === 0 ? (
-        <div className="auth-card" style={styles.emptyCard}>
+        <div className="content-card-light" style={styles.emptyCard}>
           <h3 style={styles.emptyTitle}>Belum ada data tempat praktik</h3>
           <p className="text-muted" style={styles.emptySubtitle}>
             Tambahkan tempat praktik pertama untuk mulai menghubungkan bidan praktik.
@@ -151,7 +216,7 @@ const PracticePlaceList = () => {
       ) : (
         <div style={styles.cardGrid}>
           {practicePlaces.map((place) => (
-            <div key={place.practice_id} className="auth-card" style={styles.practiceCard}>
+            <div key={place.practice_id} className="content-card-light" style={styles.practiceCard}>
               <div style={styles.cardHeader}>
                 <div>
                   <h3 style={styles.cardTitle}>{place.nama_praktik}</h3>
@@ -174,9 +239,9 @@ const PracticePlaceList = () => {
                   </span>
                 </div>
                 <div style={styles.metaCard}>
-                  <span style={styles.metaLabel}>Riwayat Data</span>
+                  <span style={styles.metaLabel}>ID Praktik</span>
                   <span style={styles.metaValue}>
-                    {place._count?.health_data || 0}
+                    {place.practice_id}
                   </span>
                 </div>
               </div>
@@ -245,8 +310,6 @@ const styles = {
     width: "auto",
     minWidth: "120px",
     paddingInline: "1rem",
-    backgroundColor: "transparent",
-    border: "1px solid var(--glass-border)",
   },
   summaryGrid: {
     display: "grid",
@@ -268,6 +331,31 @@ const styles = {
     color: "var(--color-text-muted)",
   },
   summaryValue: { fontSize: "1.55rem", lineHeight: 1.2 },
+  filterCard: {
+    maxWidth: "none",
+    margin: "0 0 1.5rem",
+  },
+  filterHeader: {
+    marginBottom: "1rem",
+  },
+  filterTitle: {
+    marginBottom: "0.35rem",
+    fontSize: "1.1rem",
+  },
+  filterSubtitle: {
+    margin: 0,
+  },
+  filterRow: {
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) auto",
+    gap: "1rem",
+    alignItems: "end",
+  },
+  clearButton: {
+    width: "auto",
+    minWidth: "130px",
+    paddingInline: "1rem",
+  },
   loadingState: { textAlign: "center", padding: "3rem" },
   emptyCard: {
     maxWidth: "none",
@@ -279,7 +367,7 @@ const styles = {
   emptySubtitle: { marginBottom: "1.25rem" },
   cardGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+    gridTemplateColumns: "1fr",
     gap: "1rem",
   },
   practiceCard: { maxWidth: "none", margin: 0 },
@@ -298,9 +386,9 @@ const styles = {
     alignItems: "center",
     padding: "0.4rem 0.8rem",
     borderRadius: "999px",
-    background: "rgba(59,130,246,0.16)",
-    border: "1px solid rgba(96,165,250,0.35)",
-    color: "#93c5fd",
+    background: "rgba(204,120,92,0.14)",
+    border: "1px solid rgba(204,120,92,0.24)",
+    color: "var(--color-primary-dark)",
     fontSize: "0.8rem",
     fontWeight: "700",
   },
@@ -311,8 +399,8 @@ const styles = {
     gap: "0.35rem",
     padding: "1rem",
     borderRadius: "14px",
-    background: "rgba(255,255,255,0.03)",
-    border: "1px solid rgba(255,255,255,0.06)",
+    background: "rgba(255,255,255,0.6)",
+    border: "1px solid rgba(73, 62, 50, 0.1)",
   },
   metaLabel: {
     fontSize: "0.78rem",
@@ -324,7 +412,7 @@ const styles = {
   cardFooter: {
     marginTop: "1rem",
     paddingTop: "1rem",
-    borderTop: "1px solid rgba(255,255,255,0.08)",
+    borderTop: "1px solid rgba(73, 62, 50, 0.08)",
     display: "flex",
     gap: "0.75rem",
     flexWrap: "wrap",
@@ -333,22 +421,25 @@ const styles = {
     width: "auto",
     minWidth: "110px",
     paddingInline: "1rem",
-    backgroundColor: "rgba(59,130,246,0.22)",
-    border: "1px solid rgba(96,165,250,0.45)",
+    backgroundColor: "rgba(93, 184, 166, 0.16)",
+    border: "1px solid rgba(93, 184, 166, 0.3)",
+    color: "#236b5d",
   },
   editButton: {
     width: "auto",
     minWidth: "110px",
     paddingInline: "1rem",
-    backgroundColor: "rgba(168,85,247,0.22)",
-    border: "1px solid rgba(168,85,247,0.45)",
+    backgroundColor: "rgba(232, 165, 90, 0.16)",
+    border: "1px solid rgba(212, 160, 23, 0.28)",
+    color: "#8d6119",
   },
   deleteButton: {
     width: "auto",
     minWidth: "110px",
     paddingInline: "1rem",
-    backgroundColor: "rgba(239,68,68,0.2)",
-    border: "1px solid rgba(248,113,113,0.45)",
+    backgroundColor: "rgba(198, 69, 69, 0.12)",
+    border: "1px solid rgba(198, 69, 69, 0.24)",
+    color: "#a13a3a",
   },
 };
 

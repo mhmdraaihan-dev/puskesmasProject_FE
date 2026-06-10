@@ -60,22 +60,22 @@ const UserList = () => {
   const activeUsers = users.filter((item) => item.status_user === "ACTIVE").length;
 
   return (
-    <div className="dashboard" style={{ maxWidth: "1280px", paddingBottom: "3rem" }}>
+    <div className="dashboard page-shell">
       <header
         className="dashboard-header"
         style={{ alignItems: "flex-start", gap: "1rem" }}
       >
-        <div>
-          <h1 style={{ marginBottom: "0.5rem" }}>User</h1>
-          <p className="text-muted" style={{ margin: 0 }}>
+        <div className="page-intro">
+          <div className="page-kicker">Management</div>
+          <h1 className="page-title" style={{ marginBottom: "0.15rem" }}>User</h1>
+          <p className="page-subtitle">
             Kelola seluruh akun user dari satu halaman.
           </p>
         </div>
-        <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+        <div className="page-actions">
           <button
             onClick={() => navigate("/")}
-            className="action-icon-btn"
-            style={{ padding: "0.75rem 1rem" }}
+            className="btn-secondary"
           >
             Kembali ke Dashboard
           </button>
@@ -90,49 +90,34 @@ const UserList = () => {
       </header>
 
       <section style={{ marginBottom: "2rem" }}>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "1rem",
-          }}
-        >
-          <div style={summaryCardStyle}>
-            <div style={summaryLabelStyle}>Total User</div>
-            <div style={summaryValueStyle}>{users.length}</div>
-            <div style={summaryNoteStyle}>akun terdaftar</div>
+        <div className="stats-grid">
+          <div className="stat-card">
+            <div className="stat-label">Total User</div>
+            <div className="stat-value">{users.length}</div>
+            <div className="stat-note">akun terdaftar</div>
           </div>
-          <div style={summaryCardStyle}>
-            <div style={summaryLabelStyle}>User Aktif</div>
-            <div style={summaryValueStyle}>{activeUsers}</div>
-            <div style={summaryNoteStyle}>siap digunakan</div>
+          <div className="stat-card">
+            <div className="stat-label">User Aktif</div>
+            <div className="stat-value">{activeUsers}</div>
+            <div className="stat-note">siap digunakan</div>
           </div>
-          <div style={summaryCardStyle}>
-            <div style={summaryLabelStyle}>Hasil Filter</div>
-            <div style={summaryValueStyle}>{filteredUsers.length}</div>
-            <div style={summaryNoteStyle}>user tampil saat ini</div>
+          <div className="stat-card">
+            <div className="stat-label">Hasil Filter</div>
+            <div className="stat-value">{filteredUsers.length}</div>
+            <div className="stat-note">user tampil saat ini</div>
           </div>
         </div>
       </section>
 
       <section>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-end",
-            gap: "1rem",
-            flexWrap: "wrap",
-            marginBottom: "1rem",
-          }}
-        >
+        <div className="section-heading">
           <div>
-            <h3 style={{ marginBottom: "0.35rem" }}>Daftar User</h3>
-            <p className="text-muted" style={{ margin: 0, fontSize: "0.92rem" }}>
+            <h3 className="section-title">Daftar User</h3>
+            <p className="section-subtitle">
               Cari berdasarkan nama, email, atau posisi.
             </p>
           </div>
-          <div style={{ width: "100%", maxWidth: "320px" }}>
+          <div className="toolbar-search">
             <input
               type="text"
               className="form-input"
@@ -144,14 +129,7 @@ const UserList = () => {
         </div>
 
         <div
-          className="auth-card"
-          style={{
-            padding: 0,
-            maxWidth: "none",
-            overflowX: "auto",
-            borderRadius: "20px",
-            boxShadow: "0 14px 38px rgba(0, 0, 0, 0.18)",
-          }}
+          className="auth-card table-shell"
         >
           {loading ? (
             <div style={{ padding: "2rem", textAlign: "center" }}>Memuat data user...</div>
@@ -247,54 +225,9 @@ const UserList = () => {
         .dashboard-table tr:hover td {
           background: rgba(255,255,255,0.02);
         }
-        .action-icon-btn {
-          background: transparent;
-          border: 1px solid rgba(255,255,255,0.12);
-          cursor: pointer;
-          font-size: 0.8rem;
-          padding: 0.42rem 0.75rem;
-          border-radius: 8px;
-          transition: background 0.2s, border-color 0.2s;
-          color: white;
-          box-shadow: none;
-        }
-        .action-icon-btn:hover {
-          background: rgba(255,255,255,0.08);
-          border-color: rgba(255,255,255,0.18);
-          transform: none;
-        }
       `}</style>
     </div>
   );
-};
-
-const summaryCardStyle = {
-  background: "rgba(255,255,255,0.03)",
-  border: "1px solid rgba(255,255,255,0.06)",
-  borderRadius: "18px",
-  padding: "1.25rem",
-  boxShadow: "0 12px 32px rgba(0, 0, 0, 0.18)",
-};
-
-const summaryLabelStyle = {
-  fontSize: "0.8rem",
-  textTransform: "uppercase",
-  letterSpacing: "0.08em",
-  color: "var(--color-text-muted)",
-  marginBottom: "0.65rem",
-  fontWeight: 700,
-};
-
-const summaryValueStyle = {
-  fontSize: "2rem",
-  lineHeight: 1,
-  fontWeight: 700,
-};
-
-const summaryNoteStyle = {
-  fontSize: "0.9rem",
-  color: "var(--color-text-muted)",
-  marginTop: "0.55rem",
 };
 
 export default UserList;

@@ -87,7 +87,7 @@ export const canDeleteHealthData = (user, healthData) => {
 
 // Check if user can verify health data
 export const canVerifyHealthData = (user) => {
-  return isBidanDesa(user) || isBidanKoordinator(user);
+  return isBidanDesa(user);
 };
 
 // Check if user can revise rejected data
@@ -164,7 +164,7 @@ export const canDeleteKehamilan = (user, data) => {
 
 // Check if user can verify kehamilan data
 export const canVerifyKehamilan = (user) => {
-  return isBidanDesa(user) || isBidanKoordinator(user);
+  return isBidanDesa(user);
 };
 
 // Check if user can edit persalinan data
@@ -191,7 +191,7 @@ export const canDeletePersalinan = (user, data) => {
 
 // Check if user can verify persalinan data
 export const canVerifyPersalinan = (user) => {
-  return isBidanDesa(user) || isBidanKoordinator(user);
+  return isBidanDesa(user);
 };
 
 // Check if user can edit KB data
@@ -218,7 +218,7 @@ export const canDeleteKB = (user, data) => {
 
 // Check if user can verify KB data
 export const canVerifyKB = (user) => {
-  return isBidanDesa(user) || isBidanKoordinator(user);
+  return isBidanDesa(user);
 };
 
 // Check if user can edit Imunisasi data
@@ -245,5 +245,5 @@ export const canDeleteImunisasi = (user, data) => {
 
 // Check if user can verify Imunisasi data
 export const canVerifyImunisasi = (user) => {
-  return isBidanDesa(user) || isBidanKoordinator(user);
+  return isBidanDesa(user);
 };
