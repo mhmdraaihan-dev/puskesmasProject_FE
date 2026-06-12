@@ -1,0 +1,177 @@
+.pemeriksaan-kehamilan-form-page {
+  padding: var(--spacing-xl) 0;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.pemeriksaan-kehamilan-form-page .form-layout {
+  display: grid;
+  gap: var(--spacing-lg);
+}
+
+.pemeriksaan-kehamilan-form__section-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(240, 245, 232, 0.95)) !important;
+  border: 1px solid rgba(77, 122, 44, 0.12);
+  border-radius: 24px;
+  box-shadow: 0 24px 44px rgba(35, 51, 24, 0.08);
+}
+
+.pemeriksaan-kehamilan-form-page .section-header {
+  margin-bottom: var(--spacing-lg);
+}
+
+.pemeriksaan-kehamilan-form-page .section-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.35rem, 2vw, 1.7rem);
+  font-weight: 600;
+  color: var(--color-ink);
+  margin-bottom: var(--spacing-xs);
+}
+
+.pemeriksaan-kehamilan-form-page .section-subtitle {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.pemeriksaan-kehamilan-form-page .form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.pemeriksaan-kehamilan-form-page .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.pemeriksaan-kehamilan-form-page .form-group--full {
+  grid-column: 1 / -1;
+}
+
+.pemeriksaan-kehamilan-form-page .form-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #445340;
+}
+
+.pemeriksaan-kehamilan-form-page .required-asterisk {
+  color: var(--color-error);
+  margin-left: var(--spacing-2xs);
+}
+
+.pemeriksaan-kehamilan-form-page .input-label {
+  color: #445340;
+  font-weight: 600;
+}
+
+.pemeriksaan-kehamilan-form-page .input,
+.pemeriksaan-kehamilan-form-page .form-select,
+.pemeriksaan-kehamilan-form-page .form-textarea {
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(77, 122, 44, 0.14);
+  color: #233022;
+}
+
+.pemeriksaan-kehamilan-form-page .input::placeholder,
+.pemeriksaan-kehamilan-form-page .form-textarea::placeholder {
+  color: rgba(84, 100, 79, 0.7);
+}
+
+.pemeriksaan-kehamilan-form-page .form-select {
+  height: 40px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-body-md);
+  transition: all 0.2s ease;
+}
+
+.pemeriksaan-kehamilan-form-page .form-textarea {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-body-md);
+  font-family: inherit;
+  resize: vertical;
+  transition: all 0.2s ease;
+}
+
+.pemeriksaan-kehamilan-form-page .input:focus,
+.pemeriksaan-kehamilan-form-page .form-select:focus,
+.pemeriksaan-kehamilan-form-page .form-textarea:focus {
+  outline: none;
+  border-color: rgba(45, 104, 31, 0.34);
+  box-shadow: 0 0 0 4px rgba(63, 134, 34, 0.08);
+  background: #ffffff;
+}
+
+.pemeriksaan-kehamilan-form-page .error-text {
+  font-size: var(--font-size-body-sm);
+  color: var(--color-error);
+  margin-top: var(--spacing-xs);
+}
+
+.pemeriksaan-kehamilan-form-page .error-alert {
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: rgba(198, 69, 69, 0.14);
+  border: 1px solid rgba(198, 69, 69, 0.28);
+  border-radius: 14px;
+  color: var(--color-error);
+  margin-bottom: var(--spacing-lg);
+}
+
+.pemeriksaan-kehamilan-form-page .warning-alert {
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(212, 160, 23, 0.24);
+  border-radius: 14px;
+  color: #9a6c0b;
+  margin-bottom: var(--spacing-lg);
+}
+
+.pemeriksaan-kehamilan-form-page .inline-patient-info {
+  margin-top: var(--spacing-sm);
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  font-size: var(--font-size-body-sm);
+  color: #6d7e67;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(246, 249, 240, 0.92);
+  border: 1px solid rgba(77, 122, 44, 0.1);
+  border-radius: 14px;
+}
+
+.pemeriksaan-kehamilan-form-page .inline-patient-info span {
+  display: inline-flex;
+  align-items: center;
+}
+
+.pemeriksaan-kehamilan-form-page .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid rgba(77, 122, 44, 0.12);
+}
+
+@media (max-width: 768px) {
+  .pemeriksaan-kehamilan-form-page {
+    padding: var(--spacing-lg) 0;
+  }
+
+  .pemeriksaan-kehamilan-form-page .form-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .pemeriksaan-kehamilan-form-page .form-actions {
+    flex-direction: column;
+  }
+
+  .pemeriksaan-kehamilan-form-page .form-actions button {
+    width: 100%;
+  }
+}

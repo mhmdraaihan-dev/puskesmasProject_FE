@@ -1,41 +1,73 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getHealthData, deleteHealthData } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import StatusBadge from '../../components/StatusBadge';
-import ConfirmDialog from '../../components/ConfirmDialog';
+import Modal from '../../components/ui/Modal';
+import PageHeader from '../../components/layout/PageHeader';
+import Card from '../../components/ui/Card';
+import Button from '../../components/Button';
+import Input from '../../components/Input';
+import Table from '../../components/ui/Table';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import EmptyState from '../../components/ui/EmptyState';
 import { formatDate } from '../../utils/dateFormatter';
-import { getJenisDataLabel, canEditHealthData, canDeleteHealthData } from '../../utils/roleHelpers';
-import '../../App.css';
+import { getJenisDataLabel, canEditHealthData, canDeleteHealthData, isBidanPraktik } from '../../utils/roleHelpers';
+import '../../styles/design-system.css';
+import './HealthDataList.css';
 
 const HealthDataList = () => {
     const [healthData, setHealthData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [filter, setFilter] = useState({ status: '', jenis: '' });
+    const [filter, setFilter] = useState({ status: '', jenis: '', search: '' });
     const [deleteDialog, setDeleteDialog] = useState({ isOpen: false, dataId: null, patientName: '' });
     const navigate = useNavigate();
     const { user } = useAuth();
 
+    const canAddData = isBidanPraktik(user);
+
+    const stats = useMemo(() => {
+        const total = healthData.length;
+        const pending = healthData.filter(item => item.status_verifikasi === 'PENDING').length;
+        const approved = healthData.filter(item => item.status_verifikasi === 'APPROVED').length;
+        const rejected = healthData.filter(item => item.status_verifikasi === 'REJECTED').length;
+
+        return { total, pending, approved, rejected };
+    }, [healthData]);
+
     useEffect(() => {
         fetchHealthData();
-    }, [filter]);
+    }, []);
 
-    const fetchHealthData = async () => {
+    const fetchHealthData = async (overrideFilter = filter) => {
         try {
             setLoading(true);
             const params = {};
-            if (filter.status) params.status_verifikasi = filter.status;
-            if (filter.jenis) params.jenis_data = filter.jenis;
+            if (overrideFilter.status) params.status_verifikasi = overrideFilter.status;
+            if (overrideFilter.jenis) params.jenis_data = overrideFilter.jenis;
+            if (overrideFilter.search) params.search = overrideFilter.search;
 
             const response = await getHealthData(params);
             setHealthData(response.data || []);
+            setError('');
         } catch (err) {
             setError('Gagal memuat data kesehatan');
             console.error(err);
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        fetchHealthData();
+    };
+
+    const handleReset = () => {
+        const resetFilter = { status: '', jenis: '', search: '' };
+        setFilter(resetFilter);
+        fetchHealthData(resetFilter);
     };
 
     const handleDelete = async () => {
@@ -49,43 +81,132 @@ const HealthDataList = () => {
         }
     };
 
+    const columns = [
+        {
+            key: 'nama_pasien',
+            label: 'Nama Pasien',
+            sortable: true,
+            render: (value) => <span style={{ fontWeight: 600 }}>{value}</span>
+        },
+        {
+            key: 'jenis_data',
+            label: 'Jenis Data',
+            render: (value) => getJenisDataLabel(value)
+        },
+        {
+            key: 'tanggal_periksa',
+            label: 'Tanggal Periksa',
+            sortable: true,
+            render: (value) => formatDate(value)
+        },
+        {
+            key: 'umur_pasien',
+            label: 'Umur',
+            render: (value) => `${value} tahun`
+        },
+        {
+            key: 'practice_place',
+            label: 'Tempat Praktik',
+            render: (value) => value?.nama_praktik || '-'
+        },
+        {
+            key: 'status_verifikasi',
+            label: 'Status',
+            render: (value) => <StatusBadge status={value} />
+        },
+        {
+            key: 'actions',
+            label: 'Aksi',
+            render: (_, row) => (
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <Button
+                        variant="secondary-on-dark"
+                        size="sm"
+                        onClick={() => navigate(`/health-data/${row.data_id}`)}
+                    >
+                        Detail
+                    </Button>
+                    {canEditHealthData(user, row) && (
+                        <Button
+                            variant="secondary-on-dark"
+                            size="sm"
+                            onClick={() => navigate(`/health-data/${row.data_id}/edit`)}
+                        >
+                            Edit
+                        </Button>
+                    )}
+                    {canDeleteHealthData(user, row) && (
+                        <Button
+                            variant="secondary-on-dark"
+                            size="sm"
+                            onClick={() => setDeleteDialog({ isOpen: true, dataId: row.data_id, patientName: row.nama_pasien })}
+                        >
+                            Hapus
+                        </Button>
+                    )}
+                </div>
+            )
+        }
+    ];
+
     return (
-        <div className="dashboard">
-            <div className="dashboard-header">
-                <div>
-                    <h2>Data Kesehatan</h2>
-                    <p className="text-muted">Kelola data kesehatan pasien</p>
-                </div>
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                    <button onClick={() => navigate('/')} className="btn-primary" style={{ backgroundColor: 'transparent', border: '1px solid var(--glass-border)' }}>
-                        Kembali
-                    </button>
-                    <button onClick={() => navigate('/health-data/add')} className="btn-primary">
-                        + Input Data Baru
-                    </button>
-                </div>
+        <div className="health-data-list-page">
+            <PageHeader
+                title="Data Kesehatan"
+                subtitle={canAddData ? "Input dan kelola data kesehatan pasien" : "Lihat data kesehatan dan proses verifikasinya"}
+                actions={
+                    <>
+                        {canAddData && (
+                            <Button variant="primary" onClick={() => navigate('/health-data/add')}>
+                                Input Data Baru
+                            </Button>
+                        )}
+                    </>
+                }
+            />
+
+            {/* Stats Section */}
+            <div className="stats-section">
+                <Card variant="surface-dark" padding="lg">
+                    <div className="stat-label">Total Data</div>
+                    <div className="stat-value">{stats.total}</div>
+                    <div className="stat-note">data kesehatan</div>
+                </Card>
+                <Card variant="surface-dark" padding="lg">
+                    <div className="stat-label">Menunggu Verifikasi</div>
+                    <div className="stat-value">{stats.pending}</div>
+                    <div className="stat-note">pending</div>
+                </Card>
+                <Card variant="surface-dark" padding="lg">
+                    <div className="stat-label">Disetujui</div>
+                    <div className="stat-value">{stats.approved}</div>
+                    <div className="stat-note">approved</div>
+                </Card>
+                <Card variant="surface-dark" padding="lg">
+                    <div className="stat-label">Ditolak</div>
+                    <div className="stat-value">{stats.rejected}</div>
+                    <div className="stat-note">rejected</div>
+                </Card>
             </div>
 
-            {/* Filters */}
-            <div className="auth-card" style={{ marginBottom: '1.5rem' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                    <div>
-                        <label className="form-label" style={{ fontSize: '0.875rem' }}>Status Verifikasi</label>
+            {/* Filter Card */}
+            <Card variant="surface-dark" padding="xl" className="filter-card">
+                <h3 className="filter-title">Filter Data Kesehatan</h3>
+                <p className="filter-subtitle">Cari data berdasarkan nama pasien, jenis data, dan status verifikasi</p>
+
+                <form onSubmit={handleSearch} className="filter-form">
+                    <Input
+                        label="Cari Nama Pasien"
+                        type="text"
+                        placeholder="Ketik nama pasien..."
+                        value={filter.search}
+                        onChange={(e) => setFilter({ ...filter, search: e.target.value })}
+                    />
+                    <div className="form-group">
+                        <label className="form-label" htmlFor="jenis">Jenis Data</label>
                         <select
-                            className="form-input"
-                            value={filter.status}
-                            onChange={(e) => setFilter({ ...filter, status: e.target.value })}
-                        >
-                            <option value="">Semua Status</option>
-                            <option value="PENDING">Menunggu Verifikasi</option>
-                            <option value="APPROVED">Disetujui</option>
-                            <option value="REJECTED">Ditolak</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label className="form-label" style={{ fontSize: '0.875rem' }}>Jenis Data</label>
-                        <select
-                            className="form-input"
+                            id="jenis"
+                            className="form-select"
                             value={filter.jenis}
                             onChange={(e) => setFilter({ ...filter, jenis: e.target.value })}
                         >
@@ -97,118 +218,53 @@ const HealthDataList = () => {
                             <option value="balita">Balita</option>
                         </select>
                     </div>
-                </div>
-            </div>
+                    <div className="form-group">
+                        <label className="form-label" htmlFor="status">Status Verifikasi</label>
+                        <select
+                            id="status"
+                            className="form-select"
+                            value={filter.status}
+                            onChange={(e) => setFilter({ ...filter, status: e.target.value })}
+                        >
+                            <option value="">Semua Status</option>
+                            <option value="PENDING">Menunggu Verifikasi</option>
+                            <option value="APPROVED">Disetujui</option>
+                            <option value="REJECTED">Ditolak</option>
+                        </select>
+                    </div>
+                    <div className="filter-actions">
+                        <Button type="submit" variant="primary">
+                            Cari
+                        </Button>
+                        <Button type="button" variant="secondary" onClick={handleReset}>
+                            Reset
+                        </Button>
+                    </div>
+                </form>
+            </Card>
 
-            {error && (
-                <div className="error-alert" style={{ marginBottom: '1rem' }}>
-                    {error}
-                </div>
-            )}
+            {error && <div className="error-alert">{error}</div>}
 
+            {/* Table */}
             {loading ? (
-                <div style={{ textAlign: 'center', padding: '3rem' }}>
-                    <p>Memuat data...</p>
-                </div>
+                <LoadingSpinner size="lg" />
             ) : healthData.length === 0 ? (
-                <div className="auth-card" style={{ textAlign: 'center', padding: '3rem' }}>
-                    <p style={{ color: 'var(--text-muted)' }}>Belum ada data kesehatan</p>
-                    <button onClick={() => navigate('/health-data/add')} className="btn-primary" style={{ marginTop: '1rem' }}>
-                        Input Data Pertama
-                    </button>
-                </div>
+                <EmptyState
+                    message={canAddData ? "Belum ada data kesehatan. Silakan tambahkan data baru atau ubah filter pencarian." : "Belum ada data kesehatan yang dapat ditampilkan."}
+                    action={
+                        canAddData ? (
+                            <Button variant="primary" onClick={() => navigate('/health-data/add')}>
+                                Input Data Pertama
+                            </Button>
+                        ) : undefined
+                    }
+                />
             ) : (
-                <div style={{ display: 'grid', gap: '1rem' }}>
-                    {healthData.map((data) => (
-                        <div key={data.data_id} className="auth-card">
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
-                                <div>
-                                    <h3 style={{ fontSize: '1.125rem', marginBottom: '0.25rem' }}>{data.nama_pasien}</h3>
-                                    <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-                                        {data.umur_pasien} tahun • {getJenisDataLabel(data.jenis_data)}
-                                    </p>
-                                </div>
-                                <StatusBadge status={data.status_verifikasi} />
-                            </div>
-
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem', fontSize: '0.875rem' }}>
-                                <div>
-                                    <p style={{ color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Tanggal Periksa</p>
-                                    <p>{formatDate(data.tanggal_periksa)}</p>
-                                </div>
-                                <div>
-                                    <p style={{ color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Tempat Praktik</p>
-                                    <p>{data.practice_place?.nama_praktik || '-'}</p>
-                                </div>
-                                <div>
-                                    <p style={{ color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Desa</p>
-                                    <p>{data.practice_place?.village?.nama_desa || '-'}</p>
-                                </div>
-                                {data.jumlah_revisi > 0 && (
-                                    <div>
-                                        <p style={{ color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Revisi</p>
-                                        <p>{data.jumlah_revisi}x</p>
-                                    </div>
-                                )}
-                            </div>
-
-                            {data.catatan && (
-                                <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1rem', fontStyle: 'italic' }}>
-                                    "{data.catatan}"
-                                </p>
-                            )}
-
-                            <div style={{ display: 'flex', gap: '0.5rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                                <button
-                                    onClick={() => navigate(`/health-data/${data.data_id}`)}
-                                    className="btn-primary"
-                                    style={{
-                                        flex: 1,
-                                        padding: '0.5rem',
-                                        fontSize: '0.875rem',
-                                        backgroundColor: 'rgba(59, 130, 246, 0.3)',
-                                        border: '1px solid #60a5fa'
-                                    }}
-                                >
-                                    Detail
-                                </button>
-                                {canEditHealthData(user, data) && (
-                                    <button
-                                        onClick={() => navigate(`/health-data/${data.data_id}/edit`)}
-                                        className="btn-primary"
-                                        style={{
-                                            flex: 1,
-                                            padding: '0.5rem',
-                                            fontSize: '0.875rem',
-                                            backgroundColor: 'rgba(168, 85, 247, 0.3)',
-                                            border: '1px solid #a855f7'
-                                        }}
-                                    >
-                                        Edit
-                                    </button>
-                                )}
-                                {canDeleteHealthData(user, data) && (
-                                    <button
-                                        onClick={() => setDeleteDialog({ isOpen: true, dataId: data.data_id, patientName: data.nama_pasien })}
-                                        className="btn-primary"
-                                        style={{
-                                            flex: 1,
-                                            padding: '0.5rem',
-                                            fontSize: '0.875rem',
-                                            backgroundColor: 'rgba(239, 68, 68, 0.3)',
-                                            border: '1px solid #ef4444'
-                                        }}
-                                    >
-                                        Hapus
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                <Table columns={columns} data={healthData} />
             )}
 
-            <ConfirmDialog
+            {/* Delete Confirmation Modal */}
+            <Modal
                 isOpen={deleteDialog.isOpen}
                 onClose={() => setDeleteDialog({ isOpen: false, dataId: null, patientName: '' })}
                 onConfirm={handleDelete}

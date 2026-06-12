@@ -1,0 +1,308 @@
+/**
+ * DashboardPraktik Component Styles
+ * 
+ * Bidan Praktik dashboard with submissions and quick action buttons.
+ */
+
+.dashboard-praktik {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl); /* 32px */
+}
+
+/* Stats Cards Grid */
+.dashboard-praktik__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--spacing-lg); /* 24px */
+}
+
+/* Rejected Section Alert */
+.dashboard-praktik__rejected-section {
+  border: 1px solid rgba(198, 69, 69, 0.18);
+  background: linear-gradient(180deg, rgba(255, 251, 251, 0.98), rgba(247, 238, 238, 0.95));
+  box-shadow: 0 24px 44px rgba(80, 33, 33, 0.08);
+}
+
+.dashboard-praktik__recent-section {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(240, 245, 232, 0.95)) !important;
+  border: 1px solid rgba(77, 122, 44, 0.12);
+  border-radius: 24px;
+  box-shadow: 0 24px 44px rgba(35, 51, 24, 0.08);
+}
+
+/* Section Headers */
+.dashboard-praktik__section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.dashboard-praktik__section-title {
+  font-family: var(--font-serif);
+  font-size: var(--type-display-md-size); /* 36px */
+  font-weight: var(--type-display-md-weight);
+  line-height: var(--type-display-md-line-height);
+  letter-spacing: var(--type-display-md-letter-spacing);
+  color: var(--color-ink);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.dashboard-praktik__section-title--error {
+  color: var(--color-error);
+}
+
+.dashboard-praktik__section-subtitle {
+  font-family: var(--font-sans);
+  font-size: var(--type-body-md-size);
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.dashboard-praktik__view-all-btn {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  border: none;
+  border-radius: var(--rounded-sm);
+  font-family: var(--font-sans);
+  font-size: var(--type-body-md-size);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  white-space: nowrap;
+}
+
+.dashboard-praktik__view-all-btn:hover {
+  background: var(--color-primary-active);
+}
+
+.dashboard-praktik__view-all-btn--error {
+  background: var(--color-error);
+}
+
+.dashboard-praktik__view-all-btn--error:hover {
+  background: #a93737;
+}
+
+.dashboard-praktik__view-all-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(204, 120, 92, 0.15);
+}
+
+.dashboard-praktik__table {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(237, 242, 230, 0.94));
+  border: 1px solid rgba(77, 122, 44, 0.12);
+  border-radius: 24px;
+  padding: 0.95rem 1.1rem;
+  margin-top: 0.65rem;
+  box-shadow: 0 24px 44px rgba(35, 51, 24, 0.08);
+}
+
+.dashboard-praktik__table .table-wrapper::-webkit-scrollbar-track {
+  background: rgba(104, 158, 61, 0.08);
+}
+
+.dashboard-praktik__table .table-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(79, 146, 40, 0.22);
+}
+
+.dashboard-praktik__table .table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(79, 146, 40, 0.34);
+}
+
+.dashboard-praktik__table .table {
+  color: #233022;
+}
+
+.dashboard-praktik__table .table-header {
+  padding: 0.95rem 0.75rem;
+  border-bottom: 1px solid rgba(77, 122, 44, 0.12);
+  color: #54644f;
+  font-size: 0.86rem;
+  letter-spacing: 0.04em;
+}
+
+.dashboard-praktik__table .table-cell {
+  padding: 0.95rem 0.75rem;
+  border-bottom: 1px solid rgba(77, 122, 44, 0.08);
+  vertical-align: middle;
+}
+
+.dashboard-praktik__table .table-row:hover {
+  background: rgba(79, 146, 40, 0.045);
+}
+
+.dashboard-praktik__table .table-loading,
+.dashboard-praktik__table .table-empty {
+  min-height: 160px;
+}
+
+.dashboard-praktik__table .table-loading-text,
+.dashboard-praktik__table .table-empty-text {
+  color: #6d7e67;
+}
+
+.dashboard-praktik__table .table-spinner {
+  border: 3px solid rgba(77, 122, 44, 0.12);
+  border-top-color: #4f9228;
+}
+
+.dashboard-praktik__table--rejected {
+  background: linear-gradient(180deg, rgba(255, 252, 252, 0.96), rgba(246, 239, 239, 0.94));
+  border-color: rgba(198, 69, 69, 0.14);
+  box-shadow: 0 24px 44px rgba(80, 33, 33, 0.08);
+}
+
+.dashboard-praktik__table--rejected .table-header {
+  border-bottom-color: rgba(198, 69, 69, 0.12);
+  color: #7b5a5a;
+}
+
+.dashboard-praktik__table--rejected .table-cell {
+  border-bottom-color: rgba(198, 69, 69, 0.08);
+}
+
+.dashboard-praktik__table--rejected .table-row:hover {
+  background: rgba(198, 69, 69, 0.04);
+}
+
+/* Quick Actions Section */
+.dashboard-praktik__actions-title {
+  font-family: var(--font-serif);
+  font-size: var(--type-display-md-size);
+  font-weight: var(--type-display-md-weight);
+  line-height: var(--type-display-md-line-height);
+  color: var(--color-ink);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.dashboard-praktik__actions-subtitle {
+  font-family: var(--font-sans);
+  font-size: var(--type-body-md-size);
+  color: var(--color-muted);
+  margin: 0 0 var(--spacing-lg) 0;
+}
+
+.dashboard-praktik__actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.dashboard-praktik__action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg);
+  background: var(--color-canvas);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--rounded-md);
+  font-family: var(--font-sans);
+  font-size: var(--type-body-md-size);
+  font-weight: 500;
+  color: var(--color-body);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dashboard-praktik__action-btn:hover {
+  background: var(--color-surface-card);
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-praktik__action-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(204, 120, 92, 0.15);
+}
+
+.dashboard-praktik__action-btn svg {
+  flex-shrink: 0;
+}
+
+/* Module-specific button colors */
+.dashboard-praktik__action-btn--kehamilan {
+  border-color: rgba(204, 120, 92, 0.3);
+}
+
+.dashboard-praktik__action-btn--kehamilan:hover {
+  background: rgba(204, 120, 92, 0.1);
+  border-color: var(--color-primary);
+}
+
+.dashboard-praktik__action-btn--persalinan {
+  border-color: rgba(93, 184, 114, 0.3);
+}
+
+.dashboard-praktik__action-btn--persalinan:hover {
+  background: rgba(93, 184, 114, 0.1);
+  border-color: var(--color-success);
+}
+
+.dashboard-praktik__action-btn--kb {
+  border-color: rgba(212, 160, 23, 0.3);
+}
+
+.dashboard-praktik__action-btn--kb:hover {
+  background: rgba(212, 160, 23, 0.1);
+  border-color: var(--color-warning);
+}
+
+.dashboard-praktik__action-btn--imunisasi {
+  border-color: rgba(98, 107, 184, 0.3);
+}
+
+.dashboard-praktik__action-btn--imunisasi:hover {
+  background: rgba(98, 107, 184, 0.1);
+  border-color: #626bb8;
+}
+
+/* Responsive: Mobile */
+@media (max-width: 767px) {
+  .dashboard-praktik {
+    gap: var(--spacing-lg);
+  }
+  
+  .dashboard-praktik__stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-praktik__section-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .dashboard-praktik__view-all-btn {
+    width: 100%;
+  }
+  
+  .dashboard-praktik__section-title {
+    font-size: 28px;
+  }
+
+  .dashboard-praktik__table {
+    padding: 0.55rem 0.75rem;
+  }
+  
+  .dashboard-praktik__actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Responsive: Tablet */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .dashboard-praktik__stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .dashboard-praktik__actions-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

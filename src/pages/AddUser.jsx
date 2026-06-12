@@ -4,7 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { registerUser, getVillages } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { isAdmin } from "../utils/roleHelpers";
-import "../App.css";
+import PageHeader from "../components/layout/PageHeader";
+import Card from "../components/ui/Card";
+import Button from "../components/Button";
+import Input from "../components/Input";
+import "../styles/design-system.css";
+import "./AddUser.css";
 
 const AddUser = () => {
   const {
@@ -131,138 +136,104 @@ const AddUser = () => {
   };
 
   return (
-    <div className="dashboard page-shell">
-      <div className="dashboard-header" style={{ alignItems: "flex-start", gap: "1rem" }}>
-        <div className="page-intro">
-          <div className="page-kicker">User Setup</div>
-          <h2 className="page-title" style={{ marginBottom: "0.15rem" }}>Tambah User Baru</h2>
-          <p className="page-subtitle">Buat akun user baru untuk sistem.</p>
-        </div>
-        <div className="page-actions">
-          <button
-            onClick={() => navigate("/")}
-            className="btn-secondary"
-          >
+    <div className="add-user-page">
+      <PageHeader
+        heading="Tambah User Baru"
+        actions={
+          <Button variant="secondary" onClick={() => navigate("/")}>
             Batal
-          </button>
-        </div>
-      </div>
+          </Button>
+        }
+      />
 
-      <div className="page-form-shell">
-      <div className="content-card-light">
-        {error && <div className="error-alert">{error}</div>}
+      <Card variant="surface-dark" padding="xl">
+        {error && (
+          <div className="error-alert" style={{ marginBottom: "var(--spacing-5)" }}>
+            {error}
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="user-grid">
+        <form onSubmit={handleSubmit(onSubmit)} className="user-form-grid">
           {/* Left Column */}
           <div>
-            <div className="form-group">
-              <label className="form-label" htmlFor="full_name">
-                Nama Lengkap *
-              </label>
-              <input
-                id="full_name"
-                className="form-input"
-                placeholder="Nama lengkap user"
-                {...register("full_name", {
-                  required: "Nama lengkap wajib diisi",
-                })}
-              />
-              {errors.full_name && (
-                <span className="error-message">
-                  {errors.full_name.message}
-                </span>
-              )}
-            </div>
+            <Input
+              label="Nama Lengkap"
+              required
+              placeholder="Nama lengkap user"
+              error={errors.full_name?.message}
+              {...register("full_name", {
+                required: "Nama lengkap wajib diisi",
+              })}
+            />
 
-            <div className="form-group">
-              <label className="form-label" htmlFor="email">
-                Email *
-              </label>
-              <input
-                id="email"
-                type="email"
-                className="form-input"
-                placeholder="email@example.com"
-                {...register("email", {
-                  required: "Email wajib diisi",
-                  pattern: {
-                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: "Format email tidak valid",
-                  },
-                })}
-              />
-              {errors.email && (
-                <span className="error-message">{errors.email.message}</span>
-              )}
-            </div>
+            <Input
+              label="Email"
+              type="email"
+              required
+              placeholder="email@example.com"
+              error={errors.email?.message}
+              {...register("email", {
+                required: "Email wajib diisi",
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Format email tidak valid",
+                },
+              })}
+            />
 
-            <div className="form-group">
-              <label className="form-label" htmlFor="password">
-                Password *
-              </label>
-              <input
-                id="password"
-                type="password"
-                className="form-input"
-                placeholder="Minimal 6 karakter"
-                {...register("password", {
-                  required: "Password wajib diisi",
-                  minLength: {
-                    value: 6,
-                    message: "Password minimal 6 karakter",
-                  },
-                })}
-              />
-              {errors.password && (
-                <span className="error-message">{errors.password.message}</span>
-              )}
-            </div>
+            <Input
+              label="Password"
+              type="password"
+              required
+              placeholder="Minimal 6 karakter"
+              error={errors.password?.message}
+              {...register("password", {
+                required: "Password wajib diisi",
+                minLength: {
+                  value: 6,
+                  message: "Password minimal 6 karakter",
+                },
+              })}
+            />
 
-            <div className="form-group">
-              <label className="form-label" htmlFor="phone_number">
-                Nomor Telepon
-              </label>
-              <input
-                id="phone_number"
-                className="form-input"
-                placeholder="081234567890"
-                {...register("phone_number")}
-              />
-            </div>
+            <Input
+              label="Nomor Telepon"
+              placeholder="081234567890"
+              {...register("phone_number")}
+            />
           </div>
 
           {/* Right Column */}
           <div>
             <div className="form-group">
               <label className="form-label" htmlFor="address">
-                Alamat *
+                Alamat <span className="required-asterisk">*</span>
               </label>
               <textarea
                 id="address"
-                className="form-input"
-                style={{ height: "120px", resize: "none" }}
+                className="form-textarea"
                 placeholder="Alamat lengkap"
                 {...register("address", { required: "Alamat wajib diisi" })}
               />
               {errors.address && (
-                <span className="error-message">{errors.address.message}</span>
+                <span className="error-text">{errors.address.message}</span>
               )}
             </div>
 
             <div className="form-group">
               <label className="form-label" htmlFor="role">
-                Role *
+                Role <span className="required-asterisk">*</span>
               </label>
               <select
                 id="role"
-                className="form-input"
+                className="form-select"
                 {...register("role", { required: "Role wajib dipilih" })}
               >
                 <option value="USER">USER</option>
                 <option value="ADMIN">ADMIN</option>
               </select>
               {errors.role && (
-                <span className="error-message">{errors.role.message}</span>
+                <span className="error-text">{errors.role.message}</span>
               )}
             </div>
 
@@ -270,11 +241,11 @@ const AddUser = () => {
             {watchRole === "USER" && (
               <div className="form-group">
                 <label className="form-label" htmlFor="position_user">
-                  Position *
+                  Position <span className="required-asterisk">*</span>
                 </label>
                 <select
                   id="position_user"
-                  className="form-input"
+                  className="form-select"
                   {...register("position_user", {
                     required:
                       watchRole === "USER"
@@ -288,7 +259,7 @@ const AddUser = () => {
                   <option value="bidan_koordinator">Bidan Koordinator</option>
                 </select>
                 {errors.position_user && (
-                  <span className="error-message">
+                  <span className="error-text">
                     {errors.position_user.message}
                   </span>
                 )}
@@ -299,11 +270,11 @@ const AddUser = () => {
             {watchPosition === "bidan_desa" && (
               <div className="form-group">
                 <label className="form-label" htmlFor="village_id">
-                  Desa *
+                  Desa <span className="required-asterisk">*</span>
                 </label>
                 <select
                   id="village_id"
-                  className="form-input"
+                  className="form-select"
                   {...register("village_id", {
                     required:
                       watchPosition === "bidan_desa"
@@ -319,12 +290,12 @@ const AddUser = () => {
                   ))}
                 </select>
                 {errors.village_id && (
-                  <span className="error-message">
+                  <span className="error-text">
                     {errors.village_id.message}
                   </span>
                 )}
                 {villages.length === 0 && (
-                  <small className="form-helper form-helper-warning">
+                  <small className="helper-text warning-text">
                     ⚠️ Belum ada desa. Buat desa terlebih dahulu.
                   </small>
                 )}
@@ -333,11 +304,11 @@ const AddUser = () => {
 
             <div className="form-group">
               <label className="form-label" htmlFor="status_user">
-                Status *
+                Status <span className="required-asterisk">*</span>
               </label>
               <select
                 id="status_user"
-                className="form-input"
+                className="form-select"
                 {...register("status_user", {
                   required: "Status wajib dipilih",
                 })}
@@ -346,7 +317,7 @@ const AddUser = () => {
                 <option value="INACTIVE">INACTIVE</option>
               </select>
               {errors.status_user && (
-                <span className="error-message">
+                <span className="error-text">
                   {errors.status_user.message}
                 </span>
               )}
@@ -354,37 +325,28 @@ const AddUser = () => {
           </div>
 
           {/* Info Box */}
-          <div
-            className="page-note"
-            style={{
-              gridColumn: "span 2",
-              marginTop: "1rem",
-            }}
-          >
-            <p className="page-note-title">
-              <strong>Catatan Penting</strong>
-            </p>
+          <div className="info-box">
+            <p className="info-title">Catatan Penting</p>
             {noteItems.length > 0 ? (
-              <ul className="page-note-list">
+              <ul className="info-list">
                 {noteItems.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
             ) : (
-              <p className="page-note-hint">
+              <p className="info-hint">
                 Pilih role dan posisi user untuk melihat aturan tambahan yang berlaku.
               </p>
             )}
           </div>
 
-          <div style={{ gridColumn: "span 2", marginTop: "1rem" }}>
-            <button type="submit" disabled={loading} className="btn-primary">
+          <div className="form-actions">
+            <Button type="submit" variant="primary" disabled={loading}>
               {loading ? "Membuat User..." : "Tambah User"}
-            </button>
+            </Button>
           </div>
         </form>
-      </div>
-      </div>
+      </Card>
     </div>
   );
 };

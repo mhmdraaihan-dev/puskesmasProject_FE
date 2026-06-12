@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import StatusBadge from "../../components/StatusBadge";
 import { useAuth } from "../../context/AuthContext";
-import "../../App.css";
 import { getPasienDetail } from "../../services/api";
 import { formatDate } from "../../utils/dateFormatter";
 import { isBidanPraktik } from "../../utils/roleHelpers";
+import PageHeader from "../../components/layout/PageHeader";
+import Card from "../../components/ui/Card";
+import Button from "../../components/Button";
+import StatusBadge from "../../components/StatusBadge";
+import LoadingSpinner from "../../components/ui/LoadingSpinner";
+import "../../styles/design-system.css";
+import "./PasienDetail.css";
 
 const PASIEN_TABS = {
   kehamilan: {
@@ -17,21 +22,21 @@ const PASIEN_TABS = {
     getItems: (data) => data.pemeriksaan_kehamilan || [],
     renderMeta: (item) => (
       <>
-        <div style={styles.metaItem}>
-          <span style={styles.metaLabel}>Tanggal</span>
-          <span style={styles.metaValue}>{formatDate(item.tanggal)}</span>
+        <div className="meta-item">
+          <span className="meta-label">Tanggal</span>
+          <span className="meta-value">{formatDate(item.tanggal)}</span>
         </div>
-        <div style={styles.metaItem}>
-          <span style={styles.metaLabel}>Umur Kehamilan</span>
-          <span style={styles.metaValue}>{item.umur_kehamilan} minggu</span>
+        <div className="meta-item">
+          <span className="meta-label">Umur Kehamilan</span>
+          <span className="meta-value">{item.umur_kehamilan} minggu</span>
         </div>
-        <div style={styles.metaItem}>
-          <span style={styles.metaLabel}>Kunjungan</span>
-          <span style={styles.metaValue}>{item.jenis_kunjungan || "-"}</span>
+        <div className="meta-item">
+          <span className="meta-label">Kunjungan</span>
+          <span className="meta-value">{item.jenis_kunjungan || "-"}</span>
         </div>
-        <div style={styles.metaItem}>
-          <span style={styles.metaLabel}>Catatan</span>
-          <span style={styles.metaValue}>{item.catatan || "-"}</span>
+        <div className="meta-item">
+          <span className="meta-label">Catatan</span>
+          <span className="meta-value">{item.catatan || "-"}</span>
         </div>
       </>
     ),
@@ -45,26 +50,26 @@ const PASIEN_TABS = {
     getItems: (data) => data.persalinan || [],
     renderMeta: (item) => (
       <>
-        <div style={styles.metaItem}>
-          <span style={styles.metaLabel}>Tanggal Partus</span>
-          <span style={styles.metaValue}>{formatDate(item.tanggal_partus)}</span>
+        <div className="meta-item">
+          <span className="meta-label">Tanggal Partus</span>
+          <span className="meta-value">{formatDate(item.tanggal_partus)}</span>
         </div>
-        <div style={styles.metaItem}>
-          <span style={styles.metaLabel}>Riwayat</span>
-          <span style={styles.metaValue}>
+        <div className="meta-item">
+          <span className="meta-label">Riwayat</span>
+          <span className="meta-value">
             G{item.gravida} P{item.para} A{item.abortus}
           </span>
         </div>
-        <div style={styles.metaItem}>
-          <span style={styles.metaLabel}>Bayi</span>
-          <span style={styles.metaValue}>
+        <div className="meta-item">
+          <span className="meta-label">Bayi</span>
+          <span className="meta-value">
             {item.keadaan_bayi?.jenis_kelamin || "-"} /{" "}
             {item.keadaan_bayi?.bb || "-"} g
           </span>
         </div>
-        <div style={styles.metaItem}>
-          <span style={styles.metaLabel}>Kondisi Ibu</span>
-          <span style={styles.metaValue}>
+        <div className="meta-item">
+          <span className="meta-label">Kondisi Ibu</span>
+          <span className="meta-value">
             {item.keadaan_ibu?.baik ? "Baik" : "Perlu Perhatian"}
           </span>
         </div>
@@ -80,25 +85,25 @@ const PASIEN_TABS = {
     getItems: (data) => data.keluarga_berencana || [],
     renderMeta: (item) => (
       <>
-        <div style={styles.metaItem}>
-          <span style={styles.metaLabel}>Tanggal Kunjungan</span>
-          <span style={styles.metaValue}>{formatDate(item.tanggal_kunjungan)}</span>
+        <div className="meta-item">
+          <span className="meta-label">Tanggal Kunjungan</span>
+          <span className="meta-value">{formatDate(item.tanggal_kunjungan)}</span>
         </div>
-        <div style={styles.metaItem}>
-          <span style={styles.metaLabel}>Metode</span>
-          <span style={styles.metaValue}>
+        <div className="meta-item">
+          <span className="meta-label">Metode</span>
+          <span className="meta-value">
             {item.alat_kontrasepsi?.replace(/_/g, " ") || "-"}
           </span>
         </div>
-        <div style={styles.metaItem}>
-          <span style={styles.metaLabel}>Anak Hidup</span>
-          <span style={styles.metaValue}>
+        <div className="meta-item">
+          <span className="meta-label">Anak Hidup</span>
+          <span className="meta-value">
             L {item.jumlah_anak_laki} / P {item.jumlah_anak_perempuan}
           </span>
         </div>
-        <div style={styles.metaItem}>
-          <span style={styles.metaLabel}>Keterangan</span>
-          <span style={styles.metaValue}>{item.keterangan || "-"}</span>
+        <div className="meta-item">
+          <span className="meta-label">Keterangan</span>
+          <span className="meta-value">{item.keterangan || "-"}</span>
         </div>
       </>
     ),
@@ -112,25 +117,25 @@ const PASIEN_TABS = {
     getItems: (data) => data.imunisasi || [],
     renderMeta: (item) => (
       <>
-        <div style={styles.metaItem}>
-          <span style={styles.metaLabel}>Tanggal Imunisasi</span>
-          <span style={styles.metaValue}>{formatDate(item.tgl_imunisasi)}</span>
+        <div className="meta-item">
+          <span className="meta-label">Tanggal Imunisasi</span>
+          <span className="meta-value">{formatDate(item.tgl_imunisasi)}</span>
         </div>
-        <div style={styles.metaItem}>
-          <span style={styles.metaLabel}>Jenis Imunisasi</span>
-          <span style={styles.metaValue}>
+        <div className="meta-item">
+          <span className="meta-label">Jenis Imunisasi</span>
+          <span className="meta-value">
             {item.jenis_imunisasi?.replace(/_/g, " ") || "-"}
           </span>
         </div>
-        <div style={styles.metaItem}>
-          <span style={styles.metaLabel}>Berat / Suhu</span>
-          <span style={styles.metaValue}>
+        <div className="meta-item">
+          <span className="meta-label">Berat / Suhu</span>
+          <span className="meta-value">
             {item.berat_badan} kg / {item.suhu_badan || "-"} C
           </span>
         </div>
-        <div style={styles.metaItem}>
-          <span style={styles.metaLabel}>Orang Tua</span>
-          <span style={styles.metaValue}>{item.nama_orangtua || "-"}</span>
+        <div className="meta-item">
+          <span className="meta-label">Orang Tua</span>
+          <span className="meta-value">{item.nama_orangtua || "-"}</span>
         </div>
       </>
     ),
@@ -165,20 +170,30 @@ const PasienDetail = () => {
 
   if (loading) {
     return (
-      <div style={{ padding: "3rem", textAlign: "center" }}>
-        Memuat detail pasien...
+      <div className="pasien-detail-page">
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
 
   if (error) {
-    return <div className="error-alert">{error}</div>;
+    return (
+      <div className="pasien-detail-page">
+        <div className="error-alert">{error}</div>
+        <Button variant="primary" onClick={() => navigate("/pasien")}>
+          Kembali ke Daftar Pasien
+        </Button>
+      </div>
+    );
   }
 
   if (!data) {
     return (
-      <div style={{ padding: "3rem", textAlign: "center" }}>
-        Data pasien tidak ditemukan
+      <div className="pasien-detail-page">
+        <div className="error-alert">Data pasien tidak ditemukan</div>
+        <Button variant="primary" onClick={() => navigate("/pasien")}>
+          Kembali ke Daftar Pasien
+        </Button>
       </div>
     );
   }
@@ -194,82 +209,72 @@ const PasienDetail = () => {
     tabs.find((tab) => tab.id === activeTab) || tabs[0] || null;
 
   return (
-    <div className="dashboard">
-      <div className="dashboard-header" style={styles.header}>
-        <div>
-          <h2 style={styles.pageTitle}>Detail Pasien</h2>
-          <p className="text-muted" style={styles.pageSubtitle}>
-            Profil pasien dan ringkasan riwayat pelayanan sesuai cakupan akses akun
-          </p>
-        </div>
-        <button
-          onClick={() => navigate("/pasien")}
-          className="btn-primary"
-          style={styles.backButton}
-        >
-          Kembali ke List
-        </button>
-      </div>
+    <div className="pasien-detail-page">
+      <PageHeader
+        title="Detail Pasien"
+        subtitle="Profil pasien dan ringkasan riwayat pelayanan sesuai cakupan akses akun"
+        actions={
+          <Button variant="secondary" onClick={() => navigate("/pasien")}>
+            Kembali ke Daftar
+          </Button>
+        }
+      />
 
-      <div className="auth-card" style={styles.heroCard}>
-        <div style={styles.heroTop}>
-          <div style={styles.identityBlock}>
-            <div style={styles.avatar}>{patientInitial}</div>
+      {/* Patient Info Card */}
+      <Card variant="surface-dark" padding="xl" className="patient-hero-card">
+        <div className="patient-hero-header">
+          <div className="patient-identity">
+            <div className="patient-avatar">{patientInitial}</div>
             <div>
-              <div style={styles.identityBadge}>Pasien</div>
-              <h3 style={styles.patientName}>{data.nama}</h3>
-              <p className="text-muted" style={{ margin: 0 }}>
-                NIK {data.nik || "-"}
-              </p>
+              <div className="patient-badge">Pasien</div>
+              <h3 className="patient-name">{data.nama}</h3>
+              <p className="patient-nik">NIK {data.nik || "-"}</p>
             </div>
           </div>
 
-          {canCreatePelayanan && activeConfig ? (
-            <button
+          {canCreatePelayanan && activeConfig && (
+            <Button
+              variant="primary"
               onClick={() => navigate(activeConfig.ctaPath)}
-              className="btn-primary"
-              style={styles.primaryAction}
             >
               {activeConfig.ctaLabel}
-            </button>
-          ) : null}
+            </Button>
+          )}
         </div>
 
-        <div style={styles.infoGrid}>
-          <div style={styles.infoCard}>
-            <span style={styles.infoLabel}>Tanggal Lahir</span>
-            <span style={styles.infoValue}>{formatDate(data.tanggal_lahir)}</span>
+        <div className="patient-info-grid">
+          <div className="patient-info-item">
+            <span className="info-label">Tanggal Lahir</span>
+            <span className="info-value">{formatDate(data.tanggal_lahir)}</span>
           </div>
-          <div style={styles.infoCard}>
-            <span style={styles.infoLabel}>Alamat Lengkap</span>
-            <span style={styles.infoValue}>{data.alamat_lengkap || "-"}</span>
+          <div className="patient-info-item">
+            <span className="info-label">Alamat Lengkap</span>
+            <span className="info-value">{data.alamat_lengkap || "-"}</span>
           </div>
         </div>
 
-        <div style={styles.summaryRow}>
+        <div className="summary-tabs">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              style={{
-                ...styles.summaryChip,
-                ...(activeTab === tab.id ? styles.summaryChipActive : {}),
-              }}
+              className={`summary-tab ${activeTab === tab.id ? "active" : ""}`}
             >
-              <span style={styles.summaryChipLabel}>{tab.shortLabel}</span>
-              <span style={styles.summaryChipValue}>{tab.items.length}</span>
+              <span className="tab-label">{tab.shortLabel}</span>
+              <span className="tab-count">{tab.items.length}</span>
             </button>
           ))}
         </div>
-      </div>
+      </Card>
 
-      {activeConfig ? (
-        <div className="auth-card" style={styles.historyCard}>
-          <div style={styles.historyHeader}>
+      {/* History Card */}
+      {activeConfig && (
+        <Card variant="surface-dark" padding="xl" className="history-card">
+          <div className="history-header">
             <div>
-              <h3 style={styles.sectionTitle}>{activeConfig.label}</h3>
-              <p className="text-muted" style={styles.sectionSubtitle}>
+              <h3 className="history-title">{activeConfig.label}</h3>
+              <p className="history-subtitle">
                 {activeConfig.items.length > 0
                   ? `Total ${activeConfig.items.length} data tercatat`
                   : "Belum ada data yang tercatat untuk modul ini"}
@@ -277,320 +282,63 @@ const PasienDetail = () => {
             </div>
           </div>
 
-          <div style={styles.tabGrid}>
+          <div className="tab-grid">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                style={{
-                  ...styles.tabButton,
-                  ...(activeTab === tab.id ? styles.activeTabButton : {}),
-                }}
+                className={`tab-button ${activeTab === tab.id ? "active" : ""}`}
               >
-                <span style={styles.tabTitle}>{tab.label}</span>
-                <span style={styles.tabCount}>{tab.items.length} data</span>
+                <span className="tab-title">{tab.label}</span>
+                <span className="tab-count-text">{tab.items.length} data</span>
               </button>
             ))}
           </div>
 
           {activeConfig.items.length > 0 ? (
-            <div style={styles.historyList}>
+            <div className="history-list">
               {activeConfig.items.map((item, index) => (
-                <div key={item.id || `${activeConfig.id}-${index}`} style={styles.historyItem}>
-                  <div style={styles.historyItemHeader}>
+                <div
+                  key={item.id || `${activeConfig.id}-${index}`}
+                  className="history-item"
+                >
+                  <div className="history-item-header">
                     <div>
-                      <h4 style={styles.historyItemTitle}>
+                      <h4 className="history-item-title">
                         {activeConfig.shortLabel} #{index + 1}
                       </h4>
-                      <p className="text-muted" style={styles.historyItemSubtitle}>
+                      <p className="history-item-subtitle">
                         Detail pelayanan pasien
                       </p>
                     </div>
-                    {item.status_verifikasi ? (
+                    {item.status_verifikasi && (
                       <StatusBadge status={item.status_verifikasi} />
-                    ) : null}
+                    )}
                   </div>
-                  <div style={styles.historyMetaGrid}>
+                  <div className="history-meta-grid">
                     {activeConfig.renderMeta(item)}
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div style={styles.emptyState}>
-              <h4 style={styles.emptyTitle}>Belum ada riwayat</h4>
-              <p className="text-muted" style={styles.emptyText}>
-                {activeConfig.emptyLabel}
-              </p>
-              {canCreatePelayanan ? (
-                <button
+            <div className="empty-state">
+              <h4 className="empty-title">Belum ada riwayat</h4>
+              <p className="empty-text">{activeConfig.emptyLabel}</p>
+              {canCreatePelayanan && (
+                <Button
+                  variant="primary"
                   onClick={() => navigate(activeConfig.ctaPath)}
-                  className="btn-primary"
-                  style={styles.primaryAction}
                 >
                   {activeConfig.ctaLabel}
-                </button>
-              ) : null}
+                </Button>
+              )}
             </div>
           )}
-        </div>
-      ) : null}
+        </Card>
+      )}
     </div>
   );
 };
-
-const styles = {
-  header: {
-    gap: "1rem",
-    flexWrap: "wrap",
-  },
-  pageTitle: {
-    marginBottom: "0.35rem",
-  },
-  pageSubtitle: {
-    margin: 0,
-  },
-  backButton: {
-    width: "auto",
-    minWidth: "190px",
-    paddingInline: "1.25rem",
-    backgroundColor: "transparent",
-    border: "1px solid var(--glass-border)",
-  },
-  heroCard: {
-    maxWidth: "none",
-    margin: "0 0 1.5rem",
-    padding: "1.75rem",
-  },
-  heroTop: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: "1rem",
-    marginBottom: "1.5rem",
-    flexWrap: "wrap",
-  },
-  identityBlock: {
-    display: "flex",
-    alignItems: "center",
-    gap: "1rem",
-    flexWrap: "wrap",
-  },
-  avatar: {
-    width: "88px",
-    height: "88px",
-    borderRadius: "24px",
-    background:
-      "linear-gradient(135deg, rgba(99,102,241,0.95), rgba(59,130,246,0.75))",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "#fff",
-    fontSize: "2.5rem",
-    fontWeight: "700",
-    flexShrink: 0,
-  },
-  identityBadge: {
-    display: "inline-flex",
-    alignItems: "center",
-    padding: "0.35rem 0.75rem",
-    borderRadius: "999px",
-    background: "rgba(255,255,255,0.05)",
-    border: "1px solid rgba(255,255,255,0.08)",
-    fontSize: "0.78rem",
-    color: "var(--color-text-muted)",
-    marginBottom: "0.75rem",
-  },
-  patientName: {
-    marginBottom: "0.35rem",
-    fontSize: "1.85rem",
-  },
-  primaryAction: {
-    width: "auto",
-    minWidth: "220px",
-    paddingInline: "1rem",
-    fontSize: "0.95rem",
-  },
-  infoGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-    gap: "1rem",
-    marginBottom: "1.25rem",
-  },
-  infoCard: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.35rem",
-    padding: "1rem 1.1rem",
-    borderRadius: "16px",
-    background: "rgba(255,255,255,0.03)",
-    border: "1px solid rgba(255,255,255,0.06)",
-  },
-  infoLabel: {
-    fontSize: "0.78rem",
-    textTransform: "uppercase",
-    letterSpacing: "0.06em",
-    color: "var(--color-text-muted)",
-  },
-  infoValue: {
-    fontSize: "1rem",
-    fontWeight: "600",
-    lineHeight: 1.5,
-  },
-  summaryRow: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-    gap: "0.85rem",
-  },
-  summaryChip: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: "1rem",
-    borderRadius: "14px",
-    border: "1px solid rgba(255,255,255,0.06)",
-    background: "rgba(255,255,255,0.03)",
-    padding: "0.95rem 1rem",
-    color: "white",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
-  },
-  summaryChipActive: {
-    background: "rgba(99,102,241,0.18)",
-    border: "1px solid rgba(99,102,241,0.32)",
-    boxShadow: "0 12px 24px rgba(59,130,246,0.12)",
-  },
-  summaryChipLabel: {
-    fontWeight: "600",
-  },
-  summaryChipValue: {
-    minWidth: "2rem",
-    height: "2rem",
-    borderRadius: "999px",
-    background: "rgba(255,255,255,0.1)",
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontWeight: "700",
-  },
-  historyCard: {
-    maxWidth: "none",
-    margin: 0,
-    padding: "1.75rem",
-  },
-  historyHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: "1rem",
-    marginBottom: "1.25rem",
-    flexWrap: "wrap",
-  },
-  sectionTitle: {
-    marginBottom: "0.35rem",
-    fontSize: "1.2rem",
-  },
-  sectionSubtitle: {
-    margin: 0,
-  },
-  tabGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-    gap: "0.85rem",
-    marginBottom: "1.25rem",
-  },
-  tabButton: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-    gap: "0.35rem",
-    padding: "1rem",
-    borderRadius: "14px",
-    border: "1px solid rgba(255,255,255,0.06)",
-    background: "rgba(255,255,255,0.03)",
-    color: "white",
-    cursor: "pointer",
-    textAlign: "left",
-    transition: "all 0.2s ease",
-  },
-  activeTabButton: {
-    background: "rgba(99,102,241,0.18)",
-    border: "1px solid rgba(99,102,241,0.32)",
-  },
-  tabTitle: {
-    fontWeight: "700",
-    lineHeight: 1.35,
-  },
-  tabCount: {
-    fontSize: "0.82rem",
-    color: "var(--color-text-muted)",
-  },
-  historyList: {
-    display: "grid",
-    gap: "1rem",
-  },
-  historyItem: {
-    padding: "1.2rem",
-    borderRadius: "16px",
-    background: "rgba(255,255,255,0.04)",
-    border: "1px solid rgba(255,255,255,0.06)",
-  },
-  historyItemHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: "1rem",
-    marginBottom: "1rem",
-    flexWrap: "wrap",
-  },
-  historyItemTitle: {
-    marginBottom: "0.25rem",
-    fontSize: "1rem",
-  },
-  historyItemSubtitle: {
-    margin: 0,
-  },
-  historyMetaGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-    gap: "0.95rem",
-  },
-  metaItem: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.3rem",
-  },
-  metaLabel: {
-    fontSize: "0.76rem",
-    textTransform: "uppercase",
-    letterSpacing: "0.05em",
-    color: "var(--color-text-muted)",
-  },
-  metaValue: {
-    lineHeight: 1.45,
-  },
-  emptyState: {
-    minHeight: "240px",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    textAlign: "center",
-    gap: "0.9rem",
-    padding: "1.5rem",
-    borderRadius: "16px",
-    border: "1px dashed rgba(255,255,255,0.1)",
-    background: "rgba(255,255,255,0.02)",
-  },
-  emptyTitle: {
-    margin: 0,
-    fontSize: "1.05rem",
-  },
-  emptyText: {
-    margin: 0,
-    maxWidth: "420px",
-  },
-};
-
 export default PasienDetail;

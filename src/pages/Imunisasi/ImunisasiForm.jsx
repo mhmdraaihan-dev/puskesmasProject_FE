@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
-import CustomSelect from "../../components/CustomSelect";
+import Select from "../../components/ui/Select";
 import { useAuth } from "../../context/AuthContext";
-import "../../App.css";
+import "../../styles/design-system.css";
+import "./ImunisasiForm.css";
 import {
   createImunisasi,
   getImunisasiDetail,
@@ -15,6 +16,11 @@ import {
   isAssignedToPractice,
   isBidanPraktik,
 } from "../../utils/roleHelpers";
+import PageHeader from "../../components/layout/PageHeader";
+import Card from "../../components/ui/Card";
+import Button from "../../components/Button";
+import Input from "../../components/Input";
+import LoadingSpinner from "../../components/ui/LoadingSpinner";
 
 const immunizationOptions = [
   { value: "HB_0", label: "HB 0" },
@@ -168,355 +174,250 @@ const ImunisasiForm = () => {
 
   if (fetching) {
     return (
-      <div style={{ padding: "3rem", textAlign: "center" }}>
-        Memuat data imunisasi...
+      <div className="imunisasi-form-page">
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
 
   return (
-    <div className="dashboard">
-      <div className="dashboard-header" style={styles.header}>
-        <div>
-          <h2 style={styles.pageTitle}>
-            {isEditMode ? "Edit Data Imunisasi" : "Input Data Imunisasi"}
-          </h2>
-          <p className="text-muted" style={styles.pageSubtitle}>
-            {isEditMode
-              ? "Perbarui data imunisasi yang perlu diperbaiki"
-              : "Masukkan data imunisasi anak dengan struktur yang lebih rapi"}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => navigate("/imunisasi")}
-          className="btn-primary"
-          style={styles.secondaryButton}
+    <div className="imunisasi-form-page">
+      <PageHeader
+        title={isEditMode ? "Edit Data Imunisasi" : "Input Data Imunisasi"}
+        subtitle={
+          isEditMode
+            ? "Perbarui data imunisasi yang perlu diperbaiki"
+            : "Masukkan data imunisasi anak dengan struktur yang rapi"
+        }
+        actions={
+          <Button variant="secondary" onClick={() => navigate("/imunisasi")}>
+            Kembali
+          </Button>
+        }
+      />
+
+      {error && <div className="error-alert">{error}</div>}
+
+      <form onSubmit={handleSubmit(onSubmit)} className="form-layout">
+        {/* Patient Info Section */}
+        <Card
+          variant="surface-card"
+          padding="xl"
+          className="imunisasi-form__section-card"
         >
-          Kembali ke List
-        </button>
-      </div>
-
-      {error ? (
-        <div className="error-alert" style={{ marginBottom: "1rem" }}>
-          {error}
-        </div>
-      ) : null}
-
-      <div className="auth-card" style={styles.formCard}>
-        <div style={styles.formIntro}>
-          <div>
-            <h3 style={styles.sectionTitle}>Ringkasan Input</h3>
-            <p className="text-muted" style={styles.sectionSubtitle}>
-              Lengkapi data kunjungan, jenis imunisasi, kondisi anak, dan data
-              orang tua pada satu alur yang rapi.
+          <div className="section-header">
+            <h3 className="section-title">Informasi Pasien</h3>
+            <p className="section-subtitle">
+              Pilih tempat praktik dan pasien yang akan menerima imunisasi
             </p>
           </div>
-          <div style={styles.infoPills}>
-            <span style={styles.infoPill}>Pasien tersedia: {patients.length}</span>
-            <span style={styles.infoPill}>
-              Praktik aktif: {practices.length || 0}
-            </span>
-          </div>
-        </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} style={styles.formLayout}>
-          <div style={styles.sectionCard}>
-            <div style={styles.sectionHeader}>
-              <h3 style={styles.sectionTitle}>Data Kunjungan</h3>
-              <p className="text-muted" style={styles.sectionSubtitle}>
-                Informasi utama kunjungan imunisasi anak
-              </p>
-            </div>
-
-            <div style={styles.inputGrid}>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Tempat Praktik *</label>
-                <Controller
-                  name="practice_id"
-                  control={control}
-                  rules={{ required: "Tempat praktik wajib dipilih" }}
-                  render={({ field }) => (
-                    <CustomSelect
-                      {...field}
-                      options={practiceOptions}
-                      onChange={(option) => field.onChange(option?.value)}
-                      value={
-                        practiceOptions.find((option) => option.value === field.value) ||
-                        null
-                      }
-                      placeholder="Pilih tempat praktik"
-                    />
-                  )}
-                />
-                {errors.practice_id ? (
-                  <span className="error-message">{errors.practice_id.message}</span>
-                ) : null}
-              </div>
-
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Pasien (Anak/Bayi) *</label>
-                <Controller
-                  name="pasien_id"
-                  control={control}
-                  rules={{ required: "Pasien wajib dipilih" }}
-                  render={({ field }) => (
-                    <CustomSelect
-                      {...field}
-                      options={patientOptions}
-                      onChange={(option) => field.onChange(option?.value)}
-                      value={
-                        patientOptions.find((option) => option.value === field.value) ||
-                        null
-                      }
-                      placeholder="Cari pasien berdasarkan nama atau NIK..."
-                    />
-                  )}
-                />
-                {errors.pasien_id ? (
-                  <span className="error-message">{errors.pasien_id.message}</span>
-                ) : null}
-                {selectedPatient ? (
-                  <div style={styles.inlinePatientInfo}>
-                    <span>NIK: {selectedPatient.nik}</span>
-                    <span>Alamat: {selectedPatient.alamat_lengkap || "-"}</span>
-                  </div>
-                ) : null}
-              </div>
-
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Tanggal Imunisasi *</label>
-                <input
-                  type="date"
-                  className="form-input"
-                  max={new Date().toISOString().split("T")[0]}
-                  {...register("tgl_imunisasi", {
-                    required: "Tanggal imunisasi wajib diisi",
-                  })}
-                />
-                {errors.tgl_imunisasi ? (
-                  <span className="error-message">
-                    {errors.tgl_imunisasi.message}
-                  </span>
-                ) : null}
-              </div>
-
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Jenis Imunisasi *</label>
-                <select
-                  className="form-input"
-                  {...register("jenis_imunisasi", {
-                    required: "Jenis imunisasi wajib dipilih",
-                  })}
-                >
-                  <option value="">Pilih jenis imunisasi</option>
-                  {immunizationOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-                {errors.jenis_imunisasi ? (
-                  <span className="error-message">
-                    {errors.jenis_imunisasi.message}
-                  </span>
-                ) : null}
-              </div>
-            </div>
-          </div>
-
-          <div style={styles.sectionCard}>
-            <div style={styles.sectionHeader}>
-              <h3 style={styles.sectionTitle}>Kondisi Anak dan Orang Tua</h3>
-              <p className="text-muted" style={styles.sectionSubtitle}>
-                Lengkapi data fisik anak dan identitas pendamping
-              </p>
-            </div>
-
-            <div style={styles.inputGrid}>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Berat Badan (kg) *</label>
-                <input
-                  type="number"
-                  step="0.1"
-                  className="form-input"
-                  {...register("berat_badan", {
-                    required: "Berat badan wajib diisi",
-                    min: { value: 0, message: "Minimal 0" },
-                  })}
-                />
-                {errors.berat_badan ? (
-                  <span className="error-message">{errors.berat_badan.message}</span>
-                ) : null}
-              </div>
-
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Suhu Badan (C)</label>
-                <input
-                  type="number"
-                  step="0.1"
-                  className="form-input"
-                  {...register("suhu_badan")}
-                />
-              </div>
-
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Nama Orang Tua *</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  {...register("nama_orangtua", {
-                    required: "Nama orang tua wajib diisi",
-                  })}
-                />
-                {errors.nama_orangtua ? (
-                  <span className="error-message">
-                    {errors.nama_orangtua.message}
-                  </span>
-                ) : null}
-              </div>
-            </div>
-          </div>
-
-          <div style={styles.sectionCard}>
-            <div style={styles.sectionHeader}>
-              <h3 style={styles.sectionTitle}>Catatan Tambahan</h3>
-              <p className="text-muted" style={styles.sectionSubtitle}>
-                Isi catatan penting bila ada reaksi, keluhan, atau kebutuhan
-                observasi lanjutan
-              </p>
-            </div>
-
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Catatan</label>
-              <textarea
-                className="form-input"
-                rows="4"
-                placeholder="Tuliskan catatan tambahan bila ada..."
-                {...register("catatan")}
+          <div className="form-grid">
+            <div className="form-group">
+              <label className="form-label" htmlFor="practice_id">
+                Tempat Praktik <span className="required-asterisk">*</span>
+              </label>
+              <Controller
+                name="practice_id"
+                control={control}
+                rules={{ required: "Tempat praktik wajib dipilih" }}
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    options={practiceOptions}
+                    onChange={(option) => field.onChange(option?.value)}
+                    value={
+                      practiceOptions.find((option) => option.value === field.value) ||
+                      null
+                    }
+                    placeholder="Pilih tempat praktik"
+                  />
+                )}
               />
+              {errors.practice_id && (
+                <span className="error-text">{errors.practice_id.message}</span>
+              )}
+            </div>
+
+            <div className="form-group form-group--full">
+              <label className="form-label" htmlFor="pasien_id">
+                Pasien (Anak/Bayi) <span className="required-asterisk">*</span>
+              </label>
+              <Controller
+                name="pasien_id"
+                control={control}
+                rules={{ required: "Pasien wajib dipilih" }}
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    options={patientOptions}
+                    onChange={(option) => field.onChange(option?.value)}
+                    value={
+                      patientOptions.find((option) => option.value === field.value) ||
+                      null
+                    }
+                    placeholder="Cari pasien berdasarkan nama atau NIK..."
+                  />
+                )}
+              />
+              {errors.pasien_id && (
+                <span className="error-text">{errors.pasien_id.message}</span>
+              )}
+              {selectedPatient && (
+                <div className="inline-patient-info">
+                  <span>NIK: {selectedPatient.nik}</span>
+                  <span>Alamat: {selectedPatient.alamat_lengkap || "-"}</span>
+                </div>
+              )}
             </div>
           </div>
+        </Card>
 
-          <div style={styles.formActions}>
-            <button
-              type="button"
-              onClick={() => navigate("/imunisasi")}
-              className="btn-primary"
-              style={styles.secondaryButton}
-            >
-              Batal
-            </button>
-            <button
-              type="submit"
-              className="btn-primary"
-              disabled={loading}
-              style={styles.primaryButton}
-            >
-              {loading
-                ? "Menyimpan..."
-                : isEditMode
-                  ? "Update Data"
-                  : "Simpan Data"}
-            </button>
+        {/* Vaccine Details Section */}
+        <Card
+          variant="surface-card"
+          padding="xl"
+          className="imunisasi-form__section-card"
+        >
+          <div className="section-header">
+            <h3 className="section-title">Detail Imunisasi</h3>
+            <p className="section-subtitle">
+              Informasi jadwal dan jenis imunisasi yang diberikan
+            </p>
           </div>
-        </form>
-      </div>
+
+          <div className="form-grid">
+            <Input
+              label="Tanggal Imunisasi"
+              required
+              type="date"
+              max={new Date().toISOString().split("T")[0]}
+              error={errors.tgl_imunisasi?.message}
+              {...register("tgl_imunisasi", {
+                required: "Tanggal imunisasi wajib diisi",
+              })}
+            />
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="jenis_imunisasi">
+                Jenis Imunisasi <span className="required-asterisk">*</span>
+              </label>
+              <select
+                id="jenis_imunisasi"
+                className="form-select"
+                {...register("jenis_imunisasi", {
+                  required: "Jenis imunisasi wajib dipilih",
+                })}
+              >
+                <option value="">Pilih jenis imunisasi</option>
+                {immunizationOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              {errors.jenis_imunisasi && (
+                <span className="error-text">
+                  {errors.jenis_imunisasi.message}
+                </span>
+              )}
+            </div>
+          </div>
+        </Card>
+
+        {/* Schedule / Child Condition Section */}
+        <Card
+          variant="surface-card"
+          padding="xl"
+          className="imunisasi-form__section-card"
+        >
+          <div className="section-header">
+            <h3 className="section-title">Kondisi Anak dan Orang Tua</h3>
+            <p className="section-subtitle">
+              Lengkapi data fisik anak dan identitas pendamping
+            </p>
+          </div>
+
+          <div className="form-grid">
+            <Input
+              label="Berat Badan (kg)"
+              required
+              type="number"
+              step="0.1"
+              min="0"
+              error={errors.berat_badan?.message}
+              {...register("berat_badan", {
+                required: "Berat badan wajib diisi",
+                min: { value: 0, message: "Minimal 0" },
+              })}
+            />
+
+            <Input
+              label="Suhu Badan (°C)"
+              type="number"
+              step="0.1"
+              {...register("suhu_badan")}
+            />
+
+            <Input
+              label="Nama Orang Tua"
+              required
+              type="text"
+              error={errors.nama_orangtua?.message}
+              {...register("nama_orangtua", {
+                required: "Nama orang tua wajib diisi",
+              })}
+            />
+          </div>
+        </Card>
+
+        {/* Notes Section */}
+        <Card
+          variant="surface-card"
+          padding="xl"
+          className="imunisasi-form__section-card"
+        >
+          <div className="section-header">
+            <h3 className="section-title">Catatan Tambahan</h3>
+            <p className="section-subtitle">
+              Isi catatan penting bila ada reaksi, keluhan, atau kebutuhan observasi
+              lanjutan
+            </p>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label" htmlFor="catatan">
+              Catatan
+            </label>
+            <textarea
+              id="catatan"
+              className="form-textarea"
+              rows="4"
+              placeholder="Tuliskan catatan tambahan bila ada..."
+              {...register("catatan")}
+            />
+          </div>
+        </Card>
+
+        <div className="form-actions">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => navigate("/imunisasi")}
+          >
+            Batal
+          </Button>
+          <Button type="submit" variant="primary" disabled={loading}>
+            {loading
+              ? "Menyimpan..."
+              : isEditMode
+                ? "Update Data"
+                : "Simpan Data"}
+          </Button>
+        </div>
+      </form>
     </div>
   );
-};
-
-const styles = {
-  header: {
-    gap: "1rem",
-    flexWrap: "wrap",
-  },
-  pageTitle: {
-    marginBottom: "0.35rem",
-  },
-  pageSubtitle: {
-    margin: 0,
-  },
-  formCard: {
-    maxWidth: "none",
-    margin: 0,
-    padding: "1.75rem",
-  },
-  formIntro: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: "1rem",
-    flexWrap: "wrap",
-    marginBottom: "1rem",
-  },
-  infoPills: {
-    display: "flex",
-    gap: "0.75rem",
-    flexWrap: "wrap",
-  },
-  infoPill: {
-    display: "inline-flex",
-    alignItems: "center",
-    padding: "0.5rem 0.85rem",
-    borderRadius: "999px",
-    background: "rgba(255,255,255,0.04)",
-    border: "1px solid rgba(255,255,255,0.07)",
-    color: "var(--color-text-muted)",
-    fontSize: "0.85rem",
-  },
-  formLayout: {
-    display: "grid",
-    gap: "1rem",
-  },
-  sectionCard: {
-    padding: "1.25rem",
-    borderRadius: "18px",
-    background: "rgba(255,255,255,0.03)",
-    border: "1px solid rgba(255,255,255,0.06)",
-  },
-  sectionHeader: {
-    marginBottom: "1rem",
-  },
-  sectionTitle: {
-    marginBottom: "0.35rem",
-    fontSize: "1.1rem",
-  },
-  sectionSubtitle: {
-    margin: 0,
-  },
-  inputGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "1rem",
-  },
-  inlinePatientInfo: {
-    marginTop: "0.75rem",
-    display: "flex",
-    gap: "0.75rem",
-    flexWrap: "wrap",
-    fontSize: "0.85rem",
-    color: "var(--color-text-muted)",
-  },
-  formActions: {
-    display: "flex",
-    justifyContent: "flex-end",
-    gap: "0.75rem",
-    flexWrap: "wrap",
-    marginTop: "0.5rem",
-  },
-  primaryButton: {
-    width: "auto",
-    minWidth: "150px",
-    paddingInline: "1rem",
-  },
-  secondaryButton: {
-    width: "auto",
-    minWidth: "150px",
-    paddingInline: "1rem",
-    backgroundColor: "transparent",
-    border: "1px solid var(--glass-border)",
-  },
 };
 
 export default ImunisasiForm;

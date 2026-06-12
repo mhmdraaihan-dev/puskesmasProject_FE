@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ConfirmDialog from "../../components/ConfirmDialog";
 import { useAuth } from "../../context/AuthContext";
-import "../../App.css";
 import { deletePasien, getPasienList } from "../../services/api";
 import { formatDate } from "../../utils/dateFormatter";
 import {
@@ -10,6 +8,16 @@ import {
   isBidanKoordinator,
   isBidanPraktik,
 } from "../../utils/roleHelpers";
+import PageHeader from "../../components/layout/PageHeader";
+import Card from "../../components/ui/Card";
+import Button from "../../components/Button";
+import Input from "../../components/Input";
+import Table from "../../components/ui/Table";
+import LoadingSpinner from "../../components/ui/LoadingSpinner";
+import EmptyState from "../../components/ui/EmptyState";
+import Modal from "../../components/ui/Modal";
+import "../../styles/design-system.css";
+import "./PasienList.css";
 
 const PasienList = () => {
   const [dataList, setDataList] = useState([]);
@@ -92,428 +100,198 @@ const PasienList = () => {
     }
   };
 
-  return (
-    <div className="dashboard page-shell" style={styles.page}>
-      <div className="dashboard-header" style={styles.header}>
-        <div className="page-intro">
-          <div className="page-kicker">Patient Records</div>
-          <h2 className="page-title" style={styles.pageTitle}>Data Pasien</h2>
-          <p className="page-subtitle" style={styles.pageSubtitle}>
-            Data pasien yang tampil mengikuti akses akun dan relasi practice place
-          </p>
-        </div>
-        <div className="page-actions" style={styles.headerActions}>
-          <button
-            onClick={() => navigate("/")}
-            className="btn-secondary"
-            style={styles.secondaryButton}
+  const columns = [
+    {
+      key: "nik",
+      label: "NIK",
+      sortable: true,
+      render: (value) => (
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.9em" }}>
+          {value || "-"}
+        </span>
+      ),
+    },
+    {
+      key: "nama",
+      label: "Nama Lengkap",
+      sortable: true,
+      render: (value) => <span style={{ fontWeight: 600 }}>{value}</span>,
+    },
+    {
+      key: "tanggal_lahir",
+      label: "Tanggal Lahir",
+      sortable: true,
+      render: (value) => formatDate(value),
+    },
+    {
+      key: "alamat_lengkap",
+      label: "Alamat",
+      render: (value) => value || "-",
+    },
+    {
+      key: "actions",
+      label: "Aksi",
+      render: (_, row) => (
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          <Button
+            variant="secondary-on-dark"
+            size="sm"
+            onClick={() => navigate(`/pasien/${row.pasien_id}`)}
           >
-            Kembali
-          </button>
-          {canManage ? (
-            <button
-              onClick={() => navigate("/pasien/add")}
-              className="btn-primary"
-              style={styles.primaryButton}
-            >
-              + Pasien Baru
-            </button>
-          ) : null}
+            Detail
+          </Button>
+          {canManage && (
+            <>
+              <Button
+                variant="secondary-on-dark"
+                size="sm"
+                onClick={() => navigate(`/pasien/${row.pasien_id}/edit`)}
+              >
+                Edit
+              </Button>
+              <Button
+                variant="secondary-on-dark"
+                size="sm"
+                onClick={() =>
+                  setDeleteDialog({
+                    isOpen: true,
+                    dataId: row.pasien_id,
+                    patientName: row.nama,
+                  })
+                }
+              >
+                Hapus
+              </Button>
+            </>
+          )}
         </div>
-      </div>
+      ),
+    },
+  ];
 
-      <div style={styles.summaryGrid}>
-        <div className="stat-card" style={styles.summaryCard}>
-          <span style={styles.summaryLabel}>Total Pasien</span>
-          <strong style={styles.summaryValue}>{stats.totalPatients}</strong>
-        </div>
-        <div className="stat-card" style={styles.summaryCard}>
-          <span style={styles.summaryLabel}>Data Alamat Terisi</span>
-          <strong style={styles.summaryValue}>{stats.patientsWithAddress}</strong>
-        </div>
-        <div className="stat-card" style={styles.summaryCard}>
-          <span style={styles.summaryLabel}>Filter Aktif</span>
-          <strong style={styles.summaryValue}>
-            {filter.search ? "Pencarian Manual" : "Semua Data"}
-          </strong>
-          <span className="text-muted" style={styles.summaryHelper}>
+  return (
+    <div className="pasien-list-page">
+      <PageHeader
+        title="Daftar Pasien"
+        subtitle="Data pasien yang tampil mengikuti akses akun dan relasi practice place"
+        actions={
+          <>
+            {canManage && (
+              <Button variant="primary" onClick={() => navigate("/pasien/add")}>
+                Tambah Pasien
+              </Button>
+            )}
+          </>
+        }
+      />
+
+      {/* Stats Section */}
+      <div className="stats-section">
+        <Card variant="surface-dark" padding="lg">
+          <div className="stat-label">Total Pasien</div>
+          <div className="stat-value">{stats.totalPatients}</div>
+          <div className="stat-note">pasien terdaftar</div>
+        </Card>
+        <Card variant="surface-dark" padding="lg">
+          <div className="stat-label">Data Alamat Terisi</div>
+          <div className="stat-value">{stats.patientsWithAddress}</div>
+          <div className="stat-note">alamat lengkap</div>
+        </Card>
+        <Card variant="surface-dark" padding="lg">
+          <div className="stat-label">Filter Aktif</div>
+          <div className="stat-value-text">
+            {filter.search ? "Pencarian" : "Semua Data"}
+          </div>
+          <div className="stat-note">
             {filter.search || "Belum ada kata kunci"}
-          </span>
-        </div>
-        <div className="stat-card" style={styles.summaryCard}>
-          <span style={styles.summaryLabel}>Referensi Tanggal</span>
-          <strong style={styles.summaryValue}>
-            {stats.latestPatient ? formatDate(stats.latestPatient) : "-"}
-          </strong>
-          <span className="text-muted" style={styles.summaryHelper}>
-            Mengikuti data yang tampil saat ini
-          </span>
-        </div>
+          </div>
+        </Card>
       </div>
 
-      <div className="content-card-light" style={styles.filterCard}>
-        <div style={styles.filterHeader}>
-          <div>
-            <h3 style={styles.sectionTitle}>Pencarian Pasien</h3>
-            <p className="text-muted" style={styles.sectionSubtitle}>
-              Cari pasien berdasarkan nama atau NIK
-            </p>
-          </div>
-        </div>
+      {/* Search Filter */}
+      <Card variant="surface-dark" padding="xl" className="filter-card">
+        <h3 className="filter-title">Pencarian Pasien</h3>
+        <p className="filter-subtitle">
+          Cari pasien berdasarkan nama atau NIK
+        </p>
 
-        <form onSubmit={handleSearch} style={styles.filterForm}>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Nama / NIK</label>
-            <input
-              type="text"
-              className="form-input"
-              placeholder="Ketik nama pasien atau NIK..."
-              value={filter.search}
-              onChange={(e) => setFilter({ ...filter, search: e.target.value })}
-            />
-          </div>
-          <div style={styles.filterActions}>
-            <button type="submit" className="btn-primary" style={styles.primaryButton}>
+        <form onSubmit={handleSearch} className="filter-form">
+          <Input
+            type="text"
+            placeholder="Ketik nama pasien atau NIK..."
+            value={filter.search}
+            onChange={(e) => setFilter({ ...filter, search: e.target.value })}
+          />
+          <div className="filter-actions">
+            <Button type="submit" variant="primary">
               Cari Data
-            </button>
-            <button
-              type="button"
-              className="btn-secondary"
-              style={styles.secondaryButton}
-              onClick={handleReset}
-            >
+            </Button>
+            <Button type="button" variant="secondary" onClick={handleReset}>
               Reset
-            </button>
+            </Button>
           </div>
         </form>
-      </div>
+      </Card>
 
-      {error ? (
-        <div className="error-alert" style={{ marginBottom: "1rem" }}>
-          {error}
-        </div>
-      ) : null}
+      {error && <div className="error-alert">{error}</div>}
 
+      {/* Table */}
       {loading ? (
-        <div style={styles.loadingState}>
-          <p>Memuat data pasien...</p>
-        </div>
+        <LoadingSpinner size="lg" />
       ) : dataList.length === 0 ? (
-        <div className="content-card-light" style={styles.emptyCard}>
-          <h3 style={styles.emptyTitle}>Belum ada data pasien</h3>
-          <p className="text-muted" style={styles.emptySubtitle}>
-            {canManage
-              ? "Silakan tambahkan pasien baru atau ubah kata kunci pencarian."
-              : "Belum ada data pasien yang dapat ditampilkan."}
-          </p>
-          {canManage ? (
-            <button
-              onClick={() => navigate("/pasien/add")}
-              className="btn-primary"
-              style={styles.primaryButton}
-            >
-              + Tambah Pasien
-            </button>
-          ) : null}
-        </div>
+        <EmptyState
+          message={
+            canManage
+              ? "Belum ada data pasien. Silakan tambahkan pasien baru atau ubah kata kunci pencarian."
+              : "Belum ada data pasien yang dapat ditampilkan."
+          }
+          action={
+            canManage ? (
+              <Button variant="primary" onClick={() => navigate("/pasien/add")}>
+                Tambah Pasien Pertama
+              </Button>
+            ) : undefined
+          }
+        />
       ) : (
-        <div style={styles.cardGrid}>
-          {dataList.map((item) => (
-            <div
-              key={item.pasien_id}
-              className="content-card-light"
-              style={styles.patientCard}
-            >
-              <div style={styles.cardHeader}>
-                <div style={styles.identityWrap}>
-                  <div style={styles.avatar}>
-                    {item.nama?.charAt(0)?.toUpperCase() || "?"}
-                  </div>
-                  <div>
-                    <h3 style={styles.patientName}>{item.nama}</h3>
-                    <p className="text-muted" style={styles.identityMeta}>
-                      NIK {item.nik || "-"}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => navigate(`/pasien/${item.pasien_id}`)}
-                  className="btn-primary"
-                  style={styles.viewButton}
-                >
-                  Lihat Detail
-                </button>
-              </div>
-
-              <div style={styles.metaGrid}>
-                <div style={styles.metaCard}>
-                  <span style={styles.metaLabel}>Tanggal Lahir</span>
-                  <span style={styles.metaValue}>
-                    {formatDate(item.tanggal_lahir)}
-                  </span>
-                </div>
-                <div style={styles.metaCard}>
-                  <span style={styles.metaLabel}>Alamat</span>
-                  <span style={styles.metaValue}>{item.alamat_lengkap || "-"}</span>
-                </div>
-              </div>
-
-              <div style={styles.cardFooter}>
-                <button
-                  onClick={() => navigate(`/pasien/${item.pasien_id}`)}
-                  className="btn-primary"
-                  style={styles.inlinePrimaryAction}
-                >
-                  Riwayat Pelayanan
-                </button>
-                {canManage ? (
-                  <>
-                    <button
-                      onClick={() => navigate(`/pasien/${item.pasien_id}/edit`)}
-                      className="btn-primary"
-                      style={styles.inlineSecondaryAction}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() =>
-                        setDeleteDialog({
-                          isOpen: true,
-                          dataId: item.pasien_id,
-                          patientName: item.nama,
-                        })
-                      }
-                      className="btn-primary"
-                      style={styles.inlineDangerAction}
-                    >
-                      Hapus
-                    </button>
-                  </>
-                ) : null}
-              </div>
-            </div>
-          ))}
-        </div>
+        <Table columns={columns} data={dataList} />
       )}
 
-      <ConfirmDialog
+      {/* Delete Confirmation Modal */}
+      <Modal
         isOpen={deleteDialog.isOpen}
         onClose={() =>
           setDeleteDialog({ isOpen: false, dataId: null, patientName: "" })
         }
-        onConfirm={handleDelete}
         title="Hapus Data Pasien"
-        message={`Menghapus pasien "${deleteDialog.patientName}" juga akan menghapus riwayat layanan yang terhubung. Pastikan data ini memang sudah tidak diperlukan.`}
-        confirmText="Hapus Data"
-        cancelText="Batal"
-        type="warning"
-      />
+      >
+        <p style={{ marginBottom: "var(--spacing-4)" }}>
+          Menghapus pasien "{deleteDialog.patientName}" juga akan menghapus
+          riwayat layanan yang terhubung. Pastikan data ini memang sudah tidak
+          diperlukan.
+        </p>
+        <div className="modal-actions">
+          <Button
+            variant="secondary-on-dark"
+            onClick={() =>
+              setDeleteDialog({ isOpen: false, dataId: null, patientName: "" })
+            }
+          >
+            Batal
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleDelete}
+            style={{
+              backgroundColor: "var(--color-error)",
+              borderColor: "var(--color-error)",
+            }}
+          >
+            Hapus Data
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };
-
-const styles = {
-  page: {
-    maxWidth: "1240px",
-    paddingBottom: "3rem",
-  },
-  header: {
-    gap: "1rem",
-    flexWrap: "wrap",
-    alignItems: "flex-start",
-  },
-  pageTitle: {
-    marginBottom: "0.35rem",
-  },
-  pageSubtitle: {
-    margin: 0,
-  },
-  headerActions: {
-    display: "flex",
-    gap: "0.75rem",
-    flexWrap: "wrap",
-  },
-  primaryButton: {
-    width: "auto",
-    minWidth: "150px",
-    paddingInline: "1rem",
-  },
-  secondaryButton: {
-    width: "auto",
-    minWidth: "130px",
-    paddingInline: "1rem",
-  },
-  summaryGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "1rem",
-    marginBottom: "1.5rem",
-  },
-  summaryCard: {
-    maxWidth: "none",
-    margin: 0,
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.45rem",
-  },
-  summaryLabel: {
-    fontSize: "0.78rem",
-    textTransform: "uppercase",
-    letterSpacing: "0.06em",
-    color: "var(--color-text-muted)",
-  },
-  summaryValue: {
-    fontSize: "1.55rem",
-    lineHeight: 1.2,
-  },
-  summaryHelper: {
-    fontSize: "0.85rem",
-  },
-  filterCard: {
-    maxWidth: "none",
-    margin: "0 0 1.5rem",
-  },
-  filterHeader: {
-    marginBottom: "1rem",
-  },
-  sectionTitle: {
-    marginBottom: "0.35rem",
-    fontSize: "1.1rem",
-  },
-  sectionSubtitle: {
-    margin: 0,
-  },
-  filterForm: {
-    display: "grid",
-    gridTemplateColumns: "minmax(0, 1fr) auto",
-    gap: "1rem",
-    alignItems: "end",
-  },
-  filterActions: {
-    display: "flex",
-    gap: "0.75rem",
-    flexWrap: "wrap",
-  },
-  loadingState: {
-    textAlign: "center",
-    padding: "3rem",
-  },
-  emptyCard: {
-    maxWidth: "none",
-    margin: 0,
-    textAlign: "center",
-    padding: "3rem",
-  },
-  emptyTitle: {
-    marginBottom: "0.6rem",
-  },
-  emptySubtitle: {
-    marginBottom: "1.25rem",
-  },
-  cardGrid: {
-    display: "grid",
-    gap: "1rem",
-  },
-  patientCard: {
-    maxWidth: "none",
-    margin: 0,
-    padding: "1rem 1.1rem",
-  },
-  cardHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: "1rem",
-    marginBottom: "1rem",
-    flexWrap: "wrap",
-  },
-  identityWrap: {
-    display: "flex",
-    alignItems: "center",
-    gap: "1rem",
-    flexWrap: "wrap",
-  },
-  avatar: {
-    width: "48px",
-    height: "48px",
-    borderRadius: "16px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background:
-      "linear-gradient(135deg, rgba(99,102,241,0.95), rgba(59,130,246,0.7))",
-    color: "#fff",
-    fontWeight: "700",
-    fontSize: "1.2rem",
-    flexShrink: 0,
-  },
-  patientName: {
-    fontSize: "1.05rem",
-    marginBottom: "0.2rem",
-  },
-  identityMeta: {
-    margin: 0,
-  },
-  viewButton: {
-    width: "auto",
-    minWidth: "140px",
-    paddingInline: "1rem",
-    backgroundColor: "rgba(59, 130, 246, 0.22)",
-    border: "1px solid rgba(96, 165, 250, 0.45)",
-  },
-  metaGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "0.85rem",
-  },
-  metaCard: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.35rem",
-    padding: "0.8rem 0.9rem",
-    borderRadius: "14px",
-    background: "rgba(255,255,255,0.62)",
-    border: "1px solid rgba(73, 62, 50, 0.1)",
-  },
-  metaLabel: {
-    fontSize: "0.78rem",
-    textTransform: "uppercase",
-    letterSpacing: "0.05em",
-    color: "var(--color-text-muted)",
-  },
-  metaValue: {
-    lineHeight: 1.5,
-    fontWeight: "600",
-  },
-  cardFooter: {
-    marginTop: "0.9rem",
-    paddingTop: "0.9rem",
-    borderTop: "1px solid rgba(73, 62, 50, 0.08)",
-    display: "flex",
-    gap: "0.75rem",
-    flexWrap: "wrap",
-  },
-  inlinePrimaryAction: {
-    width: "auto",
-    minWidth: "160px",
-    paddingInline: "1rem",
-  },
-  inlineSecondaryAction: {
-    width: "auto",
-    minWidth: "110px",
-    paddingInline: "1rem",
-    backgroundColor: "rgba(232, 165, 90, 0.16)",
-    border: "1px solid rgba(212, 160, 23, 0.28)",
-    color: "#8d6119",
-  },
-  inlineDangerAction: {
-    width: "auto",
-    minWidth: "110px",
-    paddingInline: "1rem",
-    backgroundColor: "rgba(198, 69, 69, 0.12)",
-    border: "1px solid rgba(198, 69, 69, 0.24)",
-    color: "#a13a3a",
-  },
-};
-
 export default PasienList;

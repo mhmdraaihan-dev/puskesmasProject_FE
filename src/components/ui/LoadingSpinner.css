@@ -1,0 +1,84 @@
+/**
+ * LoadingSpinner Component Styles
+ * 
+ * Implements coral-colored spinner with smooth animation.
+ * Uses CSS variables from design system for consistency.
+ */
+
+.loading-spinner-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+  width: 100%;
+}
+
+.loading-spinner {
+  display: inline-block;
+  animation: loading-spinner-rotate 1s linear infinite;
+}
+
+/* Size variants */
+.loading-spinner--sm {
+  width: 24px;
+  height: 24px;
+}
+
+.loading-spinner--md {
+  width: 40px;
+  height: 40px;
+}
+
+.loading-spinner--lg {
+  width: 64px;
+  height: 64px;
+}
+
+.loading-spinner__svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.loading-spinner__circle {
+  stroke: var(--color-primary, #cc785c);
+  stroke-linecap: round;
+  stroke-dasharray: 90, 150;
+  stroke-dashoffset: 0;
+  animation: loading-spinner-dash 1.5s ease-in-out infinite;
+}
+
+/* Screen reader only text */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Animations */
+@keyframes loading-spinner-rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loading-spinner-dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}

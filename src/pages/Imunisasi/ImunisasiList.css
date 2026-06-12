@@ -1,0 +1,248 @@
+.imunisasi-list-page {
+  padding: 0 0 var(--spacing-xl);
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.imunisasi-list-page .stats-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.imunisasi-list__summary-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 246, 235, 0.96)) !important;
+  border: 1px solid rgba(77, 122, 44, 0.14);
+  border-radius: 22px;
+  box-shadow:
+    0 18px 34px rgba(34, 52, 24, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.imunisasi-list-page .stat-label {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #6d7e67;
+  margin-bottom: 0.35rem;
+}
+
+.imunisasi-list-page .stat-value {
+  font-family: var(--font-sans);
+  font-size: clamp(1.8rem, 2.4vw, 2.35rem);
+  font-weight: 700;
+  color: #1f2f1f;
+  line-height: 1.2;
+  margin-bottom: 0.2rem;
+}
+
+.imunisasi-list-page .stat-note {
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  color: #74836f;
+}
+
+.imunisasi-list-page .filter-card {
+  margin-bottom: 2rem;
+}
+
+.imunisasi-list__filter-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(240, 245, 232, 0.95)) !important;
+  border: 1px solid rgba(77, 122, 44, 0.12);
+  border-radius: 24px;
+  box-shadow: 0 24px 44px rgba(35, 51, 24, 0.08);
+}
+
+.imunisasi-list-page .filter-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.45rem, 2vw, 1.9rem);
+  font-weight: 600;
+  color: var(--color-ink);
+  margin-bottom: 0.45rem;
+}
+
+.imunisasi-list-page .filter-subtitle {
+  font-family: var(--font-sans);
+  font-size: 0.98rem;
+  color: var(--color-muted);
+  margin-bottom: 1.4rem;
+}
+
+.imunisasi-list-page .filter-form {
+  display: grid;
+  grid-template-columns:
+    minmax(240px, 1.35fr)
+    minmax(220px, 1fr)
+    minmax(180px, 1fr)
+    minmax(180px, 1fr)
+    auto;
+  column-gap: 1rem;
+  row-gap: 0.9rem;
+  align-items: end;
+}
+
+.imunisasi-list-page .filter-form > .input-wrapper {
+  min-width: 0;
+}
+
+.imunisasi-list__select-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.imunisasi-list-page .filter-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-start;
+  align-self: end;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.imunisasi-list-page .error-alert {
+  padding: 1rem 1.1rem;
+  margin-bottom: 1.5rem;
+  background: rgba(198, 69, 69, 0.15);
+  border: 1px solid var(--color-error);
+  border-radius: 14px;
+  color: var(--color-error);
+  font-size: 0.95rem;
+}
+
+.imunisasi-list__patient-name {
+  font-weight: 700;
+  color: #233022;
+}
+
+.imunisasi-list__action-group {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.imunisasi-list__action-btn {
+  min-width: 88px;
+}
+
+.imunisasi-list-table {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(237, 242, 230, 0.94));
+  border: 1px solid rgba(77, 122, 44, 0.12);
+  border-radius: 24px;
+  padding: 0.95rem 1.1rem;
+  margin-top: 0.65rem;
+  box-shadow: 0 24px 44px rgba(35, 51, 24, 0.08);
+}
+
+.imunisasi-list-table .table-wrapper::-webkit-scrollbar-track {
+  background: rgba(104, 158, 61, 0.08);
+}
+
+.imunisasi-list-table .table-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(79, 146, 40, 0.22);
+}
+
+.imunisasi-list-table .table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(79, 146, 40, 0.34);
+}
+
+.imunisasi-list-table .table {
+  color: #233022;
+}
+
+.imunisasi-list-table .table-header {
+  padding: 0.95rem 0.75rem;
+  border-bottom: 1px solid rgba(77, 122, 44, 0.12);
+  color: #54644f;
+  font-size: 0.86rem;
+  letter-spacing: 0.04em;
+}
+
+.imunisasi-list-table .table-header--sortable:hover {
+  color: #2f6b22;
+}
+
+.imunisasi-list-table .table-cell {
+  padding: 0.95rem 0.75rem;
+  border-bottom: 1px solid rgba(77, 122, 44, 0.08);
+  vertical-align: middle;
+}
+
+.imunisasi-list-table .table-row:hover {
+  background: rgba(79, 146, 40, 0.045);
+}
+
+.imunisasi-list-table .table-loading,
+.imunisasi-list-table .table-empty {
+  min-height: 160px;
+}
+
+.imunisasi-list-table .table-loading-text,
+.imunisasi-list-table .table-empty-text {
+  color: #6d7e67;
+}
+
+.imunisasi-list-table .table-spinner {
+  border: 3px solid rgba(77, 122, 44, 0.12);
+  border-top-color: #4f9228;
+}
+
+.imunisasi-list-table .button--secondary.imunisasi-list__action-btn {
+  background: rgba(79, 146, 40, 0.1);
+  color: #2f6b22;
+  border-color: rgba(79, 146, 40, 0.12);
+}
+
+.imunisasi-list-table .button--secondary.imunisasi-list__action-btn:hover:not(:disabled) {
+  background: rgba(79, 146, 40, 0.16);
+}
+
+.imunisasi-list-table .button--warning.imunisasi-list__action-btn,
+.imunisasi-list-table .button--danger.imunisasi-list__action-btn {
+  border-width: 1px;
+}
+
+@media (max-width: 768px) {
+  .imunisasi-list-page {
+    padding: 0 0 var(--spacing-lg);
+  }
+
+  .imunisasi-list-page .stats-section {
+    grid-template-columns: 1fr;
+  }
+
+  .imunisasi-list-page .filter-form {
+    grid-template-columns: 1fr;
+  }
+
+  .imunisasi-list-page .filter-actions {
+    flex-direction: column;
+    flex-wrap: wrap;
+  }
+
+  .imunisasi-list-page .filter-actions button {
+    width: 100%;
+  }
+
+  .imunisasi-list-page .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .imunisasi-list-table {
+    padding: 0.55rem 0.75rem;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1180px) {
+  .imunisasi-list-page .filter-form {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+
+  .imunisasi-list-page .filter-actions {
+    grid-column: 1 / -1;
+    flex-wrap: wrap;
+  }
+}

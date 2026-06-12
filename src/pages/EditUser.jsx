@@ -4,7 +4,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import { updateUser, getUsers, getVillages } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { isAdmin } from "../utils/roleHelpers";
-import "../App.css";
+import PageHeader from "../components/layout/PageHeader";
+import Card from "../components/ui/Card";
+import Button from "../components/Button";
+import Input from "../components/Input";
+import LoadingSpinner from "../components/ui/LoadingSpinner";
+import "../styles/design-system.css";
+import "./AddUser.css";
 
 const EditUser = () => {
   const { userId } = useParams();
@@ -127,188 +133,149 @@ const EditUser = () => {
 
   if (loadingUser) {
     return (
-      <div className="dashboard page-shell">
-        <div className="page-intro">
-          <div className="page-kicker">User Setup</div>
-          <h2 className="page-title">Memuat Data User</h2>
-          <p className="page-subtitle">Menyiapkan formulir edit user.</p>
-        </div>
+      <div className="add-user-page">
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
 
   return (
-    <div className="dashboard page-shell">
-      <div
-        className="dashboard-header"
-        style={{ alignItems: "flex-start", gap: "1rem" }}
-      >
-        <div className="page-intro">
-          <div className="page-kicker">User Setup</div>
-          <h2 className="page-title" style={{ marginBottom: "0.15rem" }}>
-            Edit User
-          </h2>
-          <p className="page-subtitle">Update informasi user yang sudah ada.</p>
-        </div>
-        <div className="page-actions">
-          <button
-            onClick={() => navigate("/")}
-            className="btn-secondary"
-          >
+    <div className="add-user-page">
+      <PageHeader
+        heading="Edit User"
+        actions={
+          <Button variant="secondary" onClick={() => navigate("/")}>
             Batal
-          </button>
-        </div>
-      </div>
+          </Button>
+        }
+      />
 
-      <div className="page-form-shell">
-        <div className="content-card-light">
-          {error && <div className="error-alert">{error}</div>}
+      <Card variant="surface-dark" padding="xl">
+        {error && (
+          <div className="error-alert" style={{ marginBottom: "var(--spacing-5)" }}>
+            {error}
+          </div>
+        )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="user-grid">
-            {/* Left Column */}
-            <div>
-              <div className="form-group">
-                <label className="form-label" htmlFor="full_name">
-                  Nama Lengkap
-                </label>
-                <input
-                  id="full_name"
-                  className="form-input"
-                  {...register("full_name")}
-                />
-              </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="user-form-grid">
+          {/* Left Column */}
+          <div>
+            <Input
+              label="Nama Lengkap"
+              placeholder="Nama lengkap user"
+              {...register("full_name")}
+            />
 
-              <div className="form-group">
-                <label className="form-label" htmlFor="email">
-                  Email
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  className="form-input"
-                  {...register("email", {
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: "Format email tidak valid",
-                    },
-                  })}
-                />
-                {errors.email && (
-                  <span className="error-message">{errors.email.message}</span>
-                )}
-              </div>
+            <Input
+              label="Email"
+              type="email"
+              placeholder="email@example.com"
+              error={errors.email?.message}
+              {...register("email", {
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Format email tidak valid",
+                },
+              })}
+            />
 
-              <div className="form-group">
-                <label className="form-label" htmlFor="phone_number">
-                  Nomor Telepon
-                </label>
-                <input
-                  id="phone_number"
-                  className="form-input"
-                  {...register("phone_number")}
-                />
-              </div>
+            <Input
+              label="Nomor Telepon"
+              placeholder="081234567890"
+              {...register("phone_number")}
+            />
+          </div>
+
+          {/* Right Column */}
+          <div>
+            <div className="form-group">
+              <label className="form-label" htmlFor="address">
+                Alamat
+              </label>
+              <textarea
+                id="address"
+                className="form-textarea"
+                placeholder="Alamat lengkap"
+                {...register("address")}
+              />
             </div>
 
-            {/* Right Column */}
-            <div>
-              <div className="form-group">
-                <label className="form-label" htmlFor="address">
-                  Alamat
-                </label>
-                <textarea
-                  id="address"
-                  className="form-input"
-                  style={{ height: "120px", resize: "none" }}
-                  {...register("address")}
-                />
-              </div>
+            <div className="form-group">
+              <label className="form-label" htmlFor="role">
+                Role
+              </label>
+              <select id="role" className="form-select" {...register("role")}>
+                <option value="USER">USER</option>
+                <option value="ADMIN">ADMIN</option>
+              </select>
+            </div>
 
+            {/* Conditional: Position (only for USER role) */}
+            {watchRole === "USER" && (
               <div className="form-group">
-                <label className="form-label" htmlFor="role">
-                  Role
+                <label className="form-label" htmlFor="position_user">
+                  Position
                 </label>
-                <select id="role" className="form-input" {...register("role")}>
-                  <option value="USER">USER</option>
-                  <option value="ADMIN">ADMIN</option>
+                <select
+                  id="position_user"
+                  className="form-select"
+                  {...register("position_user")}
+                >
+                  <option value="">Pilih Position</option>
+                  <option value="bidan_praktik">Bidan Praktik</option>
+                  <option value="bidan_desa">Bidan Desa</option>
+                  <option value="bidan_koordinator">Bidan Koordinator</option>
                 </select>
+                <small className="helper-text">
+                  Position wajib untuk role USER.
+                </small>
               </div>
+            )}
 
-              {/* Conditional: Position (only for USER role) */}
-              {watchRole === "USER" && (
-                <div className="form-group">
-                  <label className="form-label" htmlFor="position_user">
-                    Position
-                  </label>
-                  <select
-                    id="position_user"
-                    className="form-input"
-                    {...register("position_user")}
-                  >
-                    <option value="">Pilih Position</option>
-                    <option value="bidan_praktik">Bidan Praktik</option>
-                    <option value="bidan_desa">Bidan Desa</option>
-                    <option value="bidan_koordinator">Bidan Koordinator</option>
-                  </select>
-                  <small className="form-helper">
-                    Position wajib untuk role USER.
-                  </small>
-                </div>
-              )}
+            {/* Conditional: Village (only for bidan_desa) */}
+            {watchPosition === "bidan_desa" && (
+              <div className="form-group">
+                <label className="form-label" htmlFor="village_id">
+                  Desa
+                </label>
+                <select
+                  id="village_id"
+                  className="form-select"
+                  {...register("village_id")}
+                >
+                  <option value="">Pilih Desa</option>
+                  {villages.map((village) => (
+                    <option
+                      key={village.village_id}
+                      value={village.village_id}
+                    >
+                      {village.nama_desa}
+                    </option>
+                  ))}
+                </select>
+                <small className="helper-text">
+                  Desa wajib untuk Bidan Desa.
+                </small>
+              </div>
+            )}
+          </div>
 
-              {/* Conditional: Village (only for bidan_desa) */}
-              {watchPosition === "bidan_desa" && (
-                <div className="form-group">
-                  <label className="form-label" htmlFor="village_id">
-                    Desa
-                  </label>
-                  <select
-                    id="village_id"
-                    className="form-input"
-                    {...register("village_id")}
-                  >
-                    <option value="">Pilih Desa</option>
-                    {villages.map((village) => (
-                      <option
-                        key={village.village_id}
-                        value={village.village_id}
-                      >
-                        {village.nama_desa}
-                      </option>
-                    ))}
-                  </select>
-                  <small className="form-helper">
-                    Desa wajib untuk Bidan Desa.
-                  </small>
-                </div>
-              )}
-            </div>
+          <div className="info-box">
+            <p className="info-title">Perhatian</p>
+            <ul className="info-list">
+              {noteItems.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
 
-            <div
-              className="page-note"
-              style={{
-                gridColumn: "span 2",
-                marginTop: "1rem",
-              }}
-            >
-              <p className="page-note-title">
-                <strong>Perhatian</strong>
-              </p>
-              <ul className="page-note-list">
-                {noteItems.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
-
-            <div style={{ gridColumn: "span 2", marginTop: "1rem" }}>
-              <button type="submit" disabled={loading} className="btn-primary">
-                {loading ? "Mengupdate User..." : "Update User"}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
+          <div className="form-actions">
+            <Button type="submit" variant="primary" disabled={loading}>
+              {loading ? "Mengupdate User..." : "Update User"}
+            </Button>
+          </div>
+        </form>
+      </Card>
     </div>
   );
 };

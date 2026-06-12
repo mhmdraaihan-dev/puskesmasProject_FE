@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import MainLayout from "./components/layout/MainLayout";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
@@ -38,6 +39,7 @@ import PendingDataList from "./pages/Verification/PendingDataList";
 // Revision Workflow
 import RejectedDataList from "./pages/Revision/RejectedDataList";
 import RevisionForm from "./pages/Revision/RevisionForm";
+import ModuleHistoryPage from "./pages/History/ModuleHistoryPage";
 
 // Pemeriksaan Kehamilan Management
 import PemeriksaanKehamilanList from "./pages/PemeriksaanKehamilan/PemeriksaanKehamilanList";
@@ -76,15 +78,23 @@ const ProtectedRoute = ({
 
   if (!isAuthenticated) return <Navigate to="/login" />;
 
-  if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
-    return <Navigate to="/" replace />;
-  }
+  const hasRoleConstraint = allowedRoles.length > 0;
+  const hasPositionConstraint = allowedPositions.length > 0;
 
-  if (
-    allowedPositions.length > 0 &&
-    !allowedPositions.includes(user?.position_user)
-  ) {
-    return <Navigate to="/" replace />;
+  if (hasRoleConstraint && hasPositionConstraint) {
+    // OR logic: accessible if role OR position matches
+    const roleOk = allowedRoles.includes(user?.role);
+    const positionOk = allowedPositions.includes(user?.position_user);
+    if (!roleOk && !positionOk) {
+      return <Navigate to="/" replace />;
+    }
+  } else {
+    if (hasRoleConstraint && !allowedRoles.includes(user?.role)) {
+      return <Navigate to="/" replace />;
+    }
+    if (hasPositionConstraint && !allowedPositions.includes(user?.position_user)) {
+      return <Navigate to="/" replace />;
+    }
   }
 
   return children;
@@ -95,18 +105,21 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
+          {/* Public routes - no layout */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Dashboard */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
+          {/* Protected routes - with MainLayout */}
+          <Route element={<MainLayout />}>
+            {/* Dashboard */}
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
 
           {/* User Management */}
           <Route
@@ -463,9 +476,40 @@ function App() {
             path="/verification/pending"
             element={
               <ProtectedRoute
+                allowedRoles={["ADMIN"]}
                 allowedPositions={[POSITIONS.BIDAN_DESA]}
               >
                 <PendingDataList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/history"
+            element={
+              <ProtectedRoute
+                allowedPositions={[POSITIONS.BIDAN_DESA]}
+              >
+                <Navigate to="/history/kehamilan" replace />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/verification/history"
+            element={
+              <ProtectedRoute
+                allowedPositions={[POSITIONS.BIDAN_DESA]}
+              >
+                <Navigate to="/history/kehamilan" replace />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/history/:moduleKey"
+            element={
+              <ProtectedRoute
+                allowedPositions={[POSITIONS.BIDAN_DESA]}
+              >
+                <ModuleHistoryPage />
               </ProtectedRoute>
             }
           />
@@ -493,12 +537,14 @@ function App() {
             path="/rekapitulasi"
             element={
               <ProtectedRoute
+                allowedRoles={["ADMIN"]}
                 allowedPositions={[POSITIONS.BIDAN_KOORDINATOR]}
               >
                 <RekapitulasiPage />
               </ProtectedRoute>
             }
           />
+          </Route>
         </Routes>
       </AuthProvider>
     </BrowserRouter>

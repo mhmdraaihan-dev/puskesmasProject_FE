@@ -1,0 +1,196 @@
+.kb-form-page {
+  padding: var(--spacing-xl) 0;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.kb-form-page .form-layout {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.kb-form__section-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(240, 245, 232, 0.95)) !important;
+  border: 1px solid rgba(77, 122, 44, 0.12);
+  border-radius: 24px;
+  box-shadow: 0 24px 44px rgba(35, 51, 24, 0.08);
+}
+
+.kb-form-page .section-header {
+  margin-bottom: 1.5rem;
+}
+
+.kb-form-page .section-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.35rem, 2vw, 1.7rem);
+  font-weight: 600;
+  color: var(--color-ink);
+  margin-bottom: 0.5rem;
+}
+
+.kb-form-page .section-subtitle {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.kb-form-page .form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+}
+
+.kb-form-page .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.kb-form-page .form-group--full {
+  grid-column: 1 / -1;
+}
+
+.kb-form-page .form-label,
+.kb-form-page .input-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #445340;
+}
+
+.kb-form-page .required-asterisk {
+  color: var(--color-error);
+  margin-left: 0.25rem;
+}
+
+.kb-form-page .error-text {
+  font-size: 0.8125rem;
+  color: var(--color-error);
+  margin-top: 0.25rem;
+}
+
+.kb-form-page .input,
+.kb-form-page .form-select,
+.kb-form-page .form-textarea {
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(77, 122, 44, 0.14);
+  color: #233022;
+}
+
+.kb-form-page .input::placeholder,
+.kb-form-page .form-textarea::placeholder {
+  color: rgba(84, 100, 79, 0.7);
+}
+
+.kb-form-page .input:focus,
+.kb-form-page .form-select:focus,
+.kb-form-page .form-textarea:focus {
+  outline: none;
+  border-color: rgba(45, 104, 31, 0.34);
+  box-shadow: 0 0 0 4px rgba(63, 134, 34, 0.08);
+  background: #ffffff;
+}
+
+.kb-form-page .inline-patient-info {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.8125rem;
+  color: #6d7e67;
+  margin-top: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: rgba(246, 249, 240, 0.92);
+  border: 1px solid rgba(77, 122, 44, 0.1);
+  border-radius: 14px;
+}
+
+.kb-form-page .checkbox-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.kb-form-page .checkbox-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-radius: 14px;
+  background: rgba(246, 249, 240, 0.92);
+  border: 1px solid rgba(77, 122, 44, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.kb-form-page .checkbox-card:hover {
+  background: rgba(240, 246, 233, 0.98);
+  border-color: rgba(79, 146, 40, 0.18);
+}
+
+.kb-form-page .checkbox-card input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #4f9228;
+}
+
+.kb-form-page .checkbox-card span {
+  font-size: 0.9375rem;
+  color: #233022;
+}
+
+.kb-form-page .form-select {
+  width: 100%;
+  height: 40px;
+  padding: 0 var(--spacing-3);
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
+  transition: all 0.2s ease;
+}
+
+.kb-form-page .form-textarea {
+  width: 100%;
+  padding: var(--spacing-3);
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
+  font-family: inherit;
+  resize: vertical;
+  transition: all 0.2s ease;
+}
+
+.kb-form-page .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(77, 122, 44, 0.12);
+}
+
+.kb-form-page .error-alert {
+  background: rgba(198, 69, 69, 0.15);
+  border: 1px solid rgba(198, 69, 69, 0.3);
+  color: var(--color-error);
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .kb-form-page {
+    padding: var(--spacing-lg) 0;
+  }
+
+  .kb-form-page .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kb-form-page .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .kb-form-page .form-actions button {
+    width: 100%;
+  }
+}

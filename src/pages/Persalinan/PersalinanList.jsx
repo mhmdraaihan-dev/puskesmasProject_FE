@@ -1,9 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ConfirmDialog from "../../components/ConfirmDialog";
-import StatusBadge from "../../components/StatusBadge";
 import { useAuth } from "../../context/AuthContext";
-import "../../App.css";
 import { deletePersalinan, getPersalinanList } from "../../services/api";
 import { formatDate } from "../../utils/dateFormatter";
 import {
@@ -12,6 +9,17 @@ import {
   isAdmin,
   isBidanPraktik,
 } from "../../utils/roleHelpers";
+import PageHeader from "../../components/layout/PageHeader";
+import Card from "../../components/ui/Card";
+import Button from "../../components/Button";
+import Input from "../../components/Input";
+import Table from "../../components/ui/Table";
+import StatusBadge from "../../components/StatusBadge";
+import LoadingSpinner from "../../components/ui/LoadingSpinner";
+import EmptyState from "../../components/ui/EmptyState";
+import Modal from "../../components/ui/Modal";
+import "../../styles/design-system.css";
+import "./PersalinanList.css";
 
 const getIbuSummary = (ibu) => {
   if (!ibu) return "-";
@@ -28,7 +36,12 @@ const getIbuSummary = (ibu) => {
 
 const getBayiSummary = (bayi) => {
   if (!bayi) return "-";
-  const gender = bayi.jenis_kelamin === "LAKI_LAKI" ? "L" : bayi.jenis_kelamin === "PEREMPUAN" ? "P" : "-";
+  const gender =
+    bayi.jenis_kelamin === "LAKI_LAKI"
+      ? "L"
+      : bayi.jenis_kelamin === "PEREMPUAN"
+        ? "P"
+        : "-";
   return `${gender} / ${bayi.bb || "-"} g / ${bayi.pb || "-"} cm`;
 };
 
@@ -52,21 +65,24 @@ const PersalinanList = () => {
   const canAddData = isBidanPraktik(user);
 
   useEffect(() => {
-    if (isAdmin(user)) {
-      navigate("/");
-      return;
-    }
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, navigate]);
 
   const stats = useMemo(() => {
     const total = dataList.length;
-    const pending = dataList.filter((item) => item.status_verifikasi === "PENDING").length;
-    const approved = dataList.filter((item) => item.status_verifikasi === "APPROVED").length;
+    const pending = dataList.filter(
+      (item) => item.status_verifikasi === "PENDING",
+    ).length;
+    const approved = dataList.filter(
+      (item) => item.status_verifikasi === "APPROVED",
+    ).length;
     const withComplication = dataList.filter((item) => {
       const ibu = item.keadaan_ibu_persalinan;
-      return ibu && (!ibu.baik || !ibu.hidup || ibu.hap || ibu.partus_lama || ibu.pre_eklamsi);
+      return (
+        ibu &&
+        (!ibu.baik || !ibu.hidup || ibu.hap || ibu.partus_lama || ibu.pre_eklamsi)
+      );
     }).length;
 
     return { total, pending, approved, withComplication };
@@ -96,16 +112,6 @@ const PersalinanList = () => {
     fetchData();
   };
 
-  const handleReset = () => {
-    const resetFilter = {
-      search: "",
-      tanggal_start: "",
-      tanggal_end: "",
-    };
-    setFilter(resetFilter);
-    fetchData(resetFilter);
-  };
-
   const handleDelete = async () => {
     try {
       await deletePersalinan(deleteDialog.dataId);
@@ -117,445 +123,268 @@ const PersalinanList = () => {
     }
   };
 
-  return (
-    <div className="dashboard">
-      <div className="dashboard-header" style={styles.header}>
-        <div>
-          <h2 style={styles.pageTitle}>Data Persalinan</h2>
-          <p className="text-muted" style={styles.pageSubtitle}>
-            {canAddData
-              ? "Input dan pantau seluruh data persalinan pasien"
-              : "Lihat data persalinan lintas pasien dan proses verifikasinya"}
-          </p>
-        </div>
-        <div style={styles.headerActions}>
-          <button
-            onClick={() => navigate("/")}
-            className="btn-primary"
-            style={styles.secondaryButton}
+  const columns = [
+    {
+      key: "patient_name",
+      label: "Nama Pasien",
+      sortable: true,
+      render: (_, row) => {
+        const patientName = row.pasien?.nama || row.nama_pasien || "Pasien";
+        return (
+          <span className="persalinan-list__patient-name">{patientName}</span>
+        );
+      },
+    },
+    {
+      key: "tanggal_partus",
+      label: "Tanggal Persalinan",
+      sortable: true,
+      render: (value) => formatDate(value),
+    },
+    {
+      key: "gravida",
+      label: "Riwayat GPA",
+      render: (_, row) => (
+        <span>
+          G{row.gravida} P{row.para} A{row.abortus}
+        </span>
+      ),
+    },
+    {
+      key: "keadaan_bayi",
+      label: "Data Bayi",
+      render: (_, row) => getBayiSummary(row.keadaan_bayi_persalinan),
+    },
+    {
+      key: "keadaan_ibu",
+      label: "Kondisi Ibu",
+      render: (_, row) => {
+        const ibu = row.keadaan_ibu_persalinan;
+        const ibuCritical =
+          ibu &&
+          (!ibu.baik || !ibu.hidup || ibu.hap || ibu.partus_lama || ibu.pre_eklamsi);
+        const summary = getIbuSummary(ibu);
+
+        return (
+          <span
+            className={`persalinan-list__condition-badge ${
+              ibuCritical
+                ? "persalinan-list__condition-badge--critical"
+                : "persalinan-list__condition-badge--stable"
+            }`}
           >
-            Kembali
-          </button>
-          {canAddData ? (
-            <button
-              onClick={() => navigate("/persalinan/add")}
-              className="btn-primary"
-              style={styles.primaryButton}
+            {summary}
+          </span>
+        );
+      },
+    },
+    {
+      key: "status_verifikasi",
+      label: "Status",
+      render: (value) => (value ? <StatusBadge status={value} /> : null),
+    },
+    {
+      key: "actions",
+      label: "Aksi",
+      render: (_, row) => {
+        const patientName = row.pasien?.nama || row.nama_pasien || "Pasien";
+        return (
+          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="persalinan-list__action-btn"
+              onClick={() => navigate(`/persalinan/${row.id}`)}
             >
-              + Input Data Baru
-            </button>
-          ) : null}
-        </div>
+              Detail
+            </Button>
+            {canEditPersalinan(user, row) && (
+              <Button
+                variant="warning"
+                size="sm"
+                className="persalinan-list__action-btn"
+                onClick={() => navigate(`/persalinan/${row.id}/edit`)}
+              >
+                Edit
+              </Button>
+            )}
+            {canDeletePersalinan(user, row) && (
+              <Button
+                variant="danger"
+                size="sm"
+                className="persalinan-list__action-btn"
+                onClick={() =>
+                  setDeleteDialog({
+                    isOpen: true,
+                    dataId: row.id,
+                    patientName,
+                  })
+                }
+              >
+                Hapus
+              </Button>
+            )}
+          </div>
+        );
+      },
+    },
+  ];
+
+  return (
+    <div className="persalinan-list-page">
+      <PageHeader
+        title="Data Persalinan"
+        subtitle={
+          canAddData
+            ? "Input dan pantau seluruh data persalinan pasien"
+            : "Lihat data persalinan lintas pasien dan proses verifikasinya"
+        }
+        actions={
+          <>
+            {canAddData && (
+              <Button variant="primary" onClick={() => navigate("/persalinan/add")}>
+                Input Data Baru
+              </Button>
+            )}
+          </>
+        }
+      />
+
+      {/* Stats Section */}
+      <div className="stats-section">
+        <Card
+          variant="surface-card"
+          padding="md"
+          className="persalinan-list__summary-card"
+        >
+          <div className="stat-label">Total Data</div>
+          <div className="stat-value">{stats.total}</div>
+          <div className="stat-note">persalinan</div>
+        </Card>
+        <Card
+          variant="surface-card"
+          padding="md"
+          className="persalinan-list__summary-card"
+        >
+          <div className="stat-label">Menunggu Verifikasi</div>
+          <div className="stat-value">{stats.pending}</div>
+          <div className="stat-note">pending</div>
+        </Card>
+        <Card
+          variant="surface-card"
+          padding="md"
+          className="persalinan-list__summary-card"
+        >
+          <div className="stat-label">Disetujui</div>
+          <div className="stat-value">{stats.approved}</div>
+          <div className="stat-note">approved</div>
+        </Card>
+        <Card
+          variant="surface-card"
+          padding="md"
+          className="persalinan-list__summary-card"
+        >
+          <div className="stat-label">Kondisi Perlu Perhatian</div>
+          <div className="stat-value">{stats.withComplication}</div>
+          <div className="stat-note">komplikasi</div>
+        </Card>
       </div>
 
-      <div style={styles.summaryGrid}>
-        <div className="auth-card" style={styles.summaryCard}>
-          <span style={styles.summaryLabel}>Total Data</span>
-          <strong style={styles.summaryValue}>{stats.total}</strong>
-        </div>
-        <div className="auth-card" style={styles.summaryCard}>
-          <span style={styles.summaryLabel}>Menunggu Verifikasi</span>
-          <strong style={styles.summaryValue}>{stats.pending}</strong>
-        </div>
-        <div className="auth-card" style={styles.summaryCard}>
-          <span style={styles.summaryLabel}>Disetujui</span>
-          <strong style={styles.summaryValue}>{stats.approved}</strong>
-        </div>
-        <div className="auth-card" style={styles.summaryCard}>
-          <span style={styles.summaryLabel}>Kondisi Perlu Perhatian</span>
-          <strong style={styles.summaryValue}>{stats.withComplication}</strong>
-        </div>
-      </div>
+      {/* Filter Card */}
+      <Card
+        variant="surface-card"
+        padding="xl"
+        className="filter-card persalinan-list__filter-card"
+      >
+        <h3 className="filter-title">Filter Persalinan</h3>
+        <p className="filter-subtitle">
+          Cari data berdasarkan pasien dan rentang tanggal persalinan
+        </p>
 
-      <div className="auth-card" style={styles.filterCard}>
-        <div style={styles.filterHeader}>
-          <div>
-            <h3 style={styles.sectionTitle}>Filter Persalinan</h3>
-            <p className="text-muted" style={styles.sectionSubtitle}>
-              Cari data berdasarkan pasien dan rentang tanggal persalinan
-            </p>
-          </div>
-        </div>
-
-        <form onSubmit={handleSearch} style={styles.filterForm}>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Cari Nama / NIK</label>
-            <input
-              type="text"
-              className="form-input"
-              placeholder="Ketik nama pasien atau NIK..."
-              value={filter.search}
-              onChange={(e) => setFilter({ ...filter, search: e.target.value })}
-            />
-          </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Dari Tanggal</label>
-            <input
-              type="date"
-              className="form-input"
-              value={filter.tanggal_start}
-              onChange={(e) =>
-                setFilter({ ...filter, tanggal_start: e.target.value })
-              }
-            />
-          </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Sampai Tanggal</label>
-            <input
-              type="date"
-              className="form-input"
-              value={filter.tanggal_end}
-              onChange={(e) =>
-                setFilter({ ...filter, tanggal_end: e.target.value })
-              }
-            />
-          </div>
-          <div style={styles.filterActions}>
-            <button type="submit" className="btn-primary" style={styles.primaryButton}>
+        <form onSubmit={handleSearch} className="filter-form">
+          <Input
+            label="Cari Nama / NIK"
+            type="text"
+            placeholder="Ketik nama pasien atau NIK..."
+            value={filter.search}
+            onChange={(e) => setFilter({ ...filter, search: e.target.value })}
+          />
+          <Input
+            label="Dari Tanggal"
+            type="date"
+            value={filter.tanggal_start}
+            onChange={(e) =>
+              setFilter({ ...filter, tanggal_start: e.target.value })
+            }
+          />
+          <Input
+            label="Sampai Tanggal"
+            type="date"
+            value={filter.tanggal_end}
+            onChange={(e) => setFilter({ ...filter, tanggal_end: e.target.value })}
+          />
+          <div className="filter-actions">
+            <Button type="submit" variant="primary">
               Cari
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              className="btn-primary"
-              style={styles.secondaryButton}
-              onClick={handleReset}
+              variant="secondary"
+              onClick={() => {
+                const resetFilter = {
+                  search: "",
+                  tanggal_start: "",
+                  tanggal_end: "",
+                };
+                setFilter(resetFilter);
+                fetchData(resetFilter);
+              }}
             >
               Reset
-            </button>
+            </Button>
           </div>
         </form>
-      </div>
+      </Card>
 
-      {error ? (
-        <div className="error-alert" style={{ marginBottom: "1rem" }}>
-          {error}
-        </div>
-      ) : null}
+      {error && <div className="error-alert">{error}</div>}
 
+      {/* Table */}
       {loading ? (
-        <div style={styles.loadingState}>
-          <p>Memuat data persalinan...</p>
-        </div>
+        <LoadingSpinner size="lg" />
       ) : dataList.length === 0 ? (
-        <div className="auth-card" style={styles.emptyCard}>
-          <h3 style={styles.emptyTitle}>Belum ada data persalinan</h3>
-          <p className="text-muted" style={styles.emptySubtitle}>
-            {canAddData
-              ? "Silakan tambahkan data persalinan baru atau ubah filter pencarian."
-              : "Belum ada data persalinan yang dapat ditampilkan."}
-          </p>
-          {canAddData ? (
-            <button
-              onClick={() => navigate("/persalinan/add")}
-              className="btn-primary"
-              style={styles.primaryButton}
-            >
-              Input Data Pertama
-            </button>
-          ) : null}
-        </div>
+        <EmptyState
+          message={
+            canAddData
+              ? "Belum ada data persalinan. Silakan tambahkan data baru atau ubah filter pencarian."
+              : "Belum ada data persalinan yang dapat ditampilkan."
+          }
+          action={
+            canAddData ? (
+              <Button variant="primary" onClick={() => navigate("/persalinan/add")}>
+                Input Data Pertama
+              </Button>
+            ) : undefined
+          }
+        />
       ) : (
-        <div style={styles.listGrid}>
-          {dataList.map((item) => {
-            const patientName = item.pasien?.nama || item.nama_pasien || "Pasien";
-            const ibu = item.keadaan_ibu_persalinan;
-            const ibuCritical = ibu && (!ibu.baik || !ibu.hidup || ibu.hap || ibu.partus_lama || ibu.pre_eklamsi);
-
-            return (
-              <div key={item.id} className="auth-card" style={styles.dataCard}>
-                <div style={styles.cardHeader}>
-                  <div>
-                    <div style={styles.headerTopRow}>
-                      <h3 style={styles.cardTitle}>{patientName}</h3>
-                      {item.status_verifikasi ? (
-                        <StatusBadge status={item.status_verifikasi} />
-                      ) : null}
-                    </div>
-                    <p className="text-muted" style={styles.cardSubtitle}>
-                      {formatDate(item.tanggal_partus)} |{" "}
-                      {item.practice_place?.nama_praktik || "-"}
-                    </p>
-                  </div>
-                  <span
-                    style={{
-                      ...styles.conditionBadge,
-                      ...(ibuCritical ? styles.conditionAlert : styles.conditionSafe),
-                    }}
-                  >
-                    {ibuCritical ? "Perlu perhatian" : "Kondisi stabil"}
-                  </span>
-                </div>
-
-                <div style={styles.metaGrid}>
-                  <div style={styles.metaCard}>
-                    <span style={styles.metaLabel}>Riwayat GPA</span>
-                    <span style={styles.metaValue}>
-                      G{item.gravida} P{item.para} A{item.abortus}
-                    </span>
-                  </div>
-                  <div style={styles.metaCard}>
-                    <span style={styles.metaLabel}>Data Bayi</span>
-                    <span style={styles.metaValue}>
-                      {getBayiSummary(item.keadaan_bayi_persalinan)}
-                    </span>
-                  </div>
-                  <div style={styles.metaCard}>
-                    <span style={styles.metaLabel}>Kondisi Ibu</span>
-                    <span style={styles.metaValue}>
-                      {getIbuSummary(item.keadaan_ibu_persalinan)}
-                    </span>
-                  </div>
-                </div>
-
-                <div style={styles.cardFooter}>
-                  <button
-                    onClick={() => navigate(`/persalinan/${item.id}`)}
-                    className="btn-primary"
-                    style={styles.inlinePrimaryAction}
-                  >
-                    Detail
-                  </button>
-                  {canEditPersalinan(user, item) ? (
-                    <button
-                      onClick={() => navigate(`/persalinan/${item.id}/edit`)}
-                      className="btn-primary"
-                      style={styles.inlineSecondaryAction}
-                    >
-                      Edit
-                    </button>
-                  ) : null}
-                  {canDeletePersalinan(user, item) ? (
-                    <button
-                      onClick={() =>
-                        setDeleteDialog({
-                          isOpen: true,
-                          dataId: item.id,
-                          patientName,
-                        })
-                      }
-                      className="btn-primary"
-                      style={styles.inlineDangerAction}
-                    >
-                      Hapus
-                    </button>
-                  ) : null}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <Table columns={columns} data={dataList} className="persalinan-list-table" />
       )}
 
-      <ConfirmDialog
+      {/* Delete Confirmation Modal */}
+      <Modal
         isOpen={deleteDialog.isOpen}
         onClose={() =>
           setDeleteDialog({ isOpen: false, dataId: null, patientName: "" })
         }
         onConfirm={handleDelete}
         title="Hapus Data"
-        message={`Apakah Anda yakin ingin menghapus data persalinan "${deleteDialog.patientName}"?\nPERINGATAN: Menghapus data ini juga akan menghapus data ibu dan anak yang terkait!`}
+        message={`Apakah Anda yakin ingin menghapus data persalinan "${deleteDialog.patientName}"?\n\nPERINGATAN: Menghapus data ini juga akan menghapus data ibu dan anak yang terkait!`}
         confirmText="Hapus Permanen"
         cancelText="Batal"
         type="danger"
       />
     </div>
   );
-};
-
-const styles = {
-  header: {
-    gap: "1rem",
-    flexWrap: "wrap",
-  },
-  pageTitle: {
-    marginBottom: "0.35rem",
-  },
-  pageSubtitle: {
-    margin: 0,
-  },
-  headerActions: {
-    display: "flex",
-    gap: "0.75rem",
-    flexWrap: "wrap",
-  },
-  primaryButton: {
-    width: "auto",
-    minWidth: "140px",
-    paddingInline: "1rem",
-  },
-  secondaryButton: {
-    width: "auto",
-    minWidth: "120px",
-    paddingInline: "1rem",
-    backgroundColor: "transparent",
-    border: "1px solid var(--glass-border)",
-  },
-  summaryGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "1rem",
-    marginBottom: "1.5rem",
-  },
-  summaryCard: {
-    maxWidth: "none",
-    margin: 0,
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.45rem",
-  },
-  summaryLabel: {
-    fontSize: "0.78rem",
-    textTransform: "uppercase",
-    letterSpacing: "0.06em",
-    color: "var(--color-text-muted)",
-  },
-  summaryValue: {
-    fontSize: "1.55rem",
-    lineHeight: 1.2,
-  },
-  filterCard: {
-    maxWidth: "none",
-    margin: "0 0 1.5rem",
-  },
-  filterHeader: {
-    marginBottom: "1rem",
-  },
-  sectionTitle: {
-    marginBottom: "0.35rem",
-    fontSize: "1.1rem",
-  },
-  sectionSubtitle: {
-    margin: 0,
-  },
-  filterForm: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-    gap: "1rem",
-    alignItems: "end",
-  },
-  filterActions: {
-    display: "flex",
-    gap: "0.75rem",
-    flexWrap: "wrap",
-  },
-  loadingState: {
-    textAlign: "center",
-    padding: "3rem",
-  },
-  emptyCard: {
-    maxWidth: "none",
-    margin: 0,
-    textAlign: "center",
-    padding: "3rem",
-  },
-  emptyTitle: {
-    marginBottom: "0.6rem",
-  },
-  emptySubtitle: {
-    marginBottom: "1.25rem",
-  },
-  listGrid: {
-    display: "grid",
-    gap: "1rem",
-  },
-  dataCard: {
-    maxWidth: "none",
-    margin: 0,
-  },
-  cardHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: "1rem",
-    marginBottom: "1rem",
-    flexWrap: "wrap",
-  },
-  headerTopRow: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.75rem",
-    flexWrap: "wrap",
-    marginBottom: "0.35rem",
-  },
-  cardTitle: {
-    fontSize: "1.2rem",
-    marginBottom: 0,
-  },
-  cardSubtitle: {
-    margin: 0,
-  },
-  conditionBadge: {
-    display: "inline-flex",
-    alignItems: "center",
-    borderRadius: "999px",
-    padding: "0.45rem 0.8rem",
-    fontSize: "0.8rem",
-    fontWeight: "700",
-    whiteSpace: "nowrap",
-  },
-  conditionAlert: {
-    background: "rgba(239, 68, 68, 0.18)",
-    border: "1px solid rgba(248, 113, 113, 0.35)",
-    color: "#fca5a5",
-  },
-  conditionSafe: {
-    background: "rgba(16, 185, 129, 0.16)",
-    border: "1px solid rgba(52, 211, 153, 0.35)",
-    color: "#6ee7b7",
-  },
-  metaGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
-    gap: "0.85rem",
-  },
-  metaCard: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.35rem",
-    padding: "0.95rem 1rem",
-    borderRadius: "14px",
-    background: "rgba(255,255,255,0.03)",
-    border: "1px solid rgba(255,255,255,0.06)",
-  },
-  metaLabel: {
-    fontSize: "0.78rem",
-    textTransform: "uppercase",
-    letterSpacing: "0.05em",
-    color: "var(--color-text-muted)",
-  },
-  metaValue: {
-    lineHeight: 1.5,
-    fontWeight: "600",
-  },
-  cardFooter: {
-    marginTop: "1rem",
-    paddingTop: "1rem",
-    borderTop: "1px solid rgba(255,255,255,0.08)",
-    display: "flex",
-    gap: "0.75rem",
-    flexWrap: "wrap",
-  },
-  inlinePrimaryAction: {
-    width: "auto",
-    minWidth: "110px",
-    paddingInline: "1rem",
-    backgroundColor: "rgba(59, 130, 246, 0.22)",
-    border: "1px solid rgba(96, 165, 250, 0.45)",
-  },
-  inlineSecondaryAction: {
-    width: "auto",
-    minWidth: "110px",
-    paddingInline: "1rem",
-    backgroundColor: "rgba(168, 85, 247, 0.22)",
-    border: "1px solid rgba(168, 85, 247, 0.45)",
-  },
-  inlineDangerAction: {
-    width: "auto",
-    minWidth: "110px",
-    paddingInline: "1rem",
-    backgroundColor: "rgba(239, 68, 68, 0.2)",
-    border: "1px solid rgba(248, 113, 113, 0.45)",
-  },
 };
 
 export default PersalinanList;

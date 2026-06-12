@@ -1,0 +1,17 @@
+/**
+ * MainLayout Component Styles
+ * 
+ * Root layout container for the application.
+ */
+
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--color-canvas); /* #faf9f5 - cream canvas */
+}
+
+/* Ensure layout fills viewport */
+.app-layout,
+.app-layout > * {
+  box-sizing: border-box;
+}

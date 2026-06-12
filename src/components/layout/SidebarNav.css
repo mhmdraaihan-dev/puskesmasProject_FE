@@ -1,0 +1,46 @@
+/**
+ * SidebarNav Component Styles
+ * 
+ * Main navigation container with scrollable area.
+ */
+
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--spacing-md); /* 16px */
+  
+  /* Custom scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(230, 223, 216, 0.2) transparent;
+}
+
+/* Webkit scrollbar styling */
+.sidebar-nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(230, 223, 216, 0.2);
+  border-radius: 3px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(230, 223, 216, 0.3);
+}
+
+/* Adjust padding when sidebar is collapsed */
+.sidebar[data-collapsed="true"] .sidebar-nav {
+  padding: var(--spacing-sm); /* 12px when collapsed */
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+  .sidebar-nav {
+    padding: var(--spacing-lg); /* More padding on mobile for easier scrolling */
+  }
+}

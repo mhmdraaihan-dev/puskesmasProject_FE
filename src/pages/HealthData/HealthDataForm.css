@@ -1,0 +1,165 @@
+/* HealthDataForm.css - Health Data Form Page */
+
+.health-data-form-page {
+  max-width: 100%;
+}
+
+/* Form Layout */
+.health-data-form-page .form-layout {
+  display: grid;
+  gap: 1.5rem;
+}
+
+/* Section Header */
+.health-data-form-page .section-header {
+  margin-bottom: 1.5rem;
+}
+
+.health-data-form-page .section-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+}
+
+.health-data-form-page .section-subtitle {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+/* Form Grid - 2 Column Layout */
+.health-data-form-page .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.health-data-form-page .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.health-data-form-page .form-group--full {
+  grid-column: 1 / -1;
+}
+
+/* Form Labels and Inputs */
+.health-data-form-page .form-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.health-data-form-page .required-asterisk {
+  color: var(--color-error);
+}
+
+.health-data-form-page .form-select {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--hairline-border);
+  background: var(--color-canvas);
+  color: var(--color-text);
+  font-size: 0.9375rem;
+  transition: all 0.2s ease;
+}
+
+.health-data-form-page .form-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(204, 120, 92, 0.15);
+}
+
+.health-data-form-page .form-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--hairline-border);
+  background: var(--color-canvas);
+  color: var(--color-text);
+  font-size: 0.9375rem;
+  font-family: inherit;
+  resize: vertical;
+  transition: all 0.2s ease;
+}
+
+.health-data-form-page .form-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(204, 120, 92, 0.15);
+}
+
+/* Error Text */
+.health-data-form-page .error-text {
+  font-size: 0.8125rem;
+  color: var(--color-error);
+}
+
+/* Info Card */
+.health-data-form-page .info-card {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.health-data-form-page .info-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.health-data-form-page .info-title {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--color-text);
+}
+
+.health-data-form-page .info-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.health-data-form-page .info-list li {
+  margin-bottom: 0.25rem;
+}
+
+/* Form Actions */
+.health-data-form-page .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+/* Error Alert */
+.health-data-form-page .error-alert {
+  background: rgba(198, 69, 69, 0.15);
+  border: 1px solid rgba(198, 69, 69, 0.3);
+  color: var(--color-error);
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .health-data-form-page .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .health-data-form-page .section-title {
+    font-size: 1rem;
+  }
+
+  .health-data-form-page .form-actions {
+    justify-content: stretch;
+  }
+
+  .health-data-form-page .form-actions button {
+    flex: 1;
+  }
+}

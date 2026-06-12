@@ -1,0 +1,41 @@
+/* PracticePlaceList Page Styles */
+.practice-place-list-page {
+  padding: var(--spacing-6) 0;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Error Alert */
+.error-alert {
+  padding: var(--spacing-4);
+  margin-bottom: var(--spacing-5);
+  background-color: rgba(198, 69, 69, 0.15);
+  border: 1px solid var(--color-error);
+  border-radius: var(--border-radius-md);
+  color: var(--color-error);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-body-md);
+}
+
+/* Modal Actions */
+.modal-actions {
+  display: flex;
+  gap: var(--spacing-3);
+  justify-content: flex-end;
+  margin-top: var(--spacing-4);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .practice-place-list-page {
+    padding: var(--spacing-4) 0;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .modal-actions button {
+    width: 100%;
+  }
+}

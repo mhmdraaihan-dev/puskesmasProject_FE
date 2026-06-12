@@ -1,0 +1,106 @@
+/**
+ * NavGroup Component Styles
+ * 
+ * Collapsible navigation group with header and items list.
+ * Uses smooth transitions for expand/collapse animation.
+ */
+
+.nav-group {
+  margin-bottom: var(--spacing-sm); /* 12px spacing between groups */
+}
+
+.nav-group--single {
+  margin-bottom: 0;
+}
+
+/* Group header (toggle button) */
+.nav-group__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--spacing-xs) var(--spacing-md); /* 8px 16px */
+  color: rgba(250, 249, 245, 0.6); /* Muted cream color on dark */
+  font-family: var(--font-sans);
+  font-size: 0.75rem; /* 12px */
+  font-weight: 500;
+  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  text-align: left;
+}
+
+.nav-group__header:hover {
+  color: var(--color-on-dark); /* #faf9f5 */
+}
+
+.nav-group__header:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(88, 148, 56, 0.18);
+  border-radius: var(--rounded-sm); /* 6px */
+}
+
+/* Group label */
+.nav-group__label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Chevron icon */
+.nav-group__chevron {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.nav-group--expanded .nav-group__chevron {
+  transform: rotate(180deg);
+}
+
+/* Group items container */
+.nav-group__items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs); /* 4px between items */
+  padding-top: var(--spacing-xs); /* 8px */
+  overflow: visible;
+  max-height: none;
+}
+
+/* Collapsed group items */
+.nav-group:not(.nav-group--expanded) .nav-group__items {
+  display: none;
+}
+
+/* When sidebar is collapsed, show all items without group header */
+.sidebar[data-collapsed="true"] .nav-group__items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs); /* 4px */
+  padding-top: 0;
+}
+
+.sidebar[data-collapsed="true"] .nav-group {
+  margin-bottom: var(--spacing-xs); /* 8px */
+}
+
+.sidebar[data-collapsed="true"] .nav-group__header {
+  display: none; /* Hide group headers when sidebar is collapsed */
+}
+
+/* Divider between groups */
+.nav-group + .nav-group {
+  margin-top: var(--spacing-md); /* 16px spacing between groups */
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+  .nav-group__header {
+    padding: var(--spacing-sm) var(--spacing-md); /* Larger tap target */
+  }
+}

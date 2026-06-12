@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import "../../App.css";
+import PageHeader from "../../components/layout/PageHeader";
+import Card from "../../components/ui/Card";
+import Button from "../../components/Button";
+import Input from "../../components/Input";
+import Modal from "../../components/ui/Modal";
+import LoadingSpinner from "../../components/ui/LoadingSpinner";
+import EmptyState from "../../components/ui/EmptyState";
 import {
   getImunisasiList,
   getKBList,
@@ -12,11 +18,10 @@ import {
   verifyKehamilan,
   verifyPersalinan,
 } from "../../services/api";
-import {
-  isBidanDesa,
-  VERIFICATION_STATUS,
-} from "../../utils/roleHelpers";
+import { VERIFICATION_STATUS } from "../../utils/roleHelpers";
 import { formatDate } from "../../utils/dateFormatter";
+import "../../styles/design-system.css";
+import "./PendingDataList.css";
 
 const moduleOptions = [
   { value: "ALL", label: "Semua Modul" },
@@ -92,11 +97,8 @@ const PendingDataList = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    if (!isBidanDesa(user)) {
-      navigate("/");
-      return;
-    }
     fetchPendingData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, navigate]);
 
   const fetchPendingData = async () => {
@@ -168,37 +170,39 @@ const PendingDataList = () => {
     }
   };
 
-  const filteredData = useMemo(() => {
-    return pendingData.filter((item) => {
-      const matchesModule =
-        filters.module === "ALL" || item.type === filters.module;
-      const searchValue = filters.search.trim().toLowerCase();
-      const matchesSearch =
-        !searchValue ||
-        item.pasien_nama?.toLowerCase().includes(searchValue) ||
-        item.pasien_nik?.toLowerCase().includes(searchValue);
-      const matchesVillage =
-        !filters.village ||
-        item.lokasi_desa?.toLowerCase().includes(filters.village.toLowerCase());
+  const filteredData = useMemo(
+    () =>
+      pendingData.filter((item) => {
+        const matchesModule =
+          filters.module === "ALL" || item.type === filters.module;
+        const searchValue = filters.search.trim().toLowerCase();
+        const matchesSearch =
+          !searchValue ||
+          item.pasien_nama?.toLowerCase().includes(searchValue) ||
+          item.pasien_nik?.toLowerCase().includes(searchValue);
+        const matchesVillage =
+          !filters.village ||
+          item.lokasi_desa?.toLowerCase().includes(filters.village.toLowerCase());
 
-      return matchesModule && matchesSearch && matchesVillage;
-    });
-  }, [filters, pendingData]);
+        return matchesModule && matchesSearch && matchesVillage;
+      }),
+    [filters, pendingData],
+  );
 
-  const stats = useMemo(() => {
-    const summary = {
+  const stats = useMemo(
+    () => ({
       total: filteredData.length,
       kehamilan: filteredData.filter((item) => item.type === "KEHAMILAN").length,
       persalinan: filteredData.filter((item) => item.type === "PERSALINAN").length,
       kb: filteredData.filter((item) => item.type === "KB").length,
       imunisasi: filteredData.filter((item) => item.type === "IMUNISASI").length,
-    };
-
-    return summary;
-  }, [filteredData]);
+    }),
+    [filteredData],
+  );
 
   const performVerification = async (id, type, status, alasan = "") => {
     const payload = { status, alasan };
+
     switch (type) {
       case "KEHAMILAN":
         return verifyKehamilan(id, payload);
@@ -220,19 +224,12 @@ const PendingDataList = () => {
 
     try {
       setVerifyLoadingId(`${type}-${id}`);
-      await performVerification(
-        id,
-        type,
-        VERIFICATION_STATUS.APPROVED,
-        "Disetujui",
-      );
+      await performVerification(id, type, VERIFICATION_STATUS.APPROVED, "Disetujui");
       alert("Data berhasil disetujui");
       await fetchPendingData();
     } catch (err) {
       console.error(err);
-      alert(
-        err.response?.data?.message || err.message || "Gagal menyetujui data",
-      );
+      alert(err.response?.data?.message || err.message || "Gagal menyetujui data");
     } finally {
       setVerifyLoadingId(null);
     }
@@ -265,62 +262,76 @@ const PendingDataList = () => {
   };
 
   return (
-    <div className="dashboard page-shell">
-      <div className="dashboard-header" style={styles.header}>
-        <div className="page-intro">
-          <div className="page-kicker">Verification Queue</div>
-          <h2 className="page-title" style={styles.pageTitle}>Verifikasi Data Kesehatan</h2>
-          <p className="page-subtitle" style={styles.pageSubtitle}>
-            Daftar pelayanan yang menunggu persetujuan verifier
-          </p>
-        </div>
-        <div className="page-actions" style={styles.headerActions}>
-          <button
-            onClick={() => navigate("/")}
-            className="btn-secondary"
-            style={styles.secondaryButton}
-          >
+    <div className="pending-data-list-page">
+      <PageHeader
+        title="Verifikasi Data Kesehatan"
+        subtitle="Daftar pelayanan yang menunggu persetujuan verifier"
+        actions={
+          <Button variant="secondary" onClick={() => navigate("/")}>
             Kembali
-          </button>
-        </div>
-      </div>
+          </Button>
+        }
+      />
 
-      <div style={styles.summaryGrid}>
-        <div className="stat-card" style={styles.summaryCard}>
-          <span style={styles.summaryLabel}>Total Pending</span>
-          <strong style={styles.summaryValue}>{stats.total}</strong>
-        </div>
-        <div className="stat-card" style={styles.summaryCard}>
-          <span style={styles.summaryLabel}>Kehamilan</span>
-          <strong style={styles.summaryValue}>{stats.kehamilan}</strong>
-        </div>
-        <div className="stat-card" style={styles.summaryCard}>
-          <span style={styles.summaryLabel}>Persalinan</span>
-          <strong style={styles.summaryValue}>{stats.persalinan}</strong>
-        </div>
-        <div className="stat-card" style={styles.summaryCard}>
-          <span style={styles.summaryLabel}>KB / Imunisasi</span>
-          <strong style={styles.summaryValue}>
+      <div className="stats-section">
+        <Card
+          variant="surface-card"
+          padding="lg"
+          className="pending-data-list__summary-card"
+        >
+          <div className="stat-label">Total Pending</div>
+          <div className="stat-value">{stats.total}</div>
+          <div className="stat-note">menunggu verifikasi</div>
+        </Card>
+        <Card
+          variant="surface-card"
+          padding="lg"
+          className="pending-data-list__summary-card"
+        >
+          <div className="stat-label">Kehamilan</div>
+          <div className="stat-value">{stats.kehamilan}</div>
+          <div className="stat-note">pemeriksaan</div>
+        </Card>
+        <Card
+          variant="surface-card"
+          padding="lg"
+          className="pending-data-list__summary-card"
+        >
+          <div className="stat-label">Persalinan</div>
+          <div className="stat-value">{stats.persalinan}</div>
+          <div className="stat-note">persalinan</div>
+        </Card>
+        <Card
+          variant="surface-card"
+          padding="lg"
+          className="pending-data-list__summary-card"
+        >
+          <div className="stat-label">KB / Imunisasi</div>
+          <div className="stat-value">
             {stats.kb} / {stats.imunisasi}
-          </strong>
-        </div>
+          </div>
+          <div className="stat-note">kb / imunisasi</div>
+        </Card>
       </div>
 
-      <div className="content-card-light" style={styles.filterCard}>
-        <div style={styles.filterHeader}>
-          <div>
-            <h3 style={styles.sectionTitle}>Filter Verifikasi</h3>
-            <p className="text-muted" style={styles.sectionSubtitle}>
-              Persempit antrean verifikasi berdasarkan modul, pasien, atau desa
-            </p>
-          </div>
-        </div>
+      <Card
+        variant="surface-card"
+        padding="xl"
+        className="filter-card pending-data-list__filter-card"
+      >
+        <h3 className="filter-title">Filter Verifikasi</h3>
+        <p className="filter-subtitle">
+          Persempit antrean verifikasi berdasarkan modul, pasien, atau desa
+        </p>
 
-        <div style={styles.filterGrid}>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Modul</label>
+        <div className="filter-form">
+          <div className="form-group pending-data-list__module-field">
+            <label className="input-label" htmlFor="pending-module-filter">
+              Modul
+            </label>
             <select
-              className="form-input"
+              id="pending-module-filter"
+              className="form-select"
               value={filters.module}
               onChange={(e) => setFilters({ ...filters, module: e.target.value })}
             >
@@ -331,110 +342,99 @@ const PendingDataList = () => {
               ))}
             </select>
           </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Cari Pasien / NIK</label>
-            <input
-              type="text"
-              className="form-input"
-              placeholder="Ketik nama pasien atau NIK..."
-              value={filters.search}
-              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+          <Input
+            label="Cari Pasien / NIK"
+            type="text"
+            placeholder="Ketik nama pasien atau NIK..."
+            value={filters.search}
+            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+          />
+          <Input
+            label="Lokasi Desa"
+            type="text"
+            placeholder="Cari nama desa..."
+            value={filters.village}
+            onChange={(e) => setFilters({ ...filters, village: e.target.value })}
+          />
+        </div>
+      </Card>
+
+      {error && <div className="error-alert">{error}</div>}
+
+      <Card
+        variant="surface-card"
+        padding="xl"
+        className="table-card pending-data-list__table-card"
+      >
+        <h3 className="table-title">Antrean Verifikasi</h3>
+        <p className="table-subtitle">
+          {loading
+            ? "Memuat data pending..."
+            : `${filteredData.length} data siap direview`}
+        </p>
+
+        <div className="table-wrapper">
+          {loading ? (
+            <LoadingSpinner size="lg" />
+          ) : filteredData.length === 0 ? (
+            <EmptyState
+              className="pending-data-list__empty-state"
+              message="Tidak ada data yang menunggu verifikasi"
             />
-          </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Lokasi Desa</label>
-            <input
-              type="text"
-              className="form-input"
-              placeholder="Cari nama desa..."
-              value={filters.village}
-              onChange={(e) => setFilters({ ...filters, village: e.target.value })}
-            />
-          </div>
-        </div>
-      </div>
-
-      {error ? (
-        <div className="error-alert" style={{ marginBottom: "1rem" }}>
-          {error}
-        </div>
-      ) : null}
-
-      <div className="content-card-light" style={styles.tableCard}>
-        <div style={styles.tableHeader}>
-          <div>
-            <h3 style={styles.sectionTitle}>Antrean Verifikasi</h3>
-            <p className="text-muted" style={styles.sectionSubtitle}>
-              {loading
-                ? "Memuat data pending..."
-                : `${filteredData.length} data siap direview`}
-            </p>
-          </div>
-        </div>
-
-        <div style={styles.tableWrapper}>
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.tableHead}>Pasien</th>
-                <th style={styles.tableHead}>Modul</th>
-                <th style={styles.tableHead}>Tanggal</th>
-                <th style={styles.tableHead}>Desa</th>
-                <th style={styles.tableHead}>Bidan Praktik</th>
-                <th style={styles.tableHead}>Status</th>
-                <th style={styles.tableHead}>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
+          ) : (
+            <table className="data-table">
+              <thead>
                 <tr>
-                  <td colSpan="7" style={styles.emptyRow}>
-                    Memuat data pending...
-                  </td>
+                  <th>Pasien</th>
+                  <th>Modul</th>
+                  <th>Tanggal</th>
+                  <th>Desa</th>
+                  <th>Bidan Praktik</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
                 </tr>
-              ) : filteredData.length === 0 ? (
-                <tr>
-                  <td colSpan="7" style={styles.emptyRow}>
-                    Tidak ada data yang menunggu verifikasi
-                  </td>
-                </tr>
-              ) : (
-                filteredData.map((item) => {
+              </thead>
+              <tbody>
+                {filteredData.map((item) => {
                   const rowLoading = verifyLoadingId === `${item.type}-${item.id}`;
+
                   return (
-                    <tr key={`${item.type}-${item.id}`} style={styles.tableRow}>
-                      <td style={styles.tableCellPatient}>
-                        <div style={styles.patientName}>{item.pasien_nama}</div>
-                        <div style={styles.patientMeta}>NIK {item.pasien_nik}</div>
+                    <tr key={`${item.type}-${item.id}`}>
+                      <td className="patient-cell">
+                        <div className="patient-name">{item.pasien_nama}</div>
+                        <div className="patient-meta">NIK {item.pasien_nik}</div>
                       </td>
-                      <td style={styles.tableCell}>{getTypeLabel(item.type)}</td>
-                      <td style={styles.tableCell}>
-                        {formatDate(item.service_date || item.tanggal)}
+                      <td>{getTypeLabel(item.type)}</td>
+                      <td>{formatDate(item.service_date || item.tanggal)}</td>
+                      <td>{item.lokasi_desa || "-"}</td>
+                      <td>{item.bidan_praktik || "-"}</td>
+                      <td>
+                        <span className="pending-badge">Pending</span>
                       </td>
-                      <td style={styles.tableCell}>{item.lokasi_desa || "-"}</td>
-                      <td style={styles.tableCell}>{item.bidan_praktik || "-"}</td>
-                      <td style={styles.tableCell}>
-                        <span style={styles.pendingBadge}>Pending</span>
-                      </td>
-                      <td style={styles.tableCellAction}>
-                        <button
+                      <td className="action-cell">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="pending-data-list__action-btn"
                           onClick={() => navigate(getDetailPath(item.type, item.id))}
-                          className="btn-primary"
-                          style={styles.detailButton}
                         >
                           Detail
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          variant="success"
+                          size="sm"
+                          className="pending-data-list__action-btn"
                           onClick={() =>
                             handleApprove(item.id, item.type, item.pasien_nama)
                           }
-                          className="btn-primary"
-                          style={styles.approveButton}
                           disabled={rowLoading}
                         >
                           {rowLoading ? "Proses..." : "Setujui"}
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          className="pending-data-list__action-btn"
                           onClick={() =>
                             setRejectDialog({
                               isOpen: true,
@@ -443,256 +443,57 @@ const PendingDataList = () => {
                               patientName: item.pasien_nama,
                             })
                           }
-                          className="btn-primary"
-                          style={styles.rejectButton}
                           disabled={rowLoading}
                         >
                           Tolak
-                        </button>
+                        </Button>
                       </td>
                     </tr>
                   );
-                })
-              )}
-            </tbody>
-          </table>
+                })}
+              </tbody>
+            </table>
+          )}
         </div>
-      </div>
+      </Card>
 
-      {rejectDialog.isOpen ? (
-        <div style={styles.modalOverlay}>
-          <div className="content-card-light" style={styles.modalCard}>
-            <h3 style={styles.modalTitle}>Tolak Data Kesehatan</h3>
-            <p className="text-muted" style={styles.modalText}>
-              Pasien: <strong>{rejectDialog.patientName}</strong>
-            </p>
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Alasan Penolakan *</label>
-              <textarea
-                className="form-input"
-                rows="5"
-                placeholder="Jelaskan alasan penolakan data ini..."
-                value={rejectReason}
-                onChange={(e) => setRejectReason(e.target.value)}
-              />
-            </div>
-            <div style={styles.modalActions}>
-              <button
-                onClick={() => {
-                  setRejectDialog({
-                    isOpen: false,
-                    id: null,
-                    type: null,
-                    patientName: "",
-                  });
-                  setRejectReason("");
-                }}
-                className="btn-secondary"
-                style={styles.secondaryButton}
-              >
-                Batal
-              </button>
-              <button
-                onClick={handleReject}
-                className="btn-primary"
-                style={styles.rejectButton}
-                disabled={!rejectReason.trim()}
-              >
-                Tolak Data
-              </button>
-            </div>
+      <Modal
+        isOpen={rejectDialog.isOpen}
+        onClose={() => {
+          setRejectDialog({
+            isOpen: false,
+            id: null,
+            type: null,
+            patientName: "",
+          });
+          setRejectReason("");
+        }}
+        onConfirm={handleReject}
+        title="Tolak Data Kesehatan"
+        message={`Pasien: ${rejectDialog.patientName}`}
+        confirmText="Tolak Data"
+        cancelText="Batal"
+        type="danger"
+        confirmDisabled={!rejectReason.trim()}
+      >
+        <Card variant="surface-card" padding="md">
+          <div className="form-group">
+            <label className="form-label" htmlFor="reject-reason">
+              Alasan Penolakan <span className="required-asterisk">*</span>
+            </label>
+            <textarea
+              id="reject-reason"
+              className="form-textarea"
+              rows="5"
+              placeholder="Jelaskan alasan penolakan data ini..."
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+            />
           </div>
-        </div>
-      ) : null}
+        </Card>
+      </Modal>
     </div>
   );
-};
-
-const styles = {
-  header: {
-    gap: "1rem",
-    flexWrap: "wrap",
-  },
-  pageTitle: {
-    marginBottom: "0.35rem",
-  },
-  pageSubtitle: {
-    margin: 0,
-  },
-  headerActions: {
-    display: "flex",
-    gap: "0.75rem",
-    flexWrap: "wrap",
-  },
-  secondaryButton: {
-    width: "auto",
-    minWidth: "120px",
-    paddingInline: "1rem",
-  },
-  summaryGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "1rem",
-    marginBottom: "1.5rem",
-  },
-  summaryCard: {
-    maxWidth: "none",
-    margin: 0,
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.45rem",
-  },
-  summaryLabel: {
-    fontSize: "0.78rem",
-    textTransform: "uppercase",
-    letterSpacing: "0.06em",
-    color: "var(--color-text-muted)",
-  },
-  summaryValue: {
-    fontSize: "1.55rem",
-    lineHeight: 1.2,
-  },
-  filterCard: {
-    maxWidth: "none",
-    margin: "0 0 1.5rem",
-  },
-  filterHeader: {
-    marginBottom: "1rem",
-  },
-  sectionTitle: {
-    marginBottom: "0.35rem",
-    fontSize: "1.1rem",
-  },
-  sectionSubtitle: {
-    margin: 0,
-  },
-  filterGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "1rem",
-  },
-  tableCard: {
-    maxWidth: "none",
-    margin: 0,
-    padding: "1.25rem",
-  },
-  tableHeader: {
-    marginBottom: "1rem",
-  },
-  tableWrapper: {
-    overflowX: "auto",
-  },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    minWidth: "980px",
-  },
-  tableHead: {
-    padding: "0.9rem 0.85rem",
-    textAlign: "left",
-    borderBottom: "1px solid rgba(73, 62, 50, 0.1)",
-    color: "var(--color-text-muted)",
-    fontSize: "0.8rem",
-    textTransform: "uppercase",
-    letterSpacing: "0.05em",
-    background: "rgba(255,255,255,0.56)",
-  },
-  tableRow: {
-    borderBottom: "1px solid rgba(73, 62, 50, 0.06)",
-  },
-  tableCell: {
-    padding: "1rem 0.85rem",
-    verticalAlign: "top",
-  },
-  tableCellPatient: {
-    padding: "1rem 0.85rem",
-    verticalAlign: "top",
-    minWidth: "220px",
-  },
-  tableCellAction: {
-    padding: "1rem 0.85rem",
-    verticalAlign: "top",
-    minWidth: "240px",
-    display: "flex",
-    gap: "0.5rem",
-    flexWrap: "wrap",
-  },
-  patientName: {
-    fontWeight: "700",
-    marginBottom: "0.2rem",
-  },
-  patientMeta: {
-    color: "var(--color-text-muted)",
-    fontSize: "0.85rem",
-  },
-  pendingBadge: {
-    display: "inline-flex",
-    alignItems: "center",
-    borderRadius: "999px",
-    padding: "0.35rem 0.7rem",
-    background: "rgba(251, 191, 36, 0.18)",
-    border: "1px solid rgba(251, 191, 36, 0.32)",
-    color: "#8d6119",
-    fontSize: "0.78rem",
-    fontWeight: "700",
-  },
-  detailButton: {
-    width: "auto",
-    minWidth: "70px",
-    paddingInline: "0.9rem",
-    backgroundColor: "rgba(93, 184, 166, 0.16)",
-    border: "1px solid rgba(93, 184, 166, 0.3)",
-    color: "#236b5d",
-  },
-  approveButton: {
-    width: "auto",
-    minWidth: "86px",
-    paddingInline: "0.9rem",
-    backgroundColor: "rgba(93, 184, 114, 0.16)",
-    border: "1px solid rgba(93, 184, 114, 0.28)",
-    color: "#2f8c4b",
-  },
-  rejectButton: {
-    width: "auto",
-    minWidth: "78px",
-    paddingInline: "0.9rem",
-    backgroundColor: "rgba(198, 69, 69, 0.12)",
-    border: "1px solid rgba(198, 69, 69, 0.24)",
-    color: "#a13a3a",
-  },
-  emptyRow: {
-    textAlign: "center",
-    padding: "3rem 1rem",
-    color: "var(--color-text-muted)",
-  },
-  modalOverlay: {
-    position: "fixed",
-    inset: 0,
-    backgroundColor: "rgba(61, 61, 58, 0.3)",
-    backdropFilter: "blur(10px)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: "1rem",
-    zIndex: 1000,
-  },
-  modalCard: {
-    width: "100%",
-    maxWidth: "520px",
-  },
-  modalTitle: {
-    marginBottom: "0.5rem",
-  },
-  modalText: {
-    margin: "0 0 1rem",
-  },
-  modalActions: {
-    display: "flex",
-    justifyContent: "flex-end",
-    gap: "0.75rem",
-    flexWrap: "wrap",
-    marginTop: "1rem",
-  },
 };
 
 export default PendingDataList;

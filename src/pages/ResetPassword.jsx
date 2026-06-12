@@ -3,7 +3,12 @@ import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { resetPasswordByAdmin, getUsers } from "../services/api";
 import { useAuth } from "../context/AuthContext";
-import "../App.css";
+import PageHeader from "../components/layout/PageHeader";
+import Card from "../components/ui/Card";
+import Button from "../components/Button";
+import Input from "../components/Input";
+import "../styles/design-system.css";
+import "./ChangePassword.css";
 
 const ResetPassword = () => {
   const { userId } = useParams();
@@ -76,131 +81,101 @@ const ResetPassword = () => {
   const isAdmin = currentUser?.role === "ADMIN";
 
   return (
-    <div className="dashboard">
-      <div className="dashboard-header">
-        <div>
-          <h2>Reset Password (Admin)</h2>
-          <p className="text-muted">
-            {targetUser
-              ? `Reset password untuk: ${targetUser.full_name}`
-              : "Reset user password"}
-          </p>
-        </div>
-        <div>
-          <button
-            onClick={() => navigate("/")}
-            className="btn-primary"
-            style={{
-              backgroundColor: "transparent",
-              border: "1px solid var(--glass-border)",
-            }}
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
+    <div className="change-password-page">
+      <PageHeader
+        heading={`Reset Password - ${targetUser?.full_name || "User"}`}
+        actions={
+          <Button variant="secondary" onClick={() => navigate("/")}>
+            Batal
+          </Button>
+        }
+      />
 
-      <div
-        className="auth-card"
-        style={{ maxWidth: "500px", margin: "0 auto" }}
-      >
-        {!isAdmin && (
-          <div
-            style={{
-              background: "rgba(251, 191, 36, 0.2)",
-              border: "1px solid rgba(251, 191, 36, 0.4)",
-              color: "#fbbf24",
-              padding: "1rem",
-              borderRadius: "8px",
-              marginBottom: "1rem",
-            }}
-          >
-            ⚠️ Warning: This feature is intended for ADMIN users only.
-          </div>
-        )}
+      <div className="password-form-container">
+        <Card variant="surface-dark" padding="xl">
+          {!isAdmin && (
+            <div
+              className="warning-alert"
+              style={{
+                marginBottom: "var(--spacing-5)",
+                padding: "var(--spacing-4)",
+                background: "rgba(212, 160, 23, 0.15)",
+                border: "1px solid var(--color-warning)",
+                borderRadius: "var(--border-radius-md)",
+                color: "var(--color-warning)",
+              }}
+            >
+              ⚠️ Peringatan: Fitur ini hanya untuk ADMIN.
+            </div>
+          )}
 
-        {error && <div className="error-alert">{error}</div>}
+          {error && (
+            <div
+              className="error-alert"
+              style={{ marginBottom: "var(--spacing-5)" }}
+            >
+              {error}
+            </div>
+          )}
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="form-group">
-            <label className="form-label" htmlFor="new_password">
-              New Password
-            </label>
-            <input
-              id="new_password"
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Input
+              label="Password Baru"
               type="password"
-              className="form-input"
-              placeholder="Enter new password (min. 6 characters)"
+              required
+              placeholder="Minimal 6 karakter"
+              error={errors.new_password?.message}
               {...register("new_password", {
-                required: "New password is required",
+                required: "Password baru wajib diisi",
                 minLength: {
                   value: 6,
-                  message: "Password must be at least 6 characters",
+                  message: "Password minimal 6 karakter",
                 },
               })}
             />
-            {errors.new_password && (
-              <span className="error-message">
-                {errors.new_password.message}
-              </span>
-            )}
-          </div>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="confirm_password">
-              Confirm New Password
-            </label>
-            <input
-              id="confirm_password"
+            <Input
+              label="Konfirmasi Password Baru"
               type="password"
-              className="form-input"
-              placeholder="Re-enter new password"
+              required
+              placeholder="Ulangi password baru"
+              error={errors.confirm_password?.message}
               {...register("confirm_password", {
-                required: "Please confirm the password",
+                required: "Konfirmasi password wajib diisi",
                 validate: (value) =>
-                  value === newPassword || "Passwords do not match",
+                  value === newPassword || "Password tidak cocok",
               })}
             />
-            {errors.confirm_password && (
-              <span className="error-message">
-                {errors.confirm_password.message}
-              </span>
-            )}
-          </div>
 
-          <div style={{ marginTop: "2rem" }}>
-            <button type="submit" disabled={loading} className="btn-primary">
-              {loading ? "Resetting Password..." : "Reset Password"}
-            </button>
-          </div>
-
-          <div
-            style={{
-              marginTop: "1rem",
-              padding: "1rem",
-              background: "rgba(239, 68, 68, 0.1)",
-              borderRadius: "8px",
-              border: "1px solid rgba(239, 68, 68, 0.3)",
-            }}
-          >
-            <p style={{ fontSize: "0.875rem", margin: 0, color: "#fca5a5" }}>
-              <strong>🔐 Admin Reset Password:</strong>
-            </p>
-            <ul
+            <div
+              className="info-box"
               style={{
-                fontSize: "0.875rem",
-                marginTop: "0.5rem",
-                paddingLeft: "1.5rem",
-                color: "#fca5a5",
+                marginTop: "var(--spacing-5)",
+                background: "rgba(198, 69, 69, 0.1)",
+                border: "1px solid rgba(198, 69, 69, 0.3)",
               }}
             >
-              <li>No old password required</li>
-              <li>Use this when user forgets their password</li>
-              <li>Minimum 6 characters</li>
-              <li>Inform the user of their new password after reset</li>
-            </ul>
-          </div>
-        </form>
+              <p className="info-title" style={{ color: "var(--color-error)" }}>
+                🔐 Admin Reset Password
+              </p>
+              <ul
+                className="info-list"
+                style={{ color: "var(--color-text-primary-dark)" }}
+              >
+                <li>Tidak memerlukan password lama</li>
+                <li>Gunakan ketika user lupa password</li>
+                <li>Minimal 6 karakter</li>
+                <li>Informasikan password baru kepada user setelah reset</li>
+              </ul>
+            </div>
+
+            <div style={{ marginTop: "var(--spacing-5)" }}>
+              <Button type="submit" variant="primary" disabled={loading}>
+                {loading ? "Mereset Password..." : "Reset Password"}
+              </Button>
+            </div>
+          </form>
+        </Card>
       </div>
     </div>
   );

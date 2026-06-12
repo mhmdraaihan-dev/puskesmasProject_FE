@@ -1,0 +1,161 @@
+.imunisasi-form-page {
+  padding: var(--spacing-xl) 0;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.imunisasi-form-page .form-layout {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.imunisasi-form__section-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(240, 245, 232, 0.95)) !important;
+  border: 1px solid rgba(77, 122, 44, 0.12);
+  border-radius: 24px;
+  box-shadow: 0 24px 44px rgba(35, 51, 24, 0.08);
+}
+
+.imunisasi-form-page .section-header {
+  margin-bottom: 1.5rem;
+}
+
+.imunisasi-form-page .section-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.35rem, 2vw, 1.7rem);
+  font-weight: 600;
+  color: var(--color-ink);
+  margin-bottom: 0.5rem;
+}
+
+.imunisasi-form-page .section-subtitle {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-muted);
+}
+
+.imunisasi-form-page .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.imunisasi-form-page .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.imunisasi-form-page .form-group--full {
+  grid-column: 1 / -1;
+}
+
+.imunisasi-form-page .form-label,
+.imunisasi-form-page .input-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #445340;
+}
+
+.imunisasi-form-page .required-asterisk {
+  color: var(--color-error);
+}
+
+.imunisasi-form-page .input,
+.imunisasi-form-page .form-select,
+.imunisasi-form-page .form-textarea {
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(77, 122, 44, 0.14);
+  color: #233022;
+}
+
+.imunisasi-form-page .input::placeholder,
+.imunisasi-form-page .form-textarea::placeholder {
+  color: rgba(84, 100, 79, 0.7);
+}
+
+.imunisasi-form-page .input:focus,
+.imunisasi-form-page .form-select:focus,
+.imunisasi-form-page .form-textarea:focus {
+  outline: none;
+  border-color: rgba(45, 104, 31, 0.34);
+  box-shadow: 0 0 0 4px rgba(63, 134, 34, 0.08);
+  background: #ffffff;
+}
+
+.imunisasi-form-page .form-select {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  transition: all 0.2s ease;
+}
+
+.imunisasi-form-page .form-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-family: inherit;
+  resize: vertical;
+  transition: all 0.2s ease;
+}
+
+.imunisasi-form-page .error-text {
+  font-size: 0.8125rem;
+  color: var(--color-error);
+}
+
+.imunisasi-form-page .inline-patient-info {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.8125rem;
+  color: #6d7e67;
+  padding: 0.85rem 1rem;
+  background: rgba(246, 249, 240, 0.92);
+  border: 1px solid rgba(77, 122, 44, 0.1);
+  border-radius: 14px;
+}
+
+.imunisasi-form-page .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(77, 122, 44, 0.12);
+}
+
+.imunisasi-form-page .error-alert {
+  background: rgba(198, 69, 69, 0.15);
+  border: 1px solid rgba(198, 69, 69, 0.3);
+  color: var(--color-error);
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .imunisasi-form-page {
+    padding: var(--spacing-lg) 0;
+  }
+
+  .imunisasi-form-page .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .imunisasi-form-page .section-title {
+    font-size: 1rem;
+  }
+
+  .imunisasi-form-page .form-actions {
+    justify-content: stretch;
+  }
+
+  .imunisasi-form-page .form-actions button {
+    flex: 1;
+  }
+}

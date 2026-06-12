@@ -1,77 +1,66 @@
+import React from 'react';
 import PropTypes from 'prop-types';
-import '../App.css';
+import Modal from './ui/Modal';
 
+/**
+ * ConfirmDialog Component (Backward Compatibility Wrapper)
+ * 
+ * This component wraps the new Modal component to maintain backward compatibility
+ * with existing code that uses ConfirmDialog.
+ * 
+ * For new code, use Modal component directly from ./ui/Modal
+ */
 const ConfirmDialog = ({
     isOpen,
     onClose,
     onConfirm,
     title,
     message,
-    confirmText = 'Confirm',
-    cancelText = 'Cancel',
+    confirmText = 'Konfirmasi',
+    cancelText = 'Batal',
     type = 'danger',
     isProcessing = false
 }) => {
-    if (!isOpen) return null;
-
-    const getButtonStyle = () => {
+    const getButtonClassName = () => {
         switch (type) {
             case 'danger':
-                return {
-                    backgroundColor: 'rgba(239, 68, 68, 0.3)',
-                    border: '1px solid #ef4444',
-                    color: '#ef4444'
-                };
+                return 'btn-danger';
             case 'success':
-                return {
-                    backgroundColor: 'rgba(16, 185, 129, 0.3)',
-                    border: '1px solid #10b981',
-                    color: '#10b981'
-                };
+                return 'btn-primary';
             case 'warning':
-                return {
-                    backgroundColor: 'rgba(251, 191, 36, 0.3)',
-                    border: '1px solid #fbbf24',
-                    color: '#fbbf24'
-                };
+                return 'btn-primary';
             default:
-                return {
-                    backgroundColor: 'rgba(59, 130, 246, 0.3)',
-                    border: '1px solid #3b82f6',
-                    color: '#3b82f6'
-                };
+                return 'btn-primary';
         }
     };
 
     return (
-        <div className="dialog-overlay">
-            <div className="content-card-light dialog-card">
-                <div className="auth-eyebrow">Confirmation</div>
-                <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>{title}</h3>
-                <p className="dialog-message">{message}</p>
-
-                <div className="dialog-actions">
-                    <button
-                        onClick={onClose}
-                        className="btn-secondary"
-                        disabled={isProcessing}
-                    >
-                        {cancelText}
-                    </button>
-                    <button
-                        onClick={onConfirm}
-                        className="btn-primary"
-                        disabled={isProcessing}
-                        style={{
-                            ...getButtonStyle(),
-                            padding: '0.5rem 1rem'
-                        }}
-                    >
-                        {confirmText}
-                    </button>
-                </div>
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            title={title}
+            size="sm"
+        >
+            <p>{message}</p>
+            <div className="modal-actions">
+                <button
+                    onClick={onClose}
+                    className="btn-secondary-on-dark"
+                    disabled={isProcessing}
+                    type="button"
+                >
+                    {cancelText}
+                </button>
+                <button
+                    onClick={onConfirm}
+                    className={getButtonClassName()}
+                    disabled={isProcessing}
+                    type="button"
+                >
+                    {isProcessing ? 'Memproses...' : confirmText}
+                </button>
             </div>
-        </div>
+        </Modal>
     );
 };
 

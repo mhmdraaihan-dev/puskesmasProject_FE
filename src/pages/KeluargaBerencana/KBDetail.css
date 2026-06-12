@@ -1,0 +1,328 @@
+/* KBDetail.css - Keluarga Berencana Detail Page */
+
+.kb-detail-page {
+  max-width: 100%;
+}
+
+/* Reject Banner */
+.kb-detail-page .reject-banner {
+  background: rgba(198, 69, 69, 0.15);
+  border: 1px solid rgba(198, 69, 69, 0.3);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.kb-detail-page .reject-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-error);
+  margin-bottom: 0.5rem;
+}
+
+.kb-detail-page .reject-text {
+  color: var(--color-text);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Patient Info Card */
+.kb-detail-page .patient-info-card {
+  margin-bottom: 1.5rem;
+}
+
+.kb-detail-page .patient-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.kb-detail-page .patient-badge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.kb-detail-page .patient-name {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+}
+
+.kb-detail-page .patient-meta {
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.kb-detail-page .method-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.kb-detail-page .method-badge.alert {
+  background: rgba(198, 69, 69, 0.18);
+  border: 1px solid rgba(198, 69, 69, 0.35);
+  color: var(--color-error);
+}
+
+.kb-detail-page .method-badge.safe {
+  background: rgba(59, 130, 246, 0.16);
+  border: 1px solid rgba(96, 165, 250, 0.35);
+  color: #93c5fd;
+}
+
+/* Summary Grid */
+.kb-detail-page .summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.kb-detail-page .summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.kb-detail-page .summary-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.kb-detail-page .summary-value {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+/* Content Grid */
+.kb-detail-page .content-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.85fr);
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Section Styling */
+.kb-detail-page .section-header {
+  margin-bottom: 1.5rem;
+}
+
+.kb-detail-page .section-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+}
+
+.kb-detail-page .section-subtitle {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* Detail Grid */
+.kb-detail-page .detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.kb-detail-page .detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.kb-detail-page .detail-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.kb-detail-page .detail-value {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+/* Note Card */
+.kb-detail-page .note-card {
+  padding: 1rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.kb-detail-page .note-text {
+  font-size: 0.9375rem;
+  color: var(--color-text);
+  line-height: 1.6;
+  margin: 0.5rem 0 0;
+}
+
+/* Action Summary */
+.kb-detail-page .action-summary {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Action Block */
+.kb-detail-page .action-block {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+/* Verification Card */
+.kb-detail-page .verification-card {
+  padding: 1.25rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.kb-detail-page .verification-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+}
+
+.kb-detail-page .verification-text {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin: 0 0 1rem;
+  line-height: 1.6;
+}
+
+.kb-detail-page .verification-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Modal Overlay */
+.kb-detail-page .modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  z-index: 1000;
+}
+
+.kb-detail-page .modal-card {
+  width: 100%;
+  max-width: 540px;
+}
+
+.kb-detail-page .modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.75rem;
+}
+
+.kb-detail-page .modal-text {
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
+  margin: 0 0 1.25rem;
+  line-height: 1.6;
+}
+
+.kb-detail-page .form-textarea {
+  width: 100%;
+  padding: var(--spacing-3);
+  background: var(--color-canvas);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
+  font-family: inherit;
+  color: var(--color-text);
+  resize: vertical;
+  transition: all 0.2s ease;
+  margin-bottom: 1rem;
+}
+
+.kb-detail-page .form-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(204, 120, 92, 0.15);
+}
+
+.kb-detail-page .modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Error Alert */
+.kb-detail-page .error-alert {
+  background: rgba(198, 69, 69, 0.15);
+  border: 1px solid rgba(198, 69, 69, 0.3);
+  color: var(--color-error);
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+/* Mobile Responsive */
+@media (max-width: 1024px) {
+  .kb-detail-page .content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .kb-detail-page .summary-grid,
+  .kb-detail-page .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kb-detail-page .patient-name {
+    font-size: 1.5rem;
+  }
+
+  .kb-detail-page .patient-header {
+    flex-direction: column;
+  }
+}

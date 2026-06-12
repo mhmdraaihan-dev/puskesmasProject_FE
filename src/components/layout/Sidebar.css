@@ -1,0 +1,118 @@
+/**
+ * Sidebar Component Styles
+ * 
+ * Main sidebar with dark navy background, fixed positioning, and responsive behavior.
+ * Supports collapse/expand and mobile overlay modes.
+ */
+
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  width: 240px !important; /* Force expanded width */
+  background: var(--color-surface-dark); /* #181715 - dark navy */
+  color: var(--color-on-dark); /* #faf9f5 - cream text */
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  transition: width 0.3s ease, transform 0.3s ease;
+  overflow: hidden;
+}
+
+/* Collapsed state */
+.sidebar[data-collapsed="true"] {
+  width: 64px !important; /* Force collapsed width - icon-only */
+}
+
+/* Mobile backdrop */
+.sidebar-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(20, 20, 19, 0.75); /* Dark overlay */
+  z-index: 999;
+  animation: backdropFadeIn 0.2s ease-out;
+}
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Mobile: sidebar slides in from left */
+@media (max-width: 767px) {
+  .sidebar {
+    transform: translateX(-100%); /* Hidden by default */
+    width: 280px; /* Wider on mobile for better touch */
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .sidebar[data-mobile-open="true"] {
+    transform: translateX(0); /* Slide in when open */
+  }
+  
+  /* Mobile sidebar is always "expanded" visually */
+  .sidebar[data-collapsed="true"] {
+    width: 280px;
+  }
+}
+
+/* Tablet: auto-collapse sidebar */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .sidebar {
+    width: 64px; /* Collapsed by default on tablet */
+  }
+  
+  .sidebar[data-collapsed="false"] {
+    width: 240px; /* Expanded when user toggles */
+  }
+}
+
+/* Desktop: expanded by default */
+@media (min-width: 1024px) {
+  .sidebar {
+    width: 240px; /* Expanded by default */
+  }
+  
+  .sidebar[data-collapsed="true"] {
+    width: 64px; /* Collapsed when user toggles */
+  }
+}
+
+/* Smooth transitions for all sidebar size changes */
+.sidebar * {
+  transition: opacity 0.2s ease;
+}
+
+/* Hide text elements smoothly when collapsing */
+.sidebar[data-collapsed="true"] .sidebar-header__text,
+.sidebar[data-collapsed="true"] .nav-item__label,
+.sidebar[data-collapsed="true"] .nav-item__badge,
+.sidebar[data-collapsed="true"] .sidebar-footer__user-info {
+  opacity: 0;
+  visibility: hidden;
+  width: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Accessibility: focus styles */
+.sidebar:focus-within {
+  /* Ensure focused elements are visible */
+  z-index: 1001;
+}
+
+/* Print: hide sidebar */
+@media print {
+  .sidebar,
+  .sidebar-backdrop {
+    display: none;
+  }
+}

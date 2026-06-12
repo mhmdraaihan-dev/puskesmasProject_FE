@@ -1,0 +1,89 @@
+/**
+ * PageHeader Component Styles
+ * 
+ * Page header with serif h1 headline, optional subtitle, and action buttons.
+ * Uses cream canvas background with ink text color.
+ */
+
+.page-header {
+  margin-bottom: var(--spacing-xl); /* 48px spacing below header */
+}
+
+.page-header__content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-lg); /* 24px gap between text and actions */
+  flex-wrap: wrap;
+}
+
+/* Text section */
+.page-header__text {
+  flex: 1;
+  min-width: 0; /* Allow text truncation */
+}
+
+/* Title (h1) - uses serif font from design system */
+.page-header__title {
+  font-family: var(--font-serif); /* Copernicus, Tiempos Headline, Cormorant Garamond */
+  font-size: 3rem; /* 48px */
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -1px;
+  color: #1f4518;
+  margin: 0 0 var(--spacing-xs); /* 8px bottom margin */
+  background: none;
+  -webkit-background-clip: initial;
+  -webkit-text-fill-color: #1f4518;
+  background-clip: initial;
+}
+
+/* Subtitle */
+.page-header__subtitle {
+  font-family: var(--font-sans);
+  font-size: 1rem; /* 16px - body-md */
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--color-text-muted); /* #6c6a64 - muted */
+  margin: 0;
+}
+
+/* Actions section */
+.page-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm); /* 12px gap between action buttons */
+  flex-shrink: 0;
+}
+
+/* Responsive: scale down title on smaller screens */
+@media (max-width: 1023px) {
+  .page-header__title {
+    font-size: 2.25rem; /* 36px on tablet */
+  }
+}
+
+@media (max-width: 767px) {
+  .page-header {
+    margin-bottom: var(--spacing-lg); /* 24px on mobile */
+  }
+  
+  .page-header__content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-md); /* 16px on mobile */
+  }
+  
+  .page-header__title {
+    font-size: 2rem; /* 32px on mobile */
+  }
+  
+  .page-header__actions {
+    flex-direction: column;
+    gap: var(--spacing-sm); /* 12px */
+  }
+  
+  .page-header__actions button {
+    width: 100%; /* Full width buttons on mobile */
+  }
+}

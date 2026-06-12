@@ -1,0 +1,323 @@
+.pemeriksaan-kehamilan-detail-page {
+  padding: var(--spacing-xl) 0;
+}
+
+.reject-banner {
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: rgba(198, 69, 69, 0.12);
+  border: 1px solid rgba(198, 69, 69, 0.3);
+  border-radius: var(--border-radius-lg);
+}
+
+.reject-title {
+  font-size: var(--font-size-title-sm);
+  font-weight: 600;
+  color: var(--color-error);
+  margin-bottom: var(--spacing-xs);
+}
+
+.reject-text {
+  margin: 0;
+  color: var(--color-text-primary);
+  line-height: 1.6;
+}
+
+.patient-info-card {
+  margin-bottom: var(--spacing-lg);
+}
+
+.patient-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--hairline-border);
+}
+
+.patient-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 9999px;
+  background: rgba(204, 120, 92, 0.12);
+  border: 1px solid rgba(204, 120, 92, 0.2);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-sm);
+  font-weight: 600;
+}
+
+.patient-name {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.patient-meta {
+  margin: 0;
+  font-size: var(--font-size-body-md);
+  color: var(--color-text-muted);
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-md);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--hairline-border);
+  border-radius: var(--border-radius-md);
+}
+
+.summary-label {
+  font-size: var(--font-size-body-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.summary-value {
+  font-size: var(--font-size-body-md);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.5;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr);
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.section-header {
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--hairline-border);
+}
+
+.section-title {
+  font-size: var(--font-size-title-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.section-subtitle {
+  margin: 0;
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-muted);
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-md);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--hairline-border);
+  border-radius: var(--border-radius-md);
+}
+
+.detail-label {
+  font-size: var(--font-size-body-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.detail-value {
+  font-size: var(--font-size-body-md);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.5;
+}
+
+.note-card {
+  padding: var(--spacing-md);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--hairline-border);
+  border-radius: var(--border-radius-md);
+}
+
+.note-text {
+  margin: var(--spacing-sm) 0 0;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+}
+
+.action-summary {
+  display: grid;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.action-block {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--hairline-border);
+}
+
+.verification-card {
+  padding: var(--spacing-lg);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--hairline-border);
+  border-radius: var(--border-radius-lg);
+}
+
+.verification-title {
+  font-size: var(--font-size-title-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.verification-text {
+  margin: 0 0 var(--spacing-lg);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.verification-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.lab-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(24, 23, 21, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--spacing-lg);
+  z-index: 1000;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+.modal-title {
+  font-size: var(--font-size-title-md);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.modal-text {
+  margin: 0 0 var(--spacing-lg);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.form-textarea {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-canvas);
+  border: 1px solid var(--hairline-border);
+  border-radius: var(--border-radius-md);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-body-md);
+  font-family: inherit;
+  resize: vertical;
+  transition: all 0.2s ease;
+  margin-bottom: var(--spacing-lg);
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(204, 120, 92, 0.15);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.error-alert {
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: rgba(198, 69, 69, 0.12);
+  border: 1px solid rgba(198, 69, 69, 0.3);
+  border-radius: var(--border-radius-lg);
+  color: #f8b4b4;
+  margin-bottom: var(--spacing-lg);
+}
+
+@media (max-width: 1024px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .pemeriksaan-kehamilan-detail-page {
+    padding: var(--spacing-lg) 0;
+  }
+
+  .patient-header {
+    flex-direction: column;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lab-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action-block,
+  .verification-actions,
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .action-block button,
+  .verification-actions button,
+  .modal-actions button {
+    width: 100%;
+  }
+}

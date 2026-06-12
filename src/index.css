@@ -1,19 +1,26 @@
+/* Import Design System Styles */
+@import './styles/design-system.css';
+@import './styles/layout.css';
+@import './styles/components.css';
+@import './styles/responsive.css';
+
+/* Legacy Font Import - To be replaced with design system fonts */
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap');
 
 :root {
-  /* Claude-inspired warm canvas palette */
-  --color-primary: #cc785c;
-  --color-primary-dark: #a9583e;
-  --color-primary-light: #df9b82;
-  --color-primary-soft: rgba(204, 120, 92, 0.14);
+  /* Puskesmas Lebakwangi palette */
+  --color-primary: #4f9228;
+  --color-primary-dark: #2f6b22;
+  --color-primary-light: #8bc665;
+  --color-primary-soft: rgba(79, 146, 40, 0.14);
 
   --color-bg-dark: #faf9f5;
   --color-bg-card: #1c2433;
   --color-bg-card-strong: #171f2c;
   --color-bg-card-soft: rgba(28, 36, 51, 0.94);
-  --color-canvas-soft: #f5f0e8;
-  --color-canvas-card: #efe9de;
-  --color-canvas-strong: #e8e0d2;
+  --color-canvas-soft: #f3f3ea;
+  --color-canvas-card: #edf2e6;
+  --color-canvas-strong: #e6eddc;
   --color-text-main: #252523;
   --color-text-strong: #141413;
   --color-text-muted: #6c6a64;
@@ -26,10 +33,10 @@
   --color-danger: #c64545;
   --color-warning: #d4a017;
 
-  --gradient-main: linear-gradient(135deg, #b7674b 0%, #cc785c 55%, #e8a55a 100%);
+  --gradient-main: linear-gradient(135deg, #24591a 0%, #4f9228 55%, #8bc665 100%);
   --gradient-surface: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.01));
-  --gradient-auth: radial-gradient(circle at top left, rgba(204, 120, 92, 0.16), transparent 32%),
-    radial-gradient(circle at bottom right, rgba(232, 165, 90, 0.14), transparent 26%),
+  --gradient-auth: radial-gradient(circle at top left, rgba(79, 146, 40, 0.16), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(139, 198, 101, 0.14), transparent 26%),
     radial-gradient(circle at center top, rgba(93, 184, 166, 0.08), transparent 22%);
 
   /* Typography */
@@ -61,10 +68,10 @@
   --surface-elevated: rgba(17, 24, 39, 0.78);
   --surface-raised: rgba(255, 255, 255, 0.5);
   --surface-muted: rgba(255, 255, 255, 0.32);
-  --surface-highlight: rgba(204, 120, 92, 0.08);
+  --surface-highlight: rgba(79, 146, 40, 0.08);
   --shadow-card: 0 20px 50px rgba(76, 63, 48, 0.16);
   --shadow-soft: 0 12px 28px rgba(76, 63, 48, 0.12);
-  --shadow-focus: 0 0 0 4px rgba(204, 120, 92, 0.14);
+  --shadow-focus: 0 0 0 4px rgba(79, 146, 40, 0.14);
 }
 
 * {
@@ -77,9 +84,9 @@ body {
   font-family: var(--font-sans);
   background-color: var(--color-bg-dark);
   background-image:
-    radial-gradient(circle at top, rgba(204, 120, 92, 0.12), transparent 25%),
+    radial-gradient(circle at top, rgba(79, 146, 40, 0.12), transparent 25%),
     radial-gradient(circle at bottom right, rgba(93, 184, 166, 0.08), transparent 22%),
-    linear-gradient(180deg, #faf9f5 0%, #f5f0e8 100%);
+    linear-gradient(180deg, #fafaf5 0%, #f3f3ea 100%);
   background-attachment: fixed;
   color: var(--color-text-main);
   line-height: 1.6;
@@ -188,7 +195,7 @@ textarea {
 }
 
 ::selection {
-  background: rgba(204, 120, 92, 0.22);
+  background: rgba(79, 146, 40, 0.2);
   color: var(--color-text-strong);
 }
 
@@ -202,10 +209,10 @@ textarea {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(204, 120, 92, 0.28);
+  background: rgba(79, 146, 40, 0.25);
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(204, 120, 92, 0.42);
+  background: rgba(79, 146, 40, 0.42);
 }

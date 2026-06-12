@@ -6,7 +6,13 @@ import {
   updatePasien,
   getPasienDetail,
 } from "../../services/api";
-import "../../App.css";
+import PageHeader from "../../components/layout/PageHeader";
+import Card from "../../components/ui/Card";
+import Button from "../../components/Button";
+import Input from "../../components/Input";
+import LoadingSpinner from "../../components/ui/LoadingSpinner";
+import "../../styles/design-system.css";
+import "./PasienForm.css";
 
 const PasienForm = () => {
   const { id } = useParams();
@@ -91,149 +97,122 @@ const PasienForm = () => {
     }
   };
 
-  if (fetching)
+  if (fetching) {
     return (
-      <div style={{ padding: "3rem", textAlign: "center" }}>
-        Memuat Data Pasien...
+      <div className="pasien-form-page">
+        <LoadingSpinner size="lg" />
       </div>
     );
+  }
 
   return (
-    <div className="dashboard">
-      <div className="dashboard-header">
-        <div>
-          <h2>{isEditMode ? "Edit Data Pasien" : "Registrasi Pasien Baru"}</h2>
-          <p className="text-muted">
-            {isEditMode
-              ? "Perbaiki data identitas pasien"
-              : "Masukkan data identitas pasien baru"}
-          </p>
-        </div>
-      </div>
+    <div className="pasien-form-page">
+      <PageHeader
+        title={isEditMode ? "Edit Data Pasien" : "Registrasi Pasien Baru"}
+        subtitle={
+          isEditMode
+            ? "Perbaiki data identitas pasien"
+            : "Masukkan data identitas pasien baru"
+        }
+        actions={
+          <Button variant="secondary" onClick={() => navigate("/pasien")}>
+            Kembali
+          </Button>
+        }
+      />
 
-      <div
-        className="auth-card"
-        style={{ maxWidth: "600px", margin: "0 auto" }}
-      >
-        {serverError && (
-          <div className="error-alert" style={{ marginBottom: "1rem" }}>
-            {serverError}
-          </div>
-        )}
+      <Card variant="surface-dark" padding="xl">
+        {serverError && <div className="error-alert">{serverError}</div>}
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="form-group">
-            <label className="form-label">
-              NIK (Nomor Induk Kependudukan) *
+        <form onSubmit={handleSubmit(onSubmit)} className="pasien-form-grid">
+          <Input
+            label="NIK (Nomor Induk Kependudukan)"
+            required
+            type="text"
+            placeholder="16 digit angka"
+            maxLength={16}
+            error={errors.nik?.message}
+            {...register("nik", {
+              required: "NIK wajib diisi",
+              pattern: {
+                value: /^[0-9]+$/,
+                message: "Hanya angka diperbolehkan",
+              },
+              minLength: {
+                value: 16,
+                message: "NIK harus 16 digit",
+              },
+              maxLength: {
+                value: 16,
+                message: "NIK harus 16 digit",
+              },
+            })}
+          />
+
+          <Input
+            label="Nama Lengkap"
+            required
+            type="text"
+            placeholder="Nama sesuai KTP"
+            error={errors.nama?.message}
+            {...register("nama", { required: "Nama wajib diisi" })}
+          />
+
+          <Input
+            label="Tanggal Lahir"
+            required
+            type="date"
+            max={new Date().toISOString().split("T")[0]}
+            error={errors.tanggal_lahir?.message}
+            {...register("tanggal_lahir", {
+              required: "Tanggal lahir wajib diisi",
+            })}
+          />
+
+          <div className="form-group form-group--full">
+            <label className="form-label" htmlFor="alamat_lengkap">
+              Alamat Lengkap <span className="required-asterisk">*</span>
             </label>
-            <input
-              type="text"
-              className="form-input"
-              placeholder="16 digit angka"
-              maxLength={16}
-              {...register("nik", {
-                required: "NIK wajib diisi",
-                pattern: {
-                  value: /^[0-9]+$/,
-                  message: "Hanya angka diperbolehkan",
-                },
-                minLength: {
-                  value: 16,
-                  message: "NIK harus 16 digit",
-                },
-                maxLength: {
-                  value: 16,
-                  message: "NIK harus 16 digit",
-                },
-              })}
-            />
-            {errors.nik && (
-              <span className="error-message">{errors.nik.message}</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Nama Lengkap *</label>
-            <input
-              type="text"
-              className="form-input"
-              placeholder="Nama sesuai KTP"
-              {...register("nama", { required: "Nama wajib diisi" })}
-            />
-            {errors.nama && (
-              <span className="error-message">{errors.nama.message}</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Tanggal Lahir *</label>
-            <input
-              type="date"
-              className="form-input"
-              max={new Date().toISOString().split("T")[0]} // Prevent future dates
-              {...register("tanggal_lahir", {
-                required: "Tanggal lahir wajib diisi",
-              })}
-            />
-            {errors.tanggal_lahir && (
-              <span className="error-message">
-                {errors.tanggal_lahir.message}
-              </span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Alamat Lengkap *</label>
             <textarea
-              className="form-input"
-              rows="3"
+              id="alamat_lengkap"
+              className="form-textarea"
+              rows="4"
               placeholder="Jalan, No Rumah, RT/RW, Desa/Kelurahan..."
               {...register("alamat_lengkap", {
                 required: "Alamat wajib diisi",
               })}
-            ></textarea>
+            />
             {errors.alamat_lengkap && (
-              <span className="error-message">
-                {errors.alamat_lengkap.message}
-              </span>
+              <span className="error-text">{errors.alamat_lengkap.message}</span>
             )}
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "end",
-              marginTop: "1.5rem",
-              gap: "1rem",
-            }}
-          >
-            <button
+          <div className="info-box">
+            <p className="info-title">Catatan</p>
+            <p className="info-hint">
+              NIK harus 16 digit angka sesuai KTP. Data pasien digunakan untuk
+              registrasi layanan kesehatan.
+            </p>
+          </div>
+
+          <div className="form-actions">
+            <Button
               type="button"
+              variant="secondary"
               onClick={() => navigate("/pasien")}
-              className="btn-primary"
-              style={{
-                backgroundColor: "transparent",
-                border: "1px solid var(--glass-border)",
-                minWidth: "150px",
-              }}
             >
               Batal
-            </button>
-            <button
-              type="submit"
-              className="btn-primary"
-              disabled={loading}
-              style={{ minWidth: "150px" }}
-            >
+            </Button>
+            <Button type="submit" variant="primary" disabled={loading}>
               {loading
                 ? "Menyimpan..."
                 : isEditMode
                   ? "Update Data"
                   : "Simpan Pasien"}
-            </button>
+            </Button>
           </div>
         </form>
-      </div>
+      </Card>
     </div>
   );
 };

@@ -1,0 +1,69 @@
+/**
+ * Breadcrumbs Component Styles
+ * 
+ * Navigation breadcrumb trail with muted color and body-sm typography.
+ */
+
+.breadcrumbs {
+  margin-bottom: var(--spacing-md); /* 16px spacing below breadcrumbs */
+}
+
+.breadcrumbs__list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs); /* 8px gap between items */
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.breadcrumbs__item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs); /* 8px gap between link and separator */
+}
+
+/* Breadcrumb link */
+.breadcrumbs__link {
+  font-family: var(--font-sans);
+  font-size: 0.875rem; /* 14px - body-sm */
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--color-text-muted); /* #6c6a64 - muted */
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.breadcrumbs__link:hover {
+  color: var(--color-primary); /* #cc785c - coral on hover */
+  text-decoration: underline;
+}
+
+.breadcrumbs__link:focus-visible {
+  outline: none;
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+/* Current page (not a link) */
+.breadcrumbs__current {
+  font-family: var(--font-sans);
+  font-size: 0.875rem; /* 14px - body-sm */
+  font-weight: 500;
+  line-height: 1.55;
+  color: var(--color-ink); /* #141413 - full color for current page */
+}
+
+/* Separator icon */
+.breadcrumbs__separator {
+  color: var(--color-text-muted); /* #6c6a64 - muted */
+  flex-shrink: 0;
+}
+
+/* Responsive: hide breadcrumbs on very small screens */
+@media (max-width: 479px) {
+  .breadcrumbs {
+    display: none;
+  }
+}

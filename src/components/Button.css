@@ -1,0 +1,219 @@
+/**
+ * Button Component Styles
+ * 
+ * Design system button with variants, sizes, and states.
+ */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs); /* 8px */
+  font-family: var(--font-sans);
+  font-weight: 500;
+  border-radius: var(--rounded-sm); /* 6px */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(204, 120, 92, 0.15);
+}
+
+/* Variants */
+
+/* Primary - Coral background */
+.button--primary {
+  background: var(--color-primary); /* #cc785c */
+  color: var(--color-on-primary); /* #ffffff */
+}
+
+.button--primary:hover:not(:disabled) {
+  background: var(--color-primary-active); /* #a9583e */
+}
+
+/* Secondary - Canvas background */
+.button--secondary {
+  background: var(--color-canvas); /* #faf9f5 */
+  color: var(--color-body); /* #252523 */
+  border: 1px solid var(--color-hairline); /* #e6dfd8 */
+}
+
+.button--secondary:hover:not(:disabled) {
+  background: var(--color-surface-card); /* #efe9de */
+  border-color: var(--color-primary);
+}
+
+/* Secondary on Dark - For dark surfaces */
+.button--secondary-on-dark {
+  background: var(--color-surface-dark-elevated); /* #252320 */
+  color: var(--color-on-dark); /* #faf9f5 */
+  border: 1px solid var(--color-hairline-on-dark);
+}
+
+.button--secondary-on-dark:hover:not(:disabled) {
+  background: rgba(230, 223, 216, 0.1);
+  border-color: var(--color-primary);
+}
+
+/* Text Link - No background */
+.button--text-link {
+  background: transparent;
+  color: var(--color-primary);
+  padding: 0;
+}
+
+.button--text-link:hover:not(:disabled) {
+  color: var(--color-primary-active);
+  text-decoration: underline;
+}
+
+/* Icon Circular - Round button for icons */
+.button--icon-circular {
+  background: var(--color-surface-dark-elevated);
+  color: var(--color-on-dark);
+  border-radius: 50%;
+  padding: var(--spacing-sm);
+  aspect-ratio: 1;
+}
+
+.button--icon-circular:hover:not(:disabled) {
+  background: rgba(230, 223, 216, 0.15);
+}
+
+/* Warning - Yellow/Orange background */
+.button--warning {
+  background: rgba(251, 191, 36, 0.16);
+  color: #d97706;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.button--warning:hover:not(:disabled) {
+  background: rgba(251, 191, 36, 0.24);
+  border-color: #d97706;
+}
+
+/* Danger - Red background */
+.button--danger {
+  background: rgba(198, 69, 69, 0.12);
+  color: #dc2626;
+  border: 1px solid rgba(198, 69, 69, 0.3);
+}
+
+.button--danger:hover:not(:disabled) {
+  background: rgba(198, 69, 69, 0.2);
+  border-color: #dc2626;
+}
+
+/* Success - Green background */
+.button--success {
+  background: rgba(93, 184, 114, 0.16);
+  color: #16a34a;
+  border: 1px solid rgba(93, 184, 114, 0.3);
+}
+
+.button--success:hover:not(:disabled) {
+  background: rgba(93, 184, 114, 0.24);
+  border-color: #16a34a;
+}
+
+/* Sizes */
+
+.button--sm {
+  height: 32px;
+  padding: 0 var(--spacing-md); /* 0 16px */
+  font-size: var(--type-body-sm-size); /* 14px */
+}
+
+.button--md {
+  height: 40px;
+  padding: 0 var(--spacing-lg); /* 0 24px */
+  font-size: var(--type-body-md-size); /* 16px */
+}
+
+.button--lg {
+  height: 48px;
+  padding: 0 var(--spacing-xl); /* 0 32px */
+  font-size: var(--type-body-lg-size); /* 18px */
+}
+
+/* Full Width */
+.button--full-width {
+  width: 100%;
+}
+
+/* Loading State */
+.button--loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.button__loader {
+  display: inline-flex;
+  align-items: center;
+}
+
+.button__loader-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Disabled State */
+.button--disabled,
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Icon */
+.button__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Text */
+.button__text {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Icon-only button (circular) adjustments */
+.button--icon-circular.button--sm {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+}
+
+.button--icon-circular.button--md {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+}
+
+.button--icon-circular.button--lg {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+  .button--lg {
+    height: 44px; /* Slightly smaller on mobile */
+    font-size: 16px;
+  }
+}

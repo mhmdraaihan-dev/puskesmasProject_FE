@@ -1,11 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import StatusBadge from "../../components/StatusBadge";
+import PageHeader from "../../components/layout/PageHeader";
+import Card from "../../components/ui/Card";
+import Button from "../../components/Button";
+import Input from "../../components/Input";
+import LoadingSpinner from "../../components/ui/LoadingSpinner";
+import EmptyState from "../../components/ui/EmptyState";
 import { useAuth } from "../../context/AuthContext";
 import { getRejectedData } from "../../services/api";
 import { formatDateTime } from "../../utils/dateFormatter";
 import { isBidanPraktik } from "../../utils/roleHelpers";
-import "../../App.css";
+import "../../styles/design-system.css";
+import "./RejectedDataList.css";
 
 const MODULE_META = {
   legacy: {
@@ -187,51 +194,50 @@ const RejectedDataList = () => {
   }, [filteredData.length, rejectedData]);
 
   return (
-    <div className="dashboard page-shell" style={styles.page}>
-      <header className="dashboard-header" style={styles.header}>
-        <div className="page-intro">
-          <div className="page-kicker">Revision Feed</div>
-          <h1 className="page-title" style={styles.title}>Revisi</h1>
-          <p className="page-subtitle" style={styles.subtitle}>
-            Data yang ditolak kini dibaca dari feed gabungan semua modul pelayanan.
-          </p>
-        </div>
-        <div className="page-actions" style={styles.headerActions}>
-          <button
-            onClick={() => navigate("/")}
-            className="btn-secondary"
-            style={styles.secondaryButton}
-          >
+    <div className="rejected-data-list-page">
+      <PageHeader
+        title="Data Ditolak - Revisi"
+        subtitle="Data yang ditolak dari semua modul pelayanan dan memerlukan perbaikan"
+        actions={
+          <Button variant="secondary" onClick={() => navigate("/")}>
             Kembali ke Dashboard
-          </button>
-        </div>
-      </header>
+          </Button>
+        }
+      />
 
-      <section style={styles.section}>
-        <div style={styles.summaryGrid}>
-          {summaryCards.map((card) => (
-            <div key={card.label} className="stat-card" style={styles.summaryCard}>
-              <div style={styles.summaryLabel}>{card.label}</div>
-              <div style={styles.summaryValue}>{card.value}</div>
-              <div style={styles.summaryNote}>{card.note}</div>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Stats Section */}
+      <div className="stats-section">
+        {summaryCards.map((card) => (
+          <Card
+            key={card.label}
+            variant="surface-card"
+            padding="lg"
+            className="rejected-data-list__summary-card"
+          >
+            <div className="stat-label">{card.label}</div>
+            <div className="stat-value">{card.value}</div>
+            <div className="stat-note">{card.note}</div>
+          </Card>
+        ))}
+      </div>
 
-      <section className="content-card-light" style={styles.filterCard}>
-        <div style={styles.sectionHead}>
+      {/* Filter and List Section */}
+      <Card
+        variant="surface-card"
+        padding="xl"
+        className="list-card rejected-data-list__list-card"
+      >
+        <div className="list-header">
           <div>
-            <h3 style={styles.sectionTitle}>Daftar Data Ditolak</h3>
-            <p className="text-muted" style={styles.sectionText}>
+            <h3 className="list-title">Daftar Data Ditolak</h3>
+            <p className="list-subtitle">
               Cari cepat berdasarkan nama pasien, NIK, modul, verifier, atau tempat
-              praktik.
+              praktik
             </p>
           </div>
-          <div style={styles.searchWrap}>
-            <input
+          <div className="search-wrapper">
+            <Input
               type="text"
-              className="form-input"
               placeholder="Cari data revisi..."
               value={search}
               onChange={(event) => setSearch(event.target.value)}
@@ -239,51 +245,50 @@ const RejectedDataList = () => {
           </div>
         </div>
 
-        {error ? (
-          <div className="error-alert" style={{ marginBottom: "1rem" }}>
-            {error}
-          </div>
-        ) : null}
+        {error && <div className="error-alert">{error}</div>}
 
         {loading ? (
-          <div style={styles.loadingState}>Memuat data revisi...</div>
+          <LoadingSpinner size="lg" />
         ) : filteredData.length === 0 ? (
-          <div className="content-card-light" style={styles.emptyStateCard}>
-            {rejectedData.length === 0
-              ? "Belum ada data yang ditolak."
-              : "Tidak ada data yang cocok dengan pencarian."}
-          </div>
+          <EmptyState
+            message={
+              rejectedData.length === 0
+                ? "Belum ada data yang ditolak"
+                : "Tidak ada data yang cocok dengan pencarian"
+            }
+          />
         ) : (
-          <div style={styles.listGrid}>
+          <div className="rejected-items-grid">
             {filteredData.map((data) => (
-              <article
+              <Card
                 key={`${data.moduleKey}-${data.id}`}
-                className="content-card-light"
-                style={styles.itemCard}
+                variant="surface-card"
+                padding="xl"
+                className="rejected-item"
               >
-                <div style={styles.itemHeader}>
+                <div className="item-header">
                   <div>
-                    <div style={styles.eyebrow}>{data.moduleLabel}</div>
-                    <h3 style={styles.patientName}>{data.patientName}</h3>
-                    <p className="text-muted" style={styles.patientMeta}>
+                    <div className="module-badge">{data.moduleLabel}</div>
+                    <h3 className="patient-name">{data.patientName}</h3>
+                    <p className="patient-meta">
                       NIK {data.patientNik} • {data.practiceName} • {data.villageName}
                     </p>
                   </div>
                   <StatusBadge status={data.status} />
                 </div>
 
-                <div style={styles.metaGrid}>
-                  <div style={styles.metaBlock}>
-                    <span style={styles.metaLabel}>Ditolak oleh</span>
-                    <strong>{data.verifierName}</strong>
+                <div className="meta-grid">
+                  <div className="meta-item">
+                    <span className="meta-label">Ditolak oleh</span>
+                    <strong className="meta-value">{data.verifierName}</strong>
                   </div>
-                  <div style={styles.metaBlock}>
-                    <span style={styles.metaLabel}>Tanggal ditolak</span>
-                    <strong>{formatDateTime(data.rejectedAt)}</strong>
+                  <div className="meta-item">
+                    <span className="meta-label">Tanggal ditolak</span>
+                    <strong className="meta-value">{formatDateTime(data.rejectedAt)}</strong>
                   </div>
-                  <div style={styles.metaBlock}>
-                    <span style={styles.metaLabel}>Aksi revisi</span>
-                    <strong>
+                  <div className="meta-item">
+                    <span className="meta-label">Aksi revisi</span>
+                    <strong className="meta-value">
                       {data.moduleKey === "legacy"
                         ? "Form revisi lama"
                         : "Edit modul asli"}
@@ -291,39 +296,38 @@ const RejectedDataList = () => {
                   </div>
                 </div>
 
-                <div style={styles.rejectionBox}>
-                  <div style={styles.rejectionTitle}>Alasan Penolakan</div>
-                  <p style={styles.rejectionText}>
+                <div className="rejection-reason-box">
+                  <div className="rejection-title">Alasan Penolakan</div>
+                  <p className="rejection-text">
                     {data.rejectReason || "Belum ada alasan yang dikirim backend."}
                   </p>
                 </div>
 
-                <div style={styles.actionsRow}>
-                  <button
+                <div className="item-actions">
+                  <Button
+                    variant="secondary"
                     onClick={() => data.detailRoute && navigate(data.detailRoute)}
-                    className="btn-secondary"
-                    style={styles.detailButton}
                     disabled={!data.detailRoute}
                   >
                     Detail
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="warning"
                     onClick={() => data.reviseRoute && navigate(data.reviseRoute)}
-                    className="btn-primary"
-                    style={styles.reviseButton}
                     disabled={!data.reviseRoute}
                   >
                     Revisi Data
-                  </button>
+                  </Button>
                 </div>
-              </article>
+              </Card>
             ))}
           </div>
         )}
-      </section>
+      </Card>
     </div>
   );
 };
+
 
 const styles = {
   page: {

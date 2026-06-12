@@ -1,0 +1,281 @@
+.rejected-data-list-page {
+  padding: 0 0 var(--spacing-xl);
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.rejected-data-list-page .stats-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.rejected-data-list__summary-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 246, 235, 0.96)) !important;
+  border: 1px solid rgba(77, 122, 44, 0.14);
+  border-radius: 22px;
+  box-shadow:
+    0 18px 34px rgba(34, 52, 24, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.rejected-data-list-page .stat-label {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #6d7e67;
+  margin-bottom: 0.35rem;
+}
+
+.rejected-data-list-page .stat-value {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: clamp(1.8rem, 2.4vw, 2.35rem);
+  font-weight: 700;
+  color: #1f2f1f;
+  line-height: 1.2;
+  margin-bottom: 0.2rem;
+}
+
+.rejected-data-list-page .stat-note {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  color: #74836f;
+}
+
+.rejected-data-list-page .list-card {
+  margin-bottom: 2rem;
+}
+
+.rejected-data-list__list-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(240, 245, 232, 0.95)) !important;
+  border: 1px solid rgba(77, 122, 44, 0.12);
+  border-radius: 24px;
+  box-shadow: 0 24px 44px rgba(35, 51, 24, 0.08);
+}
+
+.rejected-data-list-page .list-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.rejected-data-list-page .list-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.45rem, 2vw, 1.9rem);
+  font-weight: 600;
+  color: var(--color-ink);
+  margin-bottom: 0.45rem;
+}
+
+.rejected-data-list-page .list-subtitle {
+  font-family: var(--font-sans);
+  font-size: 0.98rem;
+  color: var(--color-muted);
+}
+
+.rejected-data-list-page .search-wrapper {
+  min-width: 280px;
+  flex: 1 1 320px;
+  max-width: 420px;
+}
+
+.rejected-data-list-page .search-wrapper .input {
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(77, 122, 44, 0.14);
+  color: #233022;
+}
+
+.rejected-data-list-page .search-wrapper .input::placeholder {
+  color: rgba(84, 100, 79, 0.7);
+}
+
+.rejected-data-list-page .search-wrapper .input:focus {
+  border-color: rgba(45, 104, 31, 0.34);
+  box-shadow: 0 0 0 4px rgba(63, 134, 34, 0.08);
+  background: #ffffff;
+}
+
+.rejected-data-list-page .error-alert {
+  background: rgba(198, 69, 69, 0.15);
+  border: 1px solid rgba(198, 69, 69, 0.3);
+  color: var(--color-error);
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.rejected-data-list-page .rejected-items-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.rejected-data-list-page .rejected-item {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(246, 249, 242, 0.95)) !important;
+  border: 1px solid rgba(77, 122, 44, 0.1);
+  border-radius: 22px;
+  box-shadow: 0 16px 32px rgba(35, 51, 24, 0.06);
+}
+
+.rejected-data-list-page .rejected-item:hover {
+  transform: translateY(-2px);
+}
+
+.rejected-data-list-page .item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.rejected-data-list-page .module-badge {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #2f6b22;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.rejected-data-list-page .patient-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #233022;
+  margin-bottom: 0.25rem;
+}
+
+.rejected-data-list-page .patient-meta {
+  font-size: 0.875rem;
+  color: #6d7e67;
+}
+
+.rejected-data-list-page .meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.rejected-data-list-page .meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-radius: 14px;
+  background: rgba(246, 249, 240, 0.92);
+  border: 1px solid rgba(77, 122, 44, 0.1);
+}
+
+.rejected-data-list-page .meta-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #74836f;
+  font-weight: 600;
+}
+
+.rejected-data-list-page .meta-value {
+  font-size: 0.9375rem;
+  color: #233022;
+}
+
+.rejected-data-list-page .rejection-reason-box {
+  padding: 1rem;
+  border-radius: 16px;
+  background: rgba(198, 69, 69, 0.08);
+  border: 1px solid rgba(198, 69, 69, 0.16);
+  margin-bottom: 1rem;
+}
+
+.rejected-data-list-page .rejection-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-error);
+  margin-bottom: 0.5rem;
+}
+
+.rejected-data-list-page .rejection-text {
+  font-size: 0.9375rem;
+  color: #3f4a3d;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.rejected-data-list-page .item-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.rejected-data-list-page .item-actions .button--secondary {
+  background: rgba(79, 146, 40, 0.1);
+  color: #2f6b22;
+  border-color: rgba(79, 146, 40, 0.12);
+}
+
+.rejected-data-list-page .item-actions .button--secondary:hover:not(:disabled) {
+  background: rgba(79, 146, 40, 0.16);
+}
+
+.rejected-data-list-page .item-actions .button--warning {
+  border-width: 1px;
+}
+
+.rejected-data-list-page .empty-state {
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rejected-data-list-page .empty-state__message {
+  color: #6d7e67;
+}
+
+@media (max-width: 768px) {
+  .rejected-data-list-page {
+    padding: 0 0 var(--spacing-lg);
+  }
+
+  .rejected-data-list-page .stats-section {
+    grid-template-columns: 1fr;
+  }
+
+  .rejected-data-list-page .list-header {
+    flex-direction: column;
+  }
+
+  .rejected-data-list-page .search-wrapper {
+    max-width: 100%;
+  }
+
+  .rejected-data-list-page .meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rejected-data-list-page .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .rejected-data-list-page .patient-name {
+    font-size: 1.125rem;
+  }
+
+  .rejected-data-list-page .item-actions {
+    flex-direction: column;
+  }
+
+  .rejected-data-list-page .item-actions button {
+    width: 100%;
+  }
+}

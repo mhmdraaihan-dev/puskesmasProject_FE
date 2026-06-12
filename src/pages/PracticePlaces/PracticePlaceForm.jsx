@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
-import CustomSelect from "../../components/CustomSelect";
-import "../../App.css";
 import {
   createPracticePlace,
   getPracticePlaceById,
@@ -11,6 +9,14 @@ import {
   updatePracticePlace,
 } from "../../services/api";
 import { POSITIONS } from "../../utils/roleHelpers";
+import PageHeader from "../../components/layout/PageHeader";
+import Card from "../../components/ui/Card";
+import Button from "../../components/Button";
+import Input from "../../components/Input";
+import Select from "../../components/ui/Select";
+import LoadingSpinner from "../../components/ui/LoadingSpinner";
+import "../../styles/design-system.css";
+import "./PracticePlaceForm.css";
 
 const PracticePlaceForm = () => {
   const { practiceId } = useParams();
@@ -123,249 +129,169 @@ const PracticePlaceForm = () => {
 
   if (fetching) {
     return (
-      <div style={{ padding: "3rem", textAlign: "center" }}>
-        Memuat data tempat praktik...
+      <div className="practice-place-form-page">
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
 
   return (
-    <div className="dashboard page-shell">
-      <div className="dashboard-header" style={styles.header}>
-        <div className="page-intro">
-          <div className="page-kicker">Practice Setup</div>
-          <h2 className="page-title" style={styles.pageTitle}>
-            {isEditMode ? "Edit Tempat Praktik" : "Tambah Tempat Praktik Baru"}
-          </h2>
-          <p className="page-subtitle" style={styles.pageSubtitle}>
-            {isEditMode
-              ? "Perbarui informasi praktik, desa, dan bidan terhubung"
-              : "Tambahkan tempat praktik baru dan hubungkan dengan bidan praktik"}
-          </p>
-        </div>
-        <button
-          onClick={() => navigate("/practice-places")}
-          type="button"
-          className="btn-secondary"
-          style={styles.secondaryButton}
-        >
-          Kembali ke List
-        </button>
-      </div>
+    <div className="practice-place-form-page">
+      <PageHeader
+        title={isEditMode ? "Edit Tempat Praktik" : "Tambah Tempat Praktik Baru"}
+        subtitle={
+          isEditMode
+            ? "Perbarui informasi praktik, desa, dan bidan terhubung"
+            : "Tambahkan tempat praktik baru dan hubungkan dengan bidan praktik"
+        }
+        actions={
+          <Button variant="secondary" onClick={() => navigate("/practice-places")}>
+            Kembali
+          </Button>
+        }
+      />
 
-      {error ? (
-        <div className="error-alert" style={{ marginBottom: "1rem" }}>
-          {error}
-        </div>
-      ) : null}
+      <Card variant="surface-dark" padding="xl">
+        {error && (
+          <div className="error-alert" style={{ marginBottom: "var(--spacing-5)" }}>
+            {error}
+          </div>
+        )}
 
-      <div className="content-card-light" style={styles.formCard}>
-        <div style={styles.formIntro}>
-          <div>
-            <h3 style={styles.sectionTitle}>Informasi Tempat Praktik</h3>
-            <p className="text-muted" style={styles.sectionSubtitle}>
-              Data ini dipakai untuk menghubungkan bidan praktik dengan wilayah kerja.
+        <form onSubmit={handleSubmit(onSubmit)} className="practice-form-grid">
+          <Input
+            label="Nama Tempat Praktik"
+            required
+            placeholder="Contoh: Praktik Bidan Siti"
+            error={errors.nama_praktik?.message}
+            {...register("nama_praktik", {
+              required: "Nama tempat praktik wajib diisi",
+            })}
+          />
+
+          <div className="form-group">
+            <label className="form-label" htmlFor="village_id">
+              Desa <span className="required-asterisk">*</span>
+            </label>
+            <select
+              id="village_id"
+              className="form-select"
+              {...register("village_id", { required: "Desa wajib dipilih" })}
+            >
+              <option value="">Pilih Desa</option>
+              {villages.map((village) => (
+                <option key={village.village_id} value={village.village_id}>
+                  {village.nama_desa}
+                </option>
+              ))}
+            </select>
+            {errors.village_id && (
+              <span className="error-text">{errors.village_id.message}</span>
+            )}
+            {villages.length === 0 && (
+              <small className="helper-text warning-text">
+                ⚠️ Belum ada desa. Buat desa terlebih dahulu.
+              </small>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label className="form-label" htmlFor="user_ids">
+              Bidan Praktik <span className="required-asterisk">*</span>
+            </label>
+            <Controller
+              name="user_ids"
+              control={control}
+              rules={{
+                validate: (value) =>
+                  Array.isArray(value) && value.length > 0
+                    ? true
+                    : "Bidan praktik wajib dipilih",
+              }}
+              render={({ field }) => (
+                <Select
+                  inputId="user_ids"
+                  isMulti
+                  closeMenuOnSelect={false}
+                  hideSelectedOptions={false}
+                  placeholder="Cari dan pilih bidan praktik..."
+                  options={bidanPraktikOptions}
+                  value={bidanPraktikOptions.filter((option) =>
+                    (field.value || []).includes(option.value),
+                  )}
+                  onChange={(selectedOptions) =>
+                    field.onChange(
+                      (selectedOptions || []).map((option) => option.value),
+                    )
+                  }
+                  formatOptionLabel={(option) => (
+                    <div>
+                      <div style={{ fontWeight: 600 }}>{option.label}</div>
+                      <div
+                        style={{
+                          fontSize: "0.75rem",
+                          color: "var(--color-text-muted)",
+                        }}
+                      >
+                        {option.email}
+                      </div>
+                    </div>
+                  )}
+                  noOptionsMessage={() => "Tidak ada bidan praktik"}
+                />
+              )}
+            />
+            {errors.user_ids && (
+              <span className="error-text">{errors.user_ids.message}</span>
+            )}
+            <small className="helper-text">
+              Bisa pilih lebih dari satu bidan. Cari nama atau email, lalu hapus tag jika salah pilih.
+            </small>
+          </div>
+
+          <div className="form-group form-group--full">
+            <label className="form-label" htmlFor="alamat">
+              Alamat <span className="required-asterisk">*</span>
+            </label>
+            <textarea
+              id="alamat"
+              className="form-textarea"
+              rows="4"
+              placeholder="Alamat lengkap tempat praktik"
+              {...register("alamat", { required: "Alamat wajib diisi" })}
+            />
+            {errors.alamat && (
+              <span className="error-text">{errors.alamat.message}</span>
+            )}
+          </div>
+
+          <div className="info-box">
+            <p className="info-title">Catatan</p>
+            <p className="info-hint">
+              Data tempat praktik digunakan untuk menghubungkan bidan praktik dengan wilayah kerja mereka.
             </p>
           </div>
-          <span style={styles.badge}>{isEditMode ? "Mode Edit" : "Mode Tambah"}</span>
-        </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} style={styles.formLayout}>
-          <div style={styles.sectionCard}>
-            <div style={styles.inputGrid}>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" htmlFor="nama_praktik">
-                  Nama Tempat Praktik *
-                </label>
-                <input
-                  id="nama_praktik"
-                  type="text"
-                  className="form-input"
-                  placeholder="Contoh: Praktik Bidan Siti"
-                  {...register("nama_praktik", {
-                    required: "Nama tempat praktik wajib diisi",
-                  })}
-                />
-                {errors.nama_praktik ? (
-                  <span className="error-message">
-                    {errors.nama_praktik.message}
-                  </span>
-                ) : null}
-              </div>
-
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" htmlFor="village_id">
-                  Desa *
-                </label>
-                <select
-                  id="village_id"
-                  className="form-input"
-                  {...register("village_id", { required: "Desa wajib dipilih" })}
-                >
-                  <option value="">Pilih Desa</option>
-                  {villages.map((village) => (
-                    <option key={village.village_id} value={village.village_id}>
-                      {village.nama_desa}
-                    </option>
-                  ))}
-                </select>
-                {errors.village_id ? (
-                  <span className="error-message">{errors.village_id.message}</span>
-                ) : null}
-              </div>
-
-              <div className="form-group" style={{ marginBottom: 0, gridColumn: "1 / -1" }}>
-                <label className="form-label" htmlFor="user_ids">
-                  Bidan Praktik *
-                </label>
-                <Controller
-                  name="user_ids"
-                  control={control}
-                  rules={{
-                    validate: (value) =>
-                      Array.isArray(value) && value.length > 0
-                        ? true
-                        : "Bidan praktik wajib dipilih",
-                  }}
-                  render={({ field }) => (
-                    <CustomSelect
-                      inputId="user_ids"
-                      isMulti
-                      closeMenuOnSelect={false}
-                      hideSelectedOptions={false}
-                      placeholder="Cari dan pilih bidan praktik..."
-                      options={bidanPraktikOptions}
-                      value={bidanPraktikOptions.filter((option) =>
-                        (field.value || []).includes(option.value),
-                      )}
-                      onChange={(selectedOptions) =>
-                        field.onChange(
-                          (selectedOptions || []).map((option) => option.value),
-                        )
-                      }
-                      formatOptionLabel={(option) => (
-                        <div>
-                          <div style={{ fontWeight: 600 }}>{option.label}</div>
-                          <div
-                            style={{
-                              fontSize: "0.75rem",
-                              color: "var(--color-text-muted)",
-                            }}
-                          >
-                            {option.email}
-                          </div>
-                        </div>
-                      )}
-                      noOptionsMessage={() => "Tidak ada bidan praktik"}
-                    />
-                  )}
-                />
-                {errors.user_ids ? (
-                  <span className="error-message">{errors.user_ids.message}</span>
-                ) : null}
-                <small className="form-helper" style={styles.helperText}>
-                  Bisa pilih lebih dari satu bidan. Cari nama atau email, lalu hapus
-                  tag jika salah pilih.
-                </small>
-              </div>
-
-              <div className="form-group" style={{ marginBottom: 0, gridColumn: "1 / -1" }}>
-                <label className="form-label" htmlFor="alamat">
-                  Alamat *
-                </label>
-                <textarea
-                  id="alamat"
-                  className="form-input"
-                  rows="4"
-                  placeholder="Alamat lengkap tempat praktik"
-                  {...register("alamat", { required: "Alamat wajib diisi" })}
-                />
-                {errors.alamat ? (
-                  <span className="error-message">{errors.alamat.message}</span>
-                ) : null}
-              </div>
-            </div>
-          </div>
-
-          <div style={styles.formActions}>
-            <button
-              onClick={() => navigate("/practice-places")}
+          <div className="form-actions">
+            <Button
               type="button"
-              className="btn-secondary"
-              style={styles.secondaryButton}
+              variant="secondary"
+              onClick={() => navigate("/practice-places")}
             >
               Batal
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary"
-              style={styles.primaryButton}
-            >
+            </Button>
+            <Button type="submit" variant="primary" disabled={loading}>
               {loading
                 ? "Menyimpan..."
                 : isEditMode
                   ? "Update Tempat Praktik"
                   : "Tambah Tempat Praktik"}
-            </button>
+            </Button>
           </div>
         </form>
-      </div>
+      </Card>
     </div>
   );
-};
-
-const styles = {
-  header: { gap: "1rem", flexWrap: "wrap" },
-  pageTitle: { marginBottom: "0.35rem" },
-  pageSubtitle: { margin: 0 },
-  formCard: { maxWidth: "none", margin: 0, padding: "1.75rem" },
-  formIntro: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: "1rem",
-    flexWrap: "wrap",
-    marginBottom: "1rem",
-  },
-  sectionTitle: { marginBottom: "0.35rem", fontSize: "1.1rem" },
-  sectionSubtitle: { margin: 0 },
-  badge: {
-    display: "inline-flex",
-    alignItems: "center",
-    padding: "0.4rem 0.8rem",
-    borderRadius: "999px",
-    background: "rgba(204,120,92,0.14)",
-    border: "1px solid rgba(204,120,92,0.24)",
-    color: "var(--color-primary-dark)",
-    fontSize: "0.8rem",
-    fontWeight: "700",
-  },
-  formLayout: { display: "grid", gap: "1rem" },
-  sectionCard: {
-    padding: "1.25rem",
-    borderRadius: "18px",
-    background: "rgba(255,255,255,0.6)",
-    border: "1px solid rgba(73, 62, 50, 0.1)",
-  },
-  inputGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "1rem",
-  },
-  helperText: { fontSize: "0.78rem", marginTop: "0.5rem", display: "block" },
-  formActions: {
-    display: "flex",
-    justifyContent: "flex-end",
-    gap: "0.75rem",
-    flexWrap: "wrap",
-  },
-  primaryButton: { width: "auto", minWidth: "170px", paddingInline: "1rem" },
-  secondaryButton: {
-    width: "auto",
-    minWidth: "150px",
-    paddingInline: "1rem",
-  },
 };
 
 export default PracticePlaceForm;

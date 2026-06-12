@@ -1,0 +1,123 @@
+/* HealthDataList.css - Health Data List Page */
+
+.health-data-list-page {
+  max-width: 100%;
+}
+
+/* Stats Section */
+.health-data-list-page .stats-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.health-data-list-page .stat-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.health-data-list-page .stat-value {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.2;
+  margin-bottom: 0.25rem;
+}
+
+.health-data-list-page .stat-note {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+/* Filter Card */
+.health-data-list-page .filter-card {
+  margin-bottom: 2rem;
+}
+
+.health-data-list-page .filter-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+}
+
+.health-data-list-page .filter-subtitle {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin-bottom: 1.5rem;
+}
+
+.health-data-list-page .filter-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+.health-data-list-page .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.health-data-list-page .form-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.health-data-list-page .form-select {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--hairline-border);
+  background: var(--color-canvas);
+  color: var(--color-text);
+  font-size: 0.9375rem;
+  transition: all 0.2s ease;
+}
+
+.health-data-list-page .form-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(204, 120, 92, 0.15);
+}
+
+.health-data-list-page .filter-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Error Alert */
+.health-data-list-page .error-alert {
+  background: rgba(198, 69, 69, 0.15);
+  border: 1px solid rgba(198, 69, 69, 0.3);
+  color: var(--color-error);
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .health-data-list-page .stats-section {
+    grid-template-columns: 1fr;
+  }
+
+  .health-data-list-page .filter-form {
+    grid-template-columns: 1fr;
+  }
+
+  .health-data-list-page .stat-value {
+    font-size: 1.5rem;
+  }
+}

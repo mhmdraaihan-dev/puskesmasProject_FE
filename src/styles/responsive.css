@@ -1,0 +1,324 @@
+/**
+ * Responsive Styles - Breakpoint Overrides
+ * 
+ * This file contains responsive overrides and adjustments for different screen sizes:
+ * - Mobile: < 768px
+ * - Tablet: 768px - 1023px  
+ * - Desktop: >= 1024px
+ * 
+ * Provides responsive typography scaling, spacing adjustments, and layout changes.
+ */
+
+/* ===== MOBILE (<768px) ===== */
+
+@media (max-width: 767px) {
+  /* Typography Scaling */
+  :root {
+    --type-display-xl-size: 32px;
+    --type-display-lg-size: 28px;
+    --type-display-md-size: 24px;
+    --type-title-lg-size: 20px;
+    --type-title-md-size: 18px;
+    --spacing-section: 48px;
+  }
+
+  /* Body padding adjustments */
+  body {
+    padding: 0;
+  }
+
+  /* Container adjustments */
+  .container {
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+  }
+
+  /* Stack flex layouts */
+  .flex-row-mobile-stack {
+    flex-direction: column;
+  }
+
+  /* Full width buttons on mobile */
+  .btn-mobile-full {
+    width: 100%;
+  }
+
+  /* Hide elements on mobile */
+  .hide-mobile {
+    display: none !important;
+  }
+
+  /* Show only on mobile */
+  .show-mobile {
+    display: block !important;
+  }
+
+  /* Text alignment on mobile */
+  .text-center-mobile {
+    text-align: center;
+  }
+
+  /* Reduce gap on mobile */
+  .gap-lg {
+    gap: var(--spacing-md);
+  }
+
+  .gap-xl {
+    gap: var(--spacing-lg);
+  }
+
+  /* Stats grid - single column on mobile */
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Card padding adjustments */
+  .card {
+    padding: var(--spacing-md);
+  }
+
+  /* Page header adjustments */
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .page-header-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .page-header-actions .btn {
+    width: 100%;
+  }
+}
+
+
+/* ===== TABLET (768px - 1023px) ===== */
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Moderate typography scaling */
+  :root {
+    --type-display-xl-size: 48px;
+    --type-display-lg-size: 40px;
+    --spacing-section: 72px;
+  }
+
+  /* Two-column grids become single column on tablet portrait */
+  .form-grid--two-col {
+    grid-template-columns: 1fr;
+  }
+
+  /* Stats grid - 2 columns on tablet */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Hide elements on tablet */
+  .hide-tablet {
+    display: none !important;
+  }
+
+  /* Show only on tablet */
+  .show-tablet {
+    display: block !important;
+  }
+}
+
+
+/* ===== DESKTOP (>= 1024px) ===== */
+
+@media (min-width: 1024px) {
+  /* Hide elements on desktop */
+  .hide-desktop {
+    display: none !important;
+  }
+
+  /* Show only on desktop */
+  .show-desktop {
+    display: block !important;
+  }
+
+  /* Stats grid - 4 columns on desktop */
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Content max-width */
+  .content-constrained {
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+
+/* ===== UTILITY RESPONSIVE CLASSES ===== */
+
+/* Flex direction responsive */
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+@media (max-width: 767px) {
+  .flex-row-mobile-column {
+    flex-direction: column;
+  }
+}
+
+/* Grid responsive */
+.grid {
+  display: grid;
+}
+
+.grid-cols-1 {
+  grid-template-columns: 1fr;
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 767px) {
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .grid-cols-2-mobile {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .grid-cols-3,
+  .grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Gap utilities */
+.gap-xs { gap: var(--spacing-xs); }
+.gap-sm { gap: var(--spacing-sm); }
+.gap-md { gap: var(--spacing-md); }
+.gap-lg { gap: var(--spacing-lg); }
+.gap-xl { gap: var(--spacing-xl); }
+
+/* Width utilities */
+.w-full { width: 100%; }
+.w-auto { width: auto; }
+
+@media (max-width: 767px) {
+  .w-full-mobile {
+    width: 100%;
+  }
+}
+
+/* Padding utilities responsive */
+@media (max-width: 767px) {
+  .p-lg-mobile-md {
+    padding: var(--spacing-md);
+  }
+
+  .p-xl-mobile-md {
+    padding: var(--spacing-md);
+  }
+
+  .px-xl-mobile-md {
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+  }
+
+  .py-xl-mobile-md {
+    padding-top: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+  }
+}
+
+/* Text alignment responsive */
+.text-left { text-align: left; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+@media (max-width: 767px) {
+  .text-left-mobile { text-align: left; }
+  .text-center-mobile { text-align: center; }
+  .text-right-mobile { text-align: right; }
+}
+
+/* Overflow utilities */
+.overflow-auto { overflow: auto; }
+.overflow-hidden { overflow: hidden; }
+.overflow-x-auto { overflow-x: auto; }
+.overflow-y-auto { overflow-y: auto; }
+
+/* Z-index utilities */
+.z-base { z-index: var(--z-base); }
+.z-dropdown { z-index: var(--z-dropdown); }
+.z-sticky { z-index: var(--z-sticky); }
+.z-fixed { z-index: var(--z-fixed); }
+.z-modal { z-index: var(--z-modal); }
+.z-tooltip { z-index: var(--z-tooltip); }
+
+/* Position utilities */
+.relative { position: relative; }
+.absolute { position: absolute; }
+.fixed { position: fixed; }
+.sticky { position: sticky; }
+
+/* Display utilities */
+.block { display: block; }
+.inline-block { display: inline-block; }
+.inline { display: inline; }
+.flex { display: flex; }
+.inline-flex { display: inline-flex; }
+.grid { display: grid; }
+.hidden { display: none; }
+
+/* Flex utilities */
+.flex-1 { flex: 1; }
+.flex-auto { flex: auto; }
+.flex-initial { flex: initial; }
+.flex-none { flex: none; }
+
+.items-start { align-items: flex-start; }
+.items-center { align-items: center; }
+.items-end { align-items: flex-end; }
+.items-stretch { align-items: stretch; }
+
+.justify-start { justify-content: flex-start; }
+.justify-center { justify-content: center; }
+.justify-end { justify-content: flex-end; }
+.justify-between { justify-content: space-between; }
+.justify-around { justify-content: space-around; }
+
+.flex-wrap { flex-wrap: wrap; }
+.flex-nowrap { flex-wrap: nowrap; }
+
+/* Container queries support (modern browsers) */
+@supports (container-type: inline-size) {
+  .container-query {
+    container-type: inline-size;
+  }
+
+  @container (max-width: 600px) {
+    .container-query .btn {
+      width: 100%;
+    }
+  }
+}

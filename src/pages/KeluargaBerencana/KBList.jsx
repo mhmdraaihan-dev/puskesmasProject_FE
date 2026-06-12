@@ -1,9 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ConfirmDialog from "../../components/ConfirmDialog";
-import StatusBadge from "../../components/StatusBadge";
 import { useAuth } from "../../context/AuthContext";
-import "../../App.css";
 import { deleteKB, getKBList } from "../../services/api";
 import { formatDate } from "../../utils/dateFormatter";
 import {
@@ -12,6 +9,18 @@ import {
   isAdmin,
   isBidanPraktik,
 } from "../../utils/roleHelpers";
+import PageHeader from "../../components/layout/PageHeader";
+import Card from "../../components/ui/Card";
+import Button from "../../components/Button";
+import Input from "../../components/Input";
+import Select from "../../components/ui/Select";
+import Table from "../../components/ui/Table";
+import StatusBadge from "../../components/StatusBadge";
+import LoadingSpinner from "../../components/ui/LoadingSpinner";
+import EmptyState from "../../components/ui/EmptyState";
+import Modal from "../../components/ui/Modal";
+import "../../styles/design-system.css";
+import "./KBList.css";
 
 const formatMethod = (value) => value?.replace(/_/g, " ") || "-";
 
@@ -36,10 +45,6 @@ const KBList = () => {
   const canAddData = isBidanPraktik(user);
 
   useEffect(() => {
-    if (isAdmin(user)) {
-      navigate("/");
-      return;
-    }
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, navigate]);
@@ -93,262 +98,265 @@ const KBList = () => {
       await deleteKB(deleteDialog.dataId);
       setDeleteDialog({ isOpen: false, dataId: null, patientName: "" });
       fetchData();
-      alert("Data berhasil dihapus");
+      alert("Data KB berhasil dihapus");
     } catch (err) {
       alert(err.response?.data?.message || "Gagal menghapus data");
     }
   };
 
+  const methodOptions = [
+    { value: "", label: "Semua metode" },
+    { value: "PIL", label: "PIL" },
+    { value: "SUNTIK_1_BULAN", label: "Suntik 1 Bulan" },
+    { value: "SUNTIK_3_BULAN", label: "Suntik 3 Bulan" },
+    { value: "IMPLANT", label: "Implant" },
+    { value: "IUD", label: "IUD" },
+    { value: "KONDOM", label: "Kondom" },
+    { value: "MOW", label: "MOW" },
+    { value: "MOP", label: "MOP" },
+  ];
+
+  const columns = [
+    {
+      key: "patient_name",
+      label: "Nama Pasien",
+      sortable: true,
+      render: (_, row) => {
+        const patientName = row.pasien?.nama || row.nama_pasien || "Pasien";
+        return <span className="kb-list__patient-name">{patientName}</span>;
+      },
+    },
+    {
+      key: "tanggal_kunjungan",
+      label: "Tanggal Kunjungan",
+      sortable: true,
+      render: (value) => formatDate(value),
+    },
+    {
+      key: "alat_kontrasepsi",
+      label: "Metode Kontrasepsi",
+      render: (value) => formatMethod(value),
+    },
+    {
+      key: "children",
+      label: "Jumlah Anak",
+      render: (_, row) => (
+        <span>
+          L: {row.jumlah_anak_laki || 0} / P: {row.jumlah_anak_perempuan || 0}
+        </span>
+      ),
+    },
+    {
+      key: "at",
+      label: "Abortus Terancam",
+      render: (value) => (
+        <span
+          className={`kb-list__risk-badge ${
+            value ? "kb-list__risk-badge--alert" : "kb-list__risk-badge--safe"
+          }`}
+        >
+          {value ? "Ya" : "Tidak"}
+        </span>
+      ),
+    },
+    {
+      key: "status_verifikasi",
+      label: "Status",
+      render: (value) => (value ? <StatusBadge status={value} /> : null),
+    },
+    {
+      key: "actions",
+      label: "Aksi",
+      render: (_, row) => {
+        const patientName = row.pasien?.nama || row.nama_pasien || "Pasien";
+        return (
+          <div className="kb-list__action-group">
+            <Button
+              variant="secondary"
+              size="sm"
+              className="kb-list__action-btn"
+              onClick={() => navigate(`/keluarga-berencana/${row.id}`)}
+            >
+              Detail
+            </Button>
+            {canEditKB(user, row) && (
+              <Button
+                variant="warning"
+                size="sm"
+                className="kb-list__action-btn"
+                onClick={() => navigate(`/keluarga-berencana/${row.id}/edit`)}
+              >
+                Edit
+              </Button>
+            )}
+            {canDeleteKB(user, row) && (
+              <Button
+                variant="danger"
+                size="sm"
+                className="kb-list__action-btn"
+                onClick={() =>
+                  setDeleteDialog({
+                    isOpen: true,
+                    dataId: row.id,
+                    patientName,
+                  })
+                }
+              >
+                Hapus
+              </Button>
+            )}
+          </div>
+        );
+      },
+    },
+  ];
+
   return (
-    <div className="dashboard">
-      <div className="dashboard-header" style={styles.header}>
-        <div>
-          <h2 style={styles.pageTitle}>Keluarga Berencana</h2>
-          <p className="text-muted" style={styles.pageSubtitle}>
-            {canAddData
-              ? "Input dan pantau data pelayanan KB pasien"
-              : "Lihat data KB pasien dan proses verifikasi yang masuk"}
-          </p>
-        </div>
-        <div style={styles.headerActions}>
-          <button
-            onClick={() => navigate("/")}
-            className="btn-primary"
-            style={styles.secondaryButton}
-          >
-            Kembali
-          </button>
-          {canAddData ? (
-            <button
-              onClick={() => navigate("/keluarga-berencana/add")}
-              className="btn-primary"
-              style={styles.primaryButton}
-            >
-              + Input Data Baru
-            </button>
-          ) : null}
-        </div>
+    <div className="kb-list-page">
+      <PageHeader
+        title="Data Keluarga Berencana"
+        subtitle={
+          canAddData
+            ? "Input dan pantau data pelayanan KB pasien"
+            : "Lihat data KB pasien dan proses verifikasi yang masuk"
+        }
+        actions={
+          <>
+            {canAddData && (
+              <Button
+                variant="primary"
+                onClick={() => navigate("/keluarga-berencana/add")}
+              >
+                Input Data Baru
+              </Button>
+            )}
+          </>
+        }
+      />
+
+      {/* Stats Section */}
+      <div className="stats-section">
+        <Card variant="surface-card" padding="lg" className="kb-list__summary-card">
+          <div className="stat-label">Total Data</div>
+          <div className="stat-value">{stats.total}</div>
+          <div className="stat-note">pelayanan KB</div>
+        </Card>
+        <Card variant="surface-card" padding="lg" className="kb-list__summary-card">
+          <div className="stat-label">Menunggu Verifikasi</div>
+          <div className="stat-value">{stats.pending}</div>
+          <div className="stat-note">pending</div>
+        </Card>
+        <Card variant="surface-card" padding="lg" className="kb-list__summary-card">
+          <div className="stat-label">Disetujui</div>
+          <div className="stat-value">{stats.approved}</div>
+          <div className="stat-note">approved</div>
+        </Card>
+        <Card variant="surface-card" padding="lg" className="kb-list__summary-card">
+          <div className="stat-label">Abortus Terancam</div>
+          <div className="stat-value">{stats.abortusRisk}</div>
+          <div className="stat-note">perlu perhatian</div>
+        </Card>
       </div>
 
-      <div style={styles.summaryGrid}>
-        <div className="auth-card" style={styles.summaryCard}>
-          <span style={styles.summaryLabel}>Total Data</span>
-          <strong style={styles.summaryValue}>{stats.total}</strong>
-        </div>
-        <div className="auth-card" style={styles.summaryCard}>
-          <span style={styles.summaryLabel}>Menunggu Verifikasi</span>
-          <strong style={styles.summaryValue}>{stats.pending}</strong>
-        </div>
-        <div className="auth-card" style={styles.summaryCard}>
-          <span style={styles.summaryLabel}>Disetujui</span>
-          <strong style={styles.summaryValue}>{stats.approved}</strong>
-        </div>
-        <div className="auth-card" style={styles.summaryCard}>
-          <span style={styles.summaryLabel}>Abortus Terancam</span>
-          <strong style={styles.summaryValue}>{stats.abortusRisk}</strong>
-        </div>
-      </div>
+      {/* Filter Card */}
+      <Card
+        variant="surface-card"
+        padding="xl"
+        className="filter-card kb-list__filter-card"
+      >
+        <h3 className="filter-title">Filter Data KB</h3>
+        <p className="filter-subtitle">
+          Cari data berdasarkan pasien, metode kontrasepsi, dan tanggal kunjungan
+        </p>
 
-      <div className="auth-card" style={styles.filterCard}>
-        <div style={styles.filterHeader}>
-          <div>
-            <h3 style={styles.sectionTitle}>Filter Data KB</h3>
-            <p className="text-muted" style={styles.sectionSubtitle}>
-              Cari data berdasarkan pasien, metode kontrasepsi, dan tanggal kunjungan
-            </p>
-          </div>
-        </div>
-
-        <form onSubmit={handleSearch} style={styles.filterForm}>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Cari Nama / NIK</label>
-            <input
-              type="text"
-              className="form-input"
-              placeholder="Ketik nama pasien atau NIK..."
-              value={filter.search}
-              onChange={(e) => setFilter({ ...filter, search: e.target.value })}
+        <form onSubmit={handleSearch} className="filter-form">
+          <Input
+            label="Cari Nama / NIK"
+            type="text"
+            placeholder="Ketik nama pasien atau NIK..."
+            value={filter.search}
+            onChange={(e) => setFilter({ ...filter, search: e.target.value })}
+          />
+          <div className="input-wrapper kb-list__select-wrapper">
+            <label className="input-label" htmlFor="kb-method-filter">
+              Metode KB
+            </label>
+            <Select
+              inputId="kb-method-filter"
+              options={methodOptions}
+              value={methodOptions.find(
+                (opt) => opt.value === filter.alat_kontrasepsi,
+              )}
+              onChange={(selectedOption) =>
+                setFilter({
+                  ...filter,
+                  alat_kontrasepsi: selectedOption?.value || "",
+                })
+              }
+              isClearable
+              placeholder="Pilih metode..."
             />
           </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Metode KB</label>
-            <select
-              className="form-input"
-              value={filter.alat_kontrasepsi}
-              onChange={(e) =>
-                setFilter({ ...filter, alat_kontrasepsi: e.target.value })
-              }
-            >
-              <option value="">Semua metode</option>
-              <option value="PIL">PIL</option>
-              <option value="SUNTIK_1_BULAN">Suntik 1 Bulan</option>
-              <option value="SUNTIK_3_BULAN">Suntik 3 Bulan</option>
-              <option value="IMPLANT">Implant</option>
-              <option value="IUD">IUD</option>
-              <option value="KONDOM">Kondom</option>
-              <option value="MOW">MOW</option>
-              <option value="MOP">MOP</option>
-            </select>
-          </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Dari Tanggal</label>
-            <input
-              type="date"
-              className="form-input"
-              value={filter.tanggal_start}
-              onChange={(e) =>
-                setFilter({ ...filter, tanggal_start: e.target.value })
-              }
-            />
-          </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Sampai Tanggal</label>
-            <input
-              type="date"
-              className="form-input"
-              value={filter.tanggal_end}
-              onChange={(e) =>
-                setFilter({ ...filter, tanggal_end: e.target.value })
-              }
-            />
-          </div>
-          <div style={styles.filterActions}>
-            <button type="submit" className="btn-primary" style={styles.primaryButton}>
+          <Input
+            label="Dari Tanggal"
+            type="date"
+            value={filter.tanggal_start}
+            onChange={(e) =>
+              setFilter({ ...filter, tanggal_start: e.target.value })
+            }
+          />
+          <Input
+            label="Sampai Tanggal"
+            type="date"
+            value={filter.tanggal_end}
+            onChange={(e) =>
+              setFilter({ ...filter, tanggal_end: e.target.value })
+            }
+          />
+          <div className="filter-actions">
+            <Button type="submit" variant="primary">
               Cari
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              className="btn-primary"
-              style={styles.secondaryButton}
+              variant="secondary"
               onClick={handleReset}
             >
               Reset
-            </button>
+            </Button>
           </div>
         </form>
-      </div>
+      </Card>
 
-      {error ? (
-        <div className="error-alert" style={{ marginBottom: "1rem" }}>
-          {error}
-        </div>
-      ) : null}
+      {error && <div className="error-alert">{error}</div>}
 
+      {/* Table */}
       {loading ? (
-        <div style={styles.loadingState}>
-          <p>Memuat data KB...</p>
-        </div>
+        <LoadingSpinner size="lg" />
       ) : dataList.length === 0 ? (
-        <div className="auth-card" style={styles.emptyCard}>
-          <h3 style={styles.emptyTitle}>Belum ada data KB</h3>
-          <p className="text-muted" style={styles.emptySubtitle}>
-            {canAddData
-              ? "Silakan tambahkan data KB baru atau ubah filter pencarian."
-              : "Belum ada data KB yang dapat ditampilkan."}
-          </p>
-          {canAddData ? (
-            <button
-              onClick={() => navigate("/keluarga-berencana/add")}
-              className="btn-primary"
-              style={styles.primaryButton}
-            >
-              Input Data Pertama
-            </button>
-          ) : null}
-        </div>
+        <EmptyState
+          message={
+            canAddData
+              ? "Belum ada data KB. Silakan tambahkan data baru atau ubah filter pencarian."
+              : "Belum ada data KB yang dapat ditampilkan."
+          }
+          action={
+            canAddData ? (
+              <Button
+                variant="primary"
+                onClick={() => navigate("/keluarga-berencana/add")}
+              >
+                Input Data Pertama
+              </Button>
+            ) : undefined
+          }
+        />
       ) : (
-        <div style={styles.listGrid}>
-          {dataList.map((item) => {
-            const patientName = item.pasien?.nama || item.nama_pasien || "Pasien";
-
-            return (
-              <div key={item.id} className="auth-card" style={styles.dataCard}>
-                <div style={styles.cardHeader}>
-                  <div>
-                    <div style={styles.headerTopRow}>
-                      <h3 style={styles.cardTitle}>{patientName}</h3>
-                      {item.status_verifikasi ? (
-                        <StatusBadge status={item.status_verifikasi} />
-                      ) : null}
-                    </div>
-                    <p className="text-muted" style={styles.cardSubtitle}>
-                      {formatDate(item.tanggal_kunjungan)} |{" "}
-                      {item.practice_place?.nama_praktik || "-"}
-                    </p>
-                  </div>
-                  <span
-                    style={{
-                      ...styles.methodBadge,
-                      ...(item.at ? styles.methodBadgeAlert : styles.methodBadgeSafe),
-                    }}
-                  >
-                    {formatMethod(item.alat_kontrasepsi)}
-                  </span>
-                </div>
-
-                <div style={styles.metaGrid}>
-                  <div style={styles.metaCard}>
-                    <span style={styles.metaLabel}>Metode Kontrasepsi</span>
-                    <span style={styles.metaValue}>
-                      {formatMethod(item.alat_kontrasepsi)}
-                    </span>
-                  </div>
-                  <div style={styles.metaCard}>
-                    <span style={styles.metaLabel}>Anak Hidup</span>
-                    <span style={styles.metaValue}>
-                      L: {item.jumlah_anak_laki || 0} / P: {item.jumlah_anak_perempuan || 0}
-                    </span>
-                  </div>
-                  <div style={styles.metaCard}>
-                    <span style={styles.metaLabel}>Abortus Terancam</span>
-                    <span style={styles.metaValue}>
-                      {item.at ? "Ya, perlu perhatian" : "Tidak"}
-                    </span>
-                  </div>
-                </div>
-
-                <div style={styles.cardFooter}>
-                  <button
-                    onClick={() => navigate(`/keluarga-berencana/${item.id}`)}
-                    className="btn-primary"
-                    style={styles.inlinePrimaryAction}
-                  >
-                    Detail
-                  </button>
-                  {canEditKB(user, item) ? (
-                    <button
-                      onClick={() =>
-                        navigate(`/keluarga-berencana/${item.id}/edit`)
-                      }
-                      className="btn-primary"
-                      style={styles.inlineSecondaryAction}
-                    >
-                      Edit
-                    </button>
-                  ) : null}
-                  {canDeleteKB(user, item) ? (
-                    <button
-                      onClick={() =>
-                        setDeleteDialog({
-                          isOpen: true,
-                          dataId: item.id,
-                          patientName,
-                        })
-                      }
-                      className="btn-primary"
-                      style={styles.inlineDangerAction}
-                    >
-                      Hapus
-                    </button>
-                  ) : null}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <Table columns={columns} data={dataList} className="kb-list-table" />
       )}
 
-      <ConfirmDialog
+      {/* Delete Confirmation Modal */}
+      <Modal
         isOpen={deleteDialog.isOpen}
         onClose={() =>
           setDeleteDialog({ isOpen: false, dataId: null, patientName: "" })
@@ -362,202 +370,6 @@ const KBList = () => {
       />
     </div>
   );
-};
-
-const styles = {
-  header: {
-    gap: "1rem",
-    flexWrap: "wrap",
-  },
-  pageTitle: {
-    marginBottom: "0.35rem",
-  },
-  pageSubtitle: {
-    margin: 0,
-  },
-  headerActions: {
-    display: "flex",
-    gap: "0.75rem",
-    flexWrap: "wrap",
-  },
-  primaryButton: {
-    width: "auto",
-    minWidth: "140px",
-    paddingInline: "1rem",
-  },
-  secondaryButton: {
-    width: "auto",
-    minWidth: "120px",
-    paddingInline: "1rem",
-    backgroundColor: "transparent",
-    border: "1px solid var(--glass-border)",
-  },
-  summaryGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "1rem",
-    marginBottom: "1.5rem",
-  },
-  summaryCard: {
-    maxWidth: "none",
-    margin: 0,
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.45rem",
-  },
-  summaryLabel: {
-    fontSize: "0.78rem",
-    textTransform: "uppercase",
-    letterSpacing: "0.06em",
-    color: "var(--color-text-muted)",
-  },
-  summaryValue: {
-    fontSize: "1.55rem",
-    lineHeight: 1.2,
-  },
-  filterCard: {
-    maxWidth: "none",
-    margin: "0 0 1.5rem",
-  },
-  filterHeader: {
-    marginBottom: "1rem",
-  },
-  sectionTitle: {
-    marginBottom: "0.35rem",
-    fontSize: "1.1rem",
-  },
-  sectionSubtitle: {
-    margin: 0,
-  },
-  filterForm: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-    gap: "1rem",
-    alignItems: "end",
-  },
-  filterActions: {
-    display: "flex",
-    gap: "0.75rem",
-    flexWrap: "wrap",
-  },
-  loadingState: {
-    textAlign: "center",
-    padding: "3rem",
-  },
-  emptyCard: {
-    maxWidth: "none",
-    margin: 0,
-    textAlign: "center",
-    padding: "3rem",
-  },
-  emptyTitle: {
-    marginBottom: "0.6rem",
-  },
-  emptySubtitle: {
-    marginBottom: "1.25rem",
-  },
-  listGrid: {
-    display: "grid",
-    gap: "1rem",
-  },
-  dataCard: {
-    maxWidth: "none",
-    margin: 0,
-  },
-  cardHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: "1rem",
-    marginBottom: "1rem",
-    flexWrap: "wrap",
-  },
-  headerTopRow: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.75rem",
-    flexWrap: "wrap",
-    marginBottom: "0.35rem",
-  },
-  cardTitle: {
-    fontSize: "1.2rem",
-    marginBottom: 0,
-  },
-  cardSubtitle: {
-    margin: 0,
-  },
-  methodBadge: {
-    display: "inline-flex",
-    alignItems: "center",
-    borderRadius: "999px",
-    padding: "0.45rem 0.8rem",
-    fontSize: "0.8rem",
-    fontWeight: "700",
-    whiteSpace: "nowrap",
-  },
-  methodBadgeAlert: {
-    background: "rgba(239, 68, 68, 0.18)",
-    border: "1px solid rgba(248, 113, 113, 0.35)",
-    color: "#fca5a5",
-  },
-  methodBadgeSafe: {
-    background: "rgba(59, 130, 246, 0.16)",
-    border: "1px solid rgba(96, 165, 250, 0.35)",
-    color: "#93c5fd",
-  },
-  metaGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
-    gap: "0.85rem",
-  },
-  metaCard: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.35rem",
-    padding: "0.95rem 1rem",
-    borderRadius: "14px",
-    background: "rgba(255,255,255,0.03)",
-    border: "1px solid rgba(255,255,255,0.06)",
-  },
-  metaLabel: {
-    fontSize: "0.78rem",
-    textTransform: "uppercase",
-    letterSpacing: "0.05em",
-    color: "var(--color-text-muted)",
-  },
-  metaValue: {
-    lineHeight: 1.5,
-    fontWeight: "600",
-  },
-  cardFooter: {
-    marginTop: "1rem",
-    paddingTop: "1rem",
-    borderTop: "1px solid rgba(255,255,255,0.08)",
-    display: "flex",
-    gap: "0.75rem",
-    flexWrap: "wrap",
-  },
-  inlinePrimaryAction: {
-    width: "auto",
-    minWidth: "110px",
-    paddingInline: "1rem",
-    backgroundColor: "rgba(59, 130, 246, 0.22)",
-    border: "1px solid rgba(96, 165, 250, 0.45)",
-  },
-  inlineSecondaryAction: {
-    width: "auto",
-    minWidth: "110px",
-    paddingInline: "1rem",
-    backgroundColor: "rgba(168, 85, 247, 0.22)",
-    border: "1px solid rgba(168, 85, 247, 0.45)",
-  },
-  inlineDangerAction: {
-    width: "auto",
-    minWidth: "110px",
-    paddingInline: "1rem",
-    backgroundColor: "rgba(239, 68, 68, 0.2)",
-    border: "1px solid rgba(248, 113, 113, 0.45)",
-  },
 };
 
 export default KBList;

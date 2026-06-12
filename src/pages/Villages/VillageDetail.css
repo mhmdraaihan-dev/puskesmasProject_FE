@@ -1,0 +1,155 @@
+/* VillageDetail Page Styles */
+.village-detail-page {
+  padding: var(--spacing-6) 0;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Stats Section */
+.stats-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-6);
+}
+
+.stat-label {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-body-sm);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-value {
+  font-family: var(--font-serif-display);
+  font-size: var(--font-size-display-lg);
+  font-weight: 400;
+  color: var(--color-text-primary-dark);
+  margin-bottom: var(--spacing-1);
+  line-height: 1.1;
+}
+
+.stat-note {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-muted);
+}
+
+/* Section Cards */
+.section-card {
+  margin-bottom: var(--spacing-5);
+}
+
+.section-title {
+  font-family: var(--font-serif-display);
+  font-size: var(--font-size-title-lg);
+  font-weight: 400;
+  color: var(--color-text-primary-dark);
+  margin-bottom: var(--spacing-2);
+}
+
+.section-subtitle {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-5);
+}
+
+/* Practice Grid */
+.practice-grid {
+  display: grid;
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-4);
+}
+
+.practice-card {
+  padding: var(--spacing-4);
+  background-color: rgba(239, 233, 222, 0.5);
+  border: 1px solid rgba(73, 62, 50, 0.1);
+  border-radius: var(--border-radius-md);
+  transition: all 0.2s ease;
+}
+
+.practice-card:hover {
+  background-color: rgba(239, 233, 222, 0.7);
+  border-color: rgba(73, 62, 50, 0.15);
+}
+
+.practice-title {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-body-lg);
+  font-weight: 600;
+  color: var(--color-text-primary-dark);
+  margin-bottom: var(--spacing-2);
+}
+
+.practice-address {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-3);
+}
+
+.practice-staff {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-body-sm);
+  color: var(--color-text-primary-dark);
+  margin: 0;
+}
+
+.practice-staff.empty {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* Empty State */
+.empty-state {
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: var(--border-radius-md);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: var(--spacing-6);
+  margin-top: var(--spacing-4);
+}
+
+.empty-state p {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-body-md);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* Error Alert */
+.error-alert {
+  padding: var(--spacing-4);
+  margin-bottom: var(--spacing-5);
+  background-color: rgba(198, 69, 69, 0.15);
+  border: 1px solid var(--color-error);
+  border-radius: var(--border-radius-md);
+  color: var(--color-error);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-body-md);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .village-detail-page {
+    padding: var(--spacing-4) 0;
+  }
+
+  .stats-section {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-3);
+  }
+
+  .stat-value {
+    font-size: var(--font-size-display-md);
+  }
+}

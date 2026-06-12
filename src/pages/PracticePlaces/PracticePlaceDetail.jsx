@@ -1,8 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import RoleGuard from "../../components/RoleGuard";
-import "../../App.css";
 import { getPracticePlaceById } from "../../services/api";
+import PageHeader from "../../components/layout/PageHeader";
+import Card from "../../components/ui/Card";
+import Button from "../../components/Button";
+import Table from "../../components/ui/Table";
+import LoadingSpinner from "../../components/ui/LoadingSpinner";
+import "../../styles/design-system.css";
+import "./PracticePlaceDetail.css";
 
 const PracticePlaceDetail = () => {
   const { practiceId } = useParams();
@@ -39,255 +45,118 @@ const PracticePlaceDetail = () => {
 
   if (loading) {
     return (
-      <div className="dashboard page-shell">
-        <div style={{ textAlign: "center", padding: "3rem" }}>
-          <p>Memuat data tempat praktik...</p>
-        </div>
+      <div className="practice-place-detail-page">
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
 
   if (error || !place) {
     return (
-      <div className="dashboard page-shell">
-        <div className="error-alert">
-          {error || "Tempat praktik tidak ditemukan"}
-        </div>
-        <button
-          onClick={() => navigate("/practice-places")}
-          className="btn-primary"
-          style={{ marginTop: "1rem" }}
-        >
+      <div className="practice-place-detail-page">
+        <div className="error-alert">{error || "Tempat praktik tidak ditemukan"}</div>
+        <Button variant="primary" onClick={() => navigate("/practice-places")}>
           Kembali ke Daftar
-        </button>
+        </Button>
       </div>
     );
   }
 
+  const userColumns = [
+    {
+      key: "full_name",
+      label: "Nama",
+      sortable: true,
+      render: (value) => <span style={{ fontWeight: 600 }}>{value}</span>,
+    },
+    {
+      key: "email",
+      label: "Email",
+      sortable: true,
+    },
+    {
+      key: "phone_number",
+      label: "Telepon",
+      render: (value) => value || "-",
+    },
+  ];
+
   return (
-    <div className="dashboard page-shell">
-      <div className="dashboard-header" style={styles.header}>
-        <div className="page-intro">
-          <div className="page-kicker">Practice Detail</div>
-          <h2 className="page-title" style={styles.pageTitle}>{place.nama_praktik}</h2>
-          <p className="page-subtitle" style={styles.pageSubtitle}>
-            Detail relasi praktik, desa, dan bidan terhubung
-          </p>
-        </div>
-        <div className="page-actions" style={styles.headerActions}>
-          <button
-            onClick={() => navigate("/practice-places")}
-            className="btn-secondary"
-            style={styles.secondaryButton}
-          >
-            Kembali
-          </button>
-          <RoleGuard allowedRoles={["ADMIN"]}>
-            <button
-              onClick={() => navigate(`/practice-places/${practiceId}/edit`)}
-              className="btn-primary"
-              style={styles.primaryButton}
-            >
-              Edit
-            </button>
-          </RoleGuard>
-        </div>
+    <div className="practice-place-detail-page">
+      <PageHeader
+        title={place.nama_praktik}
+        actions={
+          <>
+            <Button variant="secondary" onClick={() => navigate("/practice-places")}>
+              Kembali
+            </Button>
+            <RoleGuard allowedRoles={["ADMIN"]}>
+              <Button
+                variant="primary"
+                onClick={() => navigate(`/practice-places/${practiceId}/edit`)}
+              >
+                Edit Tempat Praktik
+              </Button>
+            </RoleGuard>
+          </>
+        }
+      />
+
+      {/* Summary Cards */}
+      <div className="stats-section">
+        <Card variant="surface-dark" padding="lg">
+          <div className="stat-label">Bidan Terhubung</div>
+          <div className="stat-value">{assignedUsers.length}</div>
+          <div className="stat-note">bidan praktik</div>
+        </Card>
+        <Card variant="surface-dark" padding="lg">
+          <div className="stat-label">Desa</div>
+          <div className="stat-value-text">{place.village?.nama_desa || "-"}</div>
+          <div className="stat-note">wilayah praktik</div>
+        </Card>
+        <Card variant="surface-dark" padding="lg">
+          <div className="stat-label">Riwayat Data</div>
+          <div className="stat-value">{place._count?.health_data || 0}</div>
+          <div className="stat-note">data tersimpan</div>
+        </Card>
       </div>
 
-      <div className="content-card-light" style={styles.heroCard}>
-        <div style={styles.heroTop}>
-          <div>
-            <div style={styles.badge}>Tempat Praktik</div>
-            <h3 style={styles.heroTitle}>{place.nama_praktik}</h3>
-            <p className="text-muted" style={{ margin: 0 }}>
-              Desa {place.village?.nama_desa || "-"}
-            </p>
+      {/* Practice Place Details */}
+      <Card variant="surface-dark" padding="xl" className="section-card">
+        <h3 className="section-title">Informasi Tempat Praktik</h3>
+        <p className="section-subtitle">Detail lokasi dan alamat praktik</p>
+
+        <div className="detail-grid">
+          <div className="detail-item">
+            <div className="detail-label">Nama Praktik</div>
+            <div className="detail-value">{place.nama_praktik}</div>
+          </div>
+          <div className="detail-item">
+            <div className="detail-label">Desa</div>
+            <div className="detail-value">{place.village?.nama_desa || "-"}</div>
+          </div>
+          <div className="detail-item detail-item--full">
+            <div className="detail-label">Alamat Lengkap</div>
+            <div className="detail-value">{place.alamat || "-"}</div>
           </div>
         </div>
+      </Card>
 
-        <div style={styles.summaryGrid}>
-          <div style={styles.summaryItem}>
-            <span style={styles.summaryLabel}>Bidan Terhubung</span>
-            <span style={styles.summaryValue}>{assignedUsers.length}</span>
+      {/* Associated Users Table */}
+      <Card variant="surface-dark" padding="xl" className="section-card">
+        <h3 className="section-title">Bidan Praktik</h3>
+        <p className="section-subtitle">Tenaga yang terhubung ke tempat praktik ini</p>
+
+        {assignedUsers.length > 0 ? (
+          <Table columns={userColumns} data={assignedUsers} />
+        ) : (
+          <div className="empty-state">
+            <p>Belum ada bidan praktik yang terhubung</p>
           </div>
-          <div style={styles.summaryItem}>
-            <span style={styles.summaryLabel}>Riwayat Data</span>
-            <span style={styles.summaryValue}>{place._count?.health_data || 0}</span>
-          </div>
-        </div>
-      </div>
-
-      <div style={styles.contentGrid}>
-        <div className="content-card-light" style={styles.sectionCard}>
-          <div style={styles.sectionHeader}>
-            <h3 style={styles.sectionTitle}>Informasi Utama</h3>
-            <p className="text-muted" style={styles.sectionSubtitle}>
-              Ringkasan profil tempat praktik
-            </p>
-          </div>
-
-          <div style={styles.detailGrid}>
-            <div style={styles.detailItem}>
-              <span style={styles.detailLabel}>Nama Praktik</span>
-              <span style={styles.detailValue}>{place.nama_praktik}</span>
-            </div>
-            <div style={styles.detailItem}>
-              <span style={styles.detailLabel}>Desa</span>
-              <span style={styles.detailValue}>{place.village?.nama_desa || "-"}</span>
-            </div>
-            <div style={{ ...styles.detailItem, gridColumn: "1 / -1" }}>
-              <span style={styles.detailLabel}>Alamat Lengkap</span>
-              <span style={styles.detailValue}>{place.alamat || "-"}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="content-card-light" style={styles.sectionCard}>
-          <div style={styles.sectionHeader}>
-            <h3 style={styles.sectionTitle}>Bidan Praktik</h3>
-            <p className="text-muted" style={styles.sectionSubtitle}>
-              Tenaga yang terhubung ke tempat praktik ini
-            </p>
-          </div>
-
-          {assignedUsers.length > 0 ? (
-            <div style={styles.staffGrid}>
-              {assignedUsers.map((practiceUser) => (
-                <div key={practiceUser.user_id} style={styles.staffCard}>
-                  <h4 style={styles.staffName}>{practiceUser.full_name}</h4>
-                  <p className="text-muted" style={styles.staffMeta}>
-                    {practiceUser.email}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div style={styles.emptyState}>
-              <p className="text-muted" style={{ margin: 0 }}>
-                Belum ada bidan praktik yang terhubung
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="content-card-light" style={styles.sectionCard}>
-        <div style={styles.sectionHeader}>
-          <h3 style={styles.sectionTitle}>Statistik Data</h3>
-          <p className="text-muted" style={styles.sectionSubtitle}>
-            Ringkasan data yang terkait dengan tempat praktik ini
-          </p>
-        </div>
-
-        <div style={styles.summaryGrid}>
-          <div style={styles.summaryItem}>
-            <span style={styles.summaryLabel}>Total Data Tersimpan</span>
-            <span style={styles.summaryValue}>{place._count?.health_data || 0}</span>
-          </div>
-        </div>
-      </div>
+        )}
+      </Card>
     </div>
   );
-};
-
-const styles = {
-  header: { gap: "1rem", flexWrap: "wrap" },
-  pageTitle: { marginBottom: "0.35rem" },
-  pageSubtitle: { margin: 0 },
-  headerActions: { display: "flex", gap: "0.75rem", flexWrap: "wrap" },
-  primaryButton: { width: "auto", minWidth: "120px", paddingInline: "1rem" },
-  secondaryButton: {
-    width: "auto",
-    minWidth: "120px",
-    paddingInline: "1rem",
-  },
-  heroCard: { maxWidth: "none", margin: "0 0 1.5rem", padding: "1.75rem" },
-  heroTop: { marginBottom: "1.25rem" },
-  badge: {
-    display: "inline-flex",
-    alignItems: "center",
-    padding: "0.4rem 0.8rem",
-    borderRadius: "999px",
-    background: "rgba(204,120,92,0.14)",
-    border: "1px solid rgba(204,120,92,0.24)",
-    color: "var(--color-primary-dark)",
-    fontSize: "0.8rem",
-    fontWeight: "700",
-    marginBottom: "0.75rem",
-  },
-  heroTitle: { marginBottom: "0.35rem", fontSize: "1.7rem" },
-  summaryGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-    gap: "0.85rem",
-  },
-  summaryItem: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.35rem",
-    padding: "1rem",
-    borderRadius: "14px",
-    background: "rgba(255,255,255,0.6)",
-    border: "1px solid rgba(73, 62, 50, 0.1)",
-  },
-  summaryLabel: {
-    fontSize: "0.78rem",
-    textTransform: "uppercase",
-    letterSpacing: "0.06em",
-    color: "var(--color-text-muted)",
-  },
-  summaryValue: { fontWeight: "700", lineHeight: 1.5 },
-  contentGrid: {
-    display: "grid",
-    gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
-    gap: "1.5rem",
-    marginBottom: "1.5rem",
-  },
-  sectionCard: { maxWidth: "none", margin: 0, padding: "1.5rem" },
-  sectionHeader: { marginBottom: "1rem" },
-  sectionTitle: { marginBottom: "0.35rem", fontSize: "1.1rem" },
-  sectionSubtitle: { margin: 0 },
-  detailGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: "0.85rem",
-  },
-  detailItem: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.35rem",
-    padding: "1rem",
-    borderRadius: "14px",
-    background: "rgba(255,255,255,0.6)",
-    border: "1px solid rgba(73, 62, 50, 0.1)",
-  },
-  detailLabel: {
-    fontSize: "0.78rem",
-    textTransform: "uppercase",
-    letterSpacing: "0.05em",
-    color: "var(--color-text-muted)",
-  },
-  detailValue: { lineHeight: 1.5, fontWeight: "600" },
-  staffGrid: { display: "grid", gap: "0.85rem" },
-  staffCard: {
-    padding: "1rem",
-    borderRadius: "14px",
-    background: "rgba(255,255,255,0.6)",
-    border: "1px solid rgba(73, 62, 50, 0.1)",
-  },
-  staffName: { marginBottom: "0.25rem" },
-  staffMeta: { margin: 0 },
-  emptyState: {
-    minHeight: "180px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    textAlign: "center",
-    borderRadius: "14px",
-    border: "1px dashed rgba(73, 62, 50, 0.12)",
-    background: "rgba(255,255,255,0.45)",
-    padding: "1rem",
-  },
 };
 
 export default PracticePlaceDetail;

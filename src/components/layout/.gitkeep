@@ -1,0 +1,13 @@
+# Layout Components Directory
+
+This directory contains layout-related components for the sidebar navigation system:
+- MainLayout.jsx
+- Sidebar.jsx
+- SidebarHeader.jsx
+- SidebarNav.jsx
+- NavGroup.jsx
+- NavItem.jsx
+- SidebarFooter.jsx
+- MainContent.jsx
+- PageHeader.jsx
+- Breadcrumbs.jsx

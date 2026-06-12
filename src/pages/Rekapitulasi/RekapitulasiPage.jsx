@@ -63,9 +63,9 @@ const getCreatorName = (item) =>
 
 const sectionSurface = {
   background:
-    "linear-gradient(180deg, rgba(255,255,255,0.82), rgba(239,233,222,0.96))",
-  border: "1px solid rgba(73, 62, 50, 0.1)",
-  boxShadow: "0 18px 40px rgba(76, 63, 48, 0.12)",
+    "linear-gradient(180deg, rgba(255,255,255,0.92), rgba(237,242,230,0.96))",
+  border: "1px solid rgba(77, 122, 44, 0.12)",
+  boxShadow: "0 18px 40px rgba(35, 51, 24, 0.08)",
   color: "var(--color-text-main)",
 };
 
@@ -89,15 +89,11 @@ const RekapitulasiPage = () => {
   const [villages, setVillages] = useState([]);
 
   useEffect(() => {
-    if (!isBidanKoordinator(user)) {
-      navigate("/");
-      return;
-    }
     loadVillages();
   }, [user, navigate]);
 
   useEffect(() => {
-    if (isBidanKoordinator(user)) fetchRekapData(filters);
+    fetchRekapData(filters);
   }, [filters, user]);
 
   const loadVillages = async () => {
@@ -270,12 +266,19 @@ const RekapitulasiPage = () => {
 
       <style>{`
         .rekap-table{width:100%;border-collapse:collapse;min-width:1280px;font-size:.82rem}
-        .rekap-table th{background:rgba(232,224,210,.82);color:var(--color-text-main);border:1px solid rgba(73,62,50,.1);padding:.7rem .5rem;text-align:center;vertical-align:middle;font-weight:600}
+        .rekap-table th{background:rgba(220,234,207,.82);color:var(--color-text-main);border:1px solid rgba(77,122,44,.12);padding:.7rem .5rem;text-align:center;vertical-align:middle;font-weight:600}
         .rekap-table td{border:1px solid rgba(73,62,50,.08);padding:.75rem .55rem;text-align:center;vertical-align:middle;line-height:1.3;color:var(--color-text-main)}
         .rekap-col-name{width:180px}.rekap-col-bidan{width:170px}.rekap-cell-left{text-align:left}.rekap-primary{font-weight:700}.rekap-secondary{color:var(--color-text-muted);font-size:.72rem;margin-top:.15rem}.rekap-compact{font-size:.73rem}.rekap-empty{text-align:center;padding:3rem 1rem;color:var(--color-text-muted)}
-        .rekap-table tbody tr:hover td{background:rgba(204,120,92,.06)}
-        .modal-overlay{position:fixed;inset:0;background:rgba(86,69,52,.28);backdrop-filter:blur(6px);display:flex;justify-content:center;align-items:center;z-index:1000;padding:1rem}
-        .modal-content{width:100%;max-width:520px;background:linear-gradient(180deg, rgba(255,255,255,.96), rgba(244,238,229,.98));border:1px solid rgba(73,62,50,.1);border-radius:20px;padding:2rem;box-shadow:0 22px 48px rgba(76,63,48,.2);color:var(--color-text-main)}
+        .rekap-table tbody tr:hover td{background:rgba(79,146,40,.05)}
+        .modal-overlay{position:fixed;inset:0;background:rgba(35,51,24,.32);backdrop-filter:blur(6px);display:flex;justify-content:center;align-items:center;z-index:1000;padding:1rem}
+        .modal-content{width:100%;max-width:520px;background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(237,242,230,.97));border:1px solid rgba(77,122,44,.14);border-radius:24px;padding:2rem;box-shadow:0 24px 52px rgba(35,51,24,.14);color:var(--color-text-main)}
+        .modal-content .form-label{color:var(--color-text-strong);font-weight:600;display:block;margin-bottom:.45rem;font-size:.9rem}
+        .modal-content .form-input{background:rgba(255,255,255,.88);border:1px solid rgba(77,122,44,.18);border-radius:12px;color:var(--color-text-main);width:100%;min-height:44px;padding:.75rem 1rem;font-size:.95rem;box-sizing:border-box;transition:border-color .2s,box-shadow .2s}
+        .modal-content .form-input::placeholder{color:rgba(61,61,58,.4)}
+        .modal-content .form-input:focus{outline:none;border-color:var(--color-primary);box-shadow:0 0 0 3px rgba(79,146,40,.14);background:rgba(255,255,255,1)}
+        .modal-content select.form-input option{background:#fff;color:var(--color-text-main)}
+        .modal-content h3{color:var(--color-text-strong)}
+        .modal-content .text-muted{color:var(--color-text-muted)}
         @media print{
           .no-print{display:none!important}.only-print{display:block!important}.dashboard{padding:0!important;margin:0!important;background:white!important;color:black!important}.auth-card,.content-card-light,.stat-card{border:none!important;box-shadow:none!important;background:white!important;color:black!important;padding:0!important}.rekap-table{min-width:100%!important;font-size:8pt!important}.rekap-table th{background:#f0f0f0!important;color:black!important;border:1px solid #000!important;padding:4px!important;font-size:9pt!important}.rekap-table td{border:1px solid #000!important;color:black!important;padding:4px!important;font-size:8pt!important}.rekap-secondary,.text-muted{color:#555!important}body{background:white!important}
         }

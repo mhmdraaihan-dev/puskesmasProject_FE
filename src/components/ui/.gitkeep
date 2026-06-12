@@ -1,0 +1,13 @@
+# UI Components Directory
+
+This directory contains refactored design system UI components:
+- Button.jsx (refactored)
+- Card.jsx (new)
+- Input.jsx (refactored)
+- Select.jsx (refactored from CustomSelect)
+- Table.jsx (new)
+- StatusBadge.jsx (refactored)
+- Modal.jsx (refactored from ConfirmDialog)
+- Tooltip.jsx (new)
+- EmptyState.jsx (new)
+- LoadingSpinner.jsx (new)

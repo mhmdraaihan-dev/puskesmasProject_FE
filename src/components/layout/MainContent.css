@@ -1,0 +1,80 @@
+/**
+ * MainContent Component Styles
+ * 
+ * Main content area with cream canvas background.
+ * Adjusts margin-left based on sidebar state (expanded/collapsed).
+ */
+
+.main-content {
+  flex: 1;
+  min-height: 100vh;
+  margin-left: 240px !important; /* Sidebar expanded: content pushed right 240px */
+  background: var(--color-canvas); /* #faf9f5 - cream canvas */
+  transition: margin-left 0.3s ease;
+}
+
+/* When sidebar is collapsed, content has more space (expanded) */
+.main-content--expanded {
+  margin-left: 64px !important; /* Sidebar collapsed: content only pushed 64px */
+}
+
+/* Inner container with padding */
+.main-content__inner {
+  padding: var(--spacing-xl); /* 48px padding on desktop */
+  max-width: 1600px; /* Max content width for very large screens */
+  margin: 0 auto; /* Center content on very large screens */
+}
+
+/* Mobile: no margin-left (sidebar is overlay) */
+@media (max-width: 767px) {
+  .main-content,
+  .main-content--expanded {
+    margin-left: 0;
+  }
+  
+  .main-content__inner {
+    padding: var(--spacing-lg); /* 24px padding on mobile */
+  }
+}
+
+/* Tablet: adjust for collapsed sidebar default */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .main-content {
+    margin-left: 64px; /* Sidebar collapsed by default on tablet */
+  }
+  
+  .main-content--expanded {
+    margin-left: 64px; /* Same as default - collapsed state is default */
+  }
+  
+  /* When user manually expands sidebar on tablet */
+  .main-content:not(.main-content--expanded) {
+    margin-left: 240px;
+  }
+  
+  .main-content__inner {
+    padding: var(--spacing-lg); /* 24px padding on tablet */
+  }
+}
+
+/* Print: remove sidebar margin */
+@media print {
+  .main-content,
+  .main-content--expanded {
+    margin-left: 0;
+  }
+  
+  .main-content__inner {
+    padding: 0;
+  }
+}
+
+/* Accessibility: skip-to-content target */
+.main-content:focus {
+  outline: none;
+}
+
+.main-content:focus-visible {
+  outline: 3px solid var(--color-primary); /* #cc785c - coral */
+  outline-offset: -3px;
+}

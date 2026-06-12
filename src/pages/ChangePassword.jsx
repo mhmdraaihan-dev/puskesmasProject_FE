@@ -2,7 +2,12 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import { changePassword } from '../services/api';
-import '../App.css';
+import PageHeader from '../components/layout/PageHeader';
+import Card from '../components/ui/Card';
+import Button from '../components/Button';
+import Input from '../components/Input';
+import '../styles/design-system.css';
+import './ChangePassword.css';
 
 const ChangePassword = () => {
     const { userId } = useParams();
@@ -41,93 +46,95 @@ const ChangePassword = () => {
     };
 
     return (
-        <div className="dashboard">
-            <div className="dashboard-header">
-                <div>
-                    <h2>Change Password</h2>
-                    <p className="text-muted">Update your account password.</p>
-                </div>
-                <div>
-                    <button onClick={() => navigate('/')} className="btn-primary" style={{ backgroundColor: 'transparent', border: '1px solid var(--glass-border)' }}>
-                        Cancel
-                    </button>
-                </div>
-            </div>
+        <div className="change-password-page">
+            <PageHeader
+                heading="Ubah Kata Sandi"
+                subtitle="Perbarui kata sandi akun Anda dengan aman dan pastikan konfirmasi sesuai."
+                actions={
+                    <Button variant="secondary" onClick={() => navigate('/')}>
+                        Batal
+                    </Button>
+                }
+            />
 
-            <div className="auth-card" style={{ maxWidth: '500px', margin: '0 auto' }}>
-                {error && (
-                    <div className="error-alert">
-                        {error}
-                    </div>
-                )}
+            <div className="password-form-container">
+                <Card
+                    variant="surface-card"
+                    padding="xl"
+                    className="change-password-card"
+                >
+                    {error && (
+                        <div className="error-alert change-password-error">
+                            {error}
+                        </div>
+                    )}
 
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <div className="form-group">
-                        <label className="form-label" htmlFor="old_password">Current Password</label>
-                        <input
-                            id="old_password"
+                    <form onSubmit={handleSubmit(onSubmit)} className="change-password-form">
+                        <div className="change-password-form__header">
+                            <h3 className="change-password-form__title">Form Kata Sandi</h3>
+                            <p className="change-password-form__subtitle">
+                                Masukkan password lama untuk verifikasi, lalu buat password baru
+                                yang mudah Anda ingat namun tetap aman.
+                            </p>
+                        </div>
+
+                        <Input
+                            label="Password Lama"
                             type="password"
-                            className="form-input"
-                            placeholder="Enter your current password"
-                            {...register("old_password", { required: "Current password is required" })}
+                            required
+                            placeholder="Masukkan password lama"
+                            error={errors.old_password?.message}
+                            {...register("old_password", { required: "Password lama wajib diisi" })}
                         />
-                        {errors.old_password && <span className="error-message">{errors.old_password.message}</span>}
-                    </div>
 
-                    <div className="form-group">
-                        <label className="form-label" htmlFor="new_password">New Password</label>
-                        <input
-                            id="new_password"
+                        <Input
+                            label="Password Baru"
                             type="password"
-                            className="form-input"
-                            placeholder="Enter new password (min. 6 characters)"
+                            required
+                            placeholder="Minimal 6 karakter"
+                            error={errors.new_password?.message}
                             {...register("new_password", {
-                                required: "New password is required",
+                                required: "Password baru wajib diisi",
                                 minLength: {
                                     value: 6,
-                                    message: "Password must be at least 6 characters"
+                                    message: "Password minimal 6 karakter"
                                 }
                             })}
                         />
-                        {errors.new_password && <span className="error-message">{errors.new_password.message}</span>}
-                    </div>
 
-                    <div className="form-group">
-                        <label className="form-label" htmlFor="confirm_password">Confirm New Password</label>
-                        <input
-                            id="confirm_password"
+                        <Input
+                            label="Konfirmasi Password Baru"
                             type="password"
-                            className="form-input"
-                            placeholder="Re-enter new password"
+                            required
+                            placeholder="Ulangi password baru"
+                            error={errors.confirm_password?.message}
                             {...register("confirm_password", {
-                                required: "Please confirm your password",
-                                validate: value => value === newPassword || "Passwords do not match"
+                                required: "Konfirmasi password wajib diisi",
+                                validate: value => value === newPassword || "Password tidak cocok"
                             })}
                         />
-                        {errors.confirm_password && <span className="error-message">{errors.confirm_password.message}</span>}
-                    </div>
 
-                    <div style={{ marginTop: '2rem' }}>
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="btn-primary"
-                        >
-                            {loading ? 'Changing Password...' : 'Change Password'}
-                        </button>
-                    </div>
+                        <div className="info-box change-password-info-box">
+                            <p className="info-title">🔒 Ketentuan Password</p>
+                            <ul className="info-list">
+                                <li>Minimal 6 karakter</li>
+                                <li>Password baru harus cocok dengan konfirmasi</li>
+                                <li>Password lama diperlukan untuk verifikasi</li>
+                            </ul>
+                        </div>
 
-                    <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
-                        <p style={{ fontSize: '0.875rem', margin: 0 }}>
-                            <strong>🔒 Password Requirements:</strong>
-                        </p>
-                        <ul style={{ fontSize: '0.875rem', marginTop: '0.5rem', paddingLeft: '1.5rem' }}>
-                            <li>Minimum 6 characters</li>
-                            <li>Must match confirmation</li>
-                            <li>Current password required for verification</li>
-                        </ul>
-                    </div>
-                </form>
+                        <div className="change-password-actions">
+                            <Button
+                                type="submit"
+                                variant="primary"
+                                className="change-password-submit"
+                                disabled={loading}
+                            >
+                                {loading ? 'Mengubah Password...' : 'Ubah Password'}
+                            </Button>
+                        </div>
+                    </form>
+                </Card>
             </div>
         </div>
     );

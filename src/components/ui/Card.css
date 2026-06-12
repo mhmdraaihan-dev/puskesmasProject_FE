@@ -1,0 +1,120 @@
+/**
+ * Card Component Styles
+ * 
+ * Implements design system card variants with appropriate background colors,
+ * text colors, padding, and border radius options.
+ * 
+ * Requirements: 2.1, 2.2, 2.6, 9.5, 9.6
+ */
+
+.card {
+  display: block;
+  box-sizing: border-box;
+}
+
+/* ===== VARIANT STYLES ===== */
+
+/**
+ * Canvas Variant
+ * Cream background (#faf9f5) with dark text
+ * Used for: Main content containers
+ */
+.card--canvas {
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+}
+
+/**
+ * Surface Card Variant
+ * Elevated surface (#efe9de) with dark text
+ * Used for: Feature cards, content containers, elevated sections
+ */
+.card--surface-card {
+  background-color: var(--color-surface-card);
+  color: var(--color-ink);
+}
+
+/**
+ * Surface Dark Variant
+ * Dark navy (#181715) with cream text
+ * Used for: Data tables, sidebar, dark-themed containers
+ */
+.card--surface-dark {
+  background-color: var(--color-surface-dark);
+  color: var(--color-on-dark);
+}
+
+/* ===== PADDING SIZES ===== */
+
+/**
+ * Small padding: 12px
+ */
+.card--padding-sm {
+  padding: var(--spacing-sm);
+}
+
+/**
+ * Medium padding: 16px
+ */
+.card--padding-md {
+  padding: var(--spacing-md);
+}
+
+/**
+ * Large padding: 24px
+ */
+.card--padding-lg {
+  padding: var(--spacing-lg);
+}
+
+/**
+ * Extra large padding: 32px
+ */
+.card--padding-xl {
+  padding: var(--spacing-xl);
+}
+
+/* ===== BORDER RADIUS SIZES ===== */
+
+/**
+ * Small border radius: 6px
+ */
+.card--rounded-sm {
+  border-radius: var(--rounded-sm);
+}
+
+/**
+ * Medium border radius: 8px
+ */
+.card--rounded-md {
+  border-radius: var(--rounded-md);
+}
+
+/**
+ * Large border radius: 12px
+ */
+.card--rounded-lg {
+  border-radius: var(--rounded-lg);
+}
+
+/**
+ * Extra large border radius: 16px
+ */
+.card--rounded-xl {
+  border-radius: var(--rounded-xl);
+}
+
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
+
+/**
+ * On mobile devices, reduce padding slightly for smaller screens
+ */
+@media (max-width: 767px) {
+  .card--padding-xl {
+    padding: var(--spacing-lg); /* 24px instead of 32px */
+  }
+  
+  .card--padding-lg {
+    padding: var(--spacing-md); /* 16px instead of 24px */
+  }
+}

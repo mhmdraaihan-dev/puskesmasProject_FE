@@ -1,0 +1,99 @@
+.module-history-page .page-kicker {
+  color: #79b95a;
+}
+
+.module-history-page .page-subtitle {
+  color: #6d7e67;
+}
+
+.module-history-page .module-history-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 246, 235, 0.96));
+  border: 1px solid rgba(77, 122, 44, 0.14);
+  border-radius: 22px;
+  box-shadow:
+    0 18px 34px rgba(34, 52, 24, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.module-history-page .module-history-filter-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(240, 245, 232, 0.95));
+  border: 1px solid rgba(77, 122, 44, 0.12);
+  border-radius: 24px;
+  box-shadow: 0 24px 44px rgba(35, 51, 24, 0.08);
+}
+
+.module-history-page .module-history-filter-card .form-label,
+.module-history-page .module-history-filter-card .text-muted {
+  color: #586955;
+}
+
+.module-history-page .module-history-filter-card .form-input {
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(77, 122, 44, 0.14);
+  color: #233022;
+}
+
+.module-history-page .module-history-filter-card .form-input::placeholder {
+  color: rgba(84, 100, 79, 0.7);
+}
+
+.module-history-page .module-history-filter-card .form-input:focus {
+  border-color: rgba(45, 104, 31, 0.34);
+  box-shadow: 0 0 0 4px rgba(63, 134, 34, 0.08);
+  background: #ffffff;
+}
+
+.module-history-page .module-history-table-shell {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(237, 242, 230, 0.94));
+  border: 1px solid rgba(77, 122, 44, 0.12);
+  border-radius: 24px;
+  box-shadow: 0 24px 44px rgba(35, 51, 24, 0.08);
+}
+
+.module-history-page .history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  min-width: 900px;
+  background: transparent;
+  color: #233022;
+}
+
+.module-history-page .history-table th {
+  background: rgba(246, 249, 240, 0.96);
+  padding: 1rem;
+  color: #54644f;
+  font-weight: 700;
+  text-align: center;
+  border-bottom: 1px solid rgba(77, 122, 44, 0.12);
+}
+
+.module-history-page .history-table td {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(77, 122, 44, 0.08);
+  vertical-align: middle;
+}
+
+.module-history-page .history-table tr:last-child td {
+  border-bottom: none;
+}
+
+.module-history-page .history-table tbody tr:hover td {
+  background: rgba(79, 146, 40, 0.045);
+}
+
+.module-history-page .module-history-detail-btn {
+  background: rgba(79, 146, 40, 0.1);
+  color: #2f6b22;
+  border-color: rgba(79, 146, 40, 0.12);
+}
+
+.module-history-page .module-history-detail-btn:hover {
+  background: rgba(79, 146, 40, 0.16);
+}
+
+@media (max-width: 768px) {
+  .module-history-page .history-table {
+    min-width: 760px;
+  }
+}
