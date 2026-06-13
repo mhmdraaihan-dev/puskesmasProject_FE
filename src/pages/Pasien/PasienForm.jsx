@@ -7,7 +7,6 @@ import {
   getPasienDetail,
 } from "../../services/api";
 import PageHeader from "../../components/layout/PageHeader";
-import Card from "../../components/ui/Card";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
@@ -121,7 +120,7 @@ const PasienForm = () => {
         }
       />
 
-      <Card variant="surface-dark" padding="xl">
+      <div className="pf-form-card">
         {serverError && <div className="error-alert">{serverError}</div>}
 
         <form onSubmit={handleSubmit(onSubmit)} className="pasien-form-grid">
@@ -212,7 +211,7 @@ const PasienForm = () => {
             </Button>
           </div>
         </form>
-      </Card>
+      </div>
     </div>
   );
 };

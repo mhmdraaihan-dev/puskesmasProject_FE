@@ -528,7 +528,7 @@ function App() {
             element={
               <ProtectedRoute
                 allowedRoles={["ADMIN"]}
-                allowedPositions={[POSITIONS.BIDAN_KOORDINATOR]}
+                allowedPositions={[POSITIONS.BIDAN_KOORDINATOR, POSITIONS.BIDAN_DESA]}
               >
                 <RekapitulasiPage />
               </ProtectedRoute>

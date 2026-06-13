@@ -1,3 +1,13 @@
+/* ---- New stat cards: pk-stat-* (no Card component) ---- */
+.pk-stat-row { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 2rem; }
+.pk-stat-card { flex: 0 0 220px; display: flex; flex-direction: column; justify-content: center; gap: 0.25rem; padding: 1.5rem 2rem; background: linear-gradient(160deg, #ffffff 0%, #f0f6ea 100%); border: 1px solid rgba(77, 122, 44, 0.15); border-radius: 20px; box-shadow: 0 4px 20px rgba(34, 52, 24, 0.07); }
+.pk-stat-label { font-size: 0.7rem; font-weight: 700; color: #7a8f74; text-transform: uppercase; letter-spacing: 0.1em; }
+.pk-stat-value { font-size: clamp(2rem, 2.6vw, 2.5rem); font-weight: 700; color: #1a2e1a; line-height: 1; }
+.pk-stat-note { font-size: 0.875rem; color: #74836f; }
+
+/* ---- Filter box (no Card padding override) ---- */
+.kehamilan-list__filter-card { padding: 1.75rem 2rem; }
+
 .kehamilan-list-page {
   padding: 0 0 var(--spacing-xl);
   max-width: 1320px;

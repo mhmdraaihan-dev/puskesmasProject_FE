@@ -1,3 +1,15 @@
+/* ---- New stat cards: ps-stat-* (no Card component) ---- */
+.ps-stat-row { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 2rem; }
+.ps-stat-card { flex: 0 0 220px; display: flex; flex-direction: column; justify-content: center; gap: 0.25rem; padding: 1.5rem 2rem; background: linear-gradient(160deg, #ffffff 0%, #f0f6ea 100%); border: 1px solid rgba(77, 122, 44, 0.15); border-radius: 20px; box-shadow: 0 4px 20px rgba(34, 52, 24, 0.07); }
+.ps-stat-label { font-size: 0.7rem; font-weight: 700; color: #7a8f74; text-transform: uppercase; letter-spacing: 0.1em; }
+.ps-stat-value { font-size: clamp(2rem, 2.6vw, 2.5rem); font-weight: 700; color: #1a2e1a; line-height: 1; }
+.ps-stat-note { font-size: 0.875rem; color: #74836f; }
+
+/* ---- Filter box (no Card padding override) ---- */
+.persalinan-list__filter-card { padding: 1.75rem 2rem; }
+.persalinan-list-page .form-select { height: 40px; padding: 0 var(--spacing-md); font-family: var(--font-sans); font-size: var(--type-body-md-size); color: var(--color-body); background: var(--color-canvas); border: 1px solid var(--color-hairline); border-radius: var(--rounded-sm); transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+.persalinan-list-page .form-select:focus { outline: none; border-color: rgba(45, 104, 31, 0.34); box-shadow: 0 0 0 4px rgba(63, 134, 34, 0.08); }
+
 .persalinan-list-page {
   padding: 0 0 var(--spacing-xl);
   max-width: 1320px;
@@ -74,9 +86,10 @@
 .persalinan-list-page .filter-form {
   display: grid;
   grid-template-columns:
-    minmax(260px, 1.35fr)
-    minmax(180px, 1fr)
-    minmax(180px, 1fr)
+    minmax(240px, 1.35fr)
+    minmax(160px, 1fr)
+    minmax(160px, 1fr)
+    minmax(160px, 1fr)
     auto;
   column-gap: 1rem;
   row-gap: 0.9rem;

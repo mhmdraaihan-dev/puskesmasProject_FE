@@ -95,13 +95,9 @@ const UserList = () => {
       key: "status_user",
       label: "Status",
       sortable: true,
-      render: (value) => {
-        const statusMap = {
-          ACTIVE: "success",
-          INACTIVE: "muted",
-        };
-        return <StatusBadge status={statusMap[value] || "muted"} label={value} size="sm" />;
-      },
+      render: (value) => (
+        <StatusBadge status={value || "INACTIVE"} size="sm" />
+      ),
     },
     {
       key: "actions",

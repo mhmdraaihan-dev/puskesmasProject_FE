@@ -1,18 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { deleteImunisasi, getImunisasiList } from "../../services/api";
+import { deleteImunisasi, getImunisasiList, getVillages, getPracticePlacesByVillage } from "../../services/api";
 import { formatDate } from "../../utils/dateFormatter";
 import {
   canDeleteImunisasi,
   canEditImunisasi,
+  isBidanKoordinator,
   isBidanPraktik,
 } from "../../utils/roleHelpers";
 import PageHeader from "../../components/layout/PageHeader";
-import Card from "../../components/ui/Card";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
-import Select from "../../components/ui/Select";
 import Table from "../../components/ui/Table";
 import StatusBadge from "../../components/StatusBadge";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
@@ -31,8 +30,12 @@ const ImunisasiList = () => {
     search: "",
     tanggal_start: "",
     tanggal_end: "",
-    jenis_imunisasi: "",
+    bulan: "",
+    village_id: "",
+    practice_id: "",
   });
+  const [villages, setVillages] = useState([]);
+  const [practicePlaces, setPracticePlaces] = useState([]);
   const [deleteDialog, setDeleteDialog] = useState({
     isOpen: false,
     dataId: null,
@@ -42,21 +45,39 @@ const ImunisasiList = () => {
   const { user } = useAuth();
 
   const canAddData = isBidanPraktik(user);
+  const isKoor = isBidanKoordinator(user);
 
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, navigate]);
 
+  useEffect(() => {
+    if (isKoor) {
+      getVillages()
+        .then((res) => setVillages(res.data || []))
+        .catch(() => {});
+    }
+  }, [isKoor]);
+
+  useEffect(() => {
+    if (!isKoor || !filter.village_id) { setPracticePlaces([]); return; }
+    getPracticePlacesByVillage(filter.village_id)
+      .then((res) => setPracticePlaces(res.data || []))
+      .catch(() => {});
+  }, [isKoor, filter.village_id]);
+
+  const handleVillageChange = (village_id) => {
+    setFilter((f) => ({ ...f, village_id, practice_id: "" }));
+  };
+
   const stats = useMemo(() => {
     const total = dataList.length;
     const pending = dataList.filter((item) => item.status_verifikasi === "PENDING").length;
     const approved = dataList.filter((item) => item.status_verifikasi === "APPROVED").length;
-    const withTemperature = dataList.filter(
-      (item) => item.suhu_badan !== null && item.suhu_badan !== undefined,
-    ).length;
+    const rejected = dataList.filter((item) => item.status_verifikasi === "REJECTED").length;
 
-    return { total, pending, approved, withTemperature };
+    return { total, pending, approved, rejected };
   }, [dataList]);
 
   const fetchData = async (overrideFilter = filter) => {
@@ -88,9 +109,12 @@ const ImunisasiList = () => {
       search: "",
       tanggal_start: "",
       tanggal_end: "",
-      jenis_imunisasi: "",
+      bulan: "",
+      village_id: "",
+      practice_id: "",
     };
     setFilter(resetFilter);
+    if (isKoor) setPracticePlaces([]);
     fetchData(resetFilter);
   };
 
@@ -104,23 +128,6 @@ const ImunisasiList = () => {
       alert(err.response?.data?.message || "Gagal menghapus data");
     }
   };
-
-  const immunizationOptions = [
-    { value: "", label: "Semua jenis" },
-    { value: "HB_0", label: "HB 0" },
-    { value: "BCG", label: "BCG" },
-    { value: "POLIO_1", label: "POLIO 1" },
-    { value: "POLIO_2", label: "POLIO 2" },
-    { value: "POLIO_3", label: "POLIO 3" },
-    { value: "POLIO_4", label: "POLIO 4" },
-    { value: "DPT_HB_HIB_1", label: "DPT-HB-Hib 1" },
-    { value: "DPT_HB_HIB_2", label: "DPT-HB-Hib 2" },
-    { value: "DPT_HB_HIB_3", label: "DPT-HB-Hib 3" },
-    { value: "CAMPAK", label: "Campak" },
-    { value: "IPV", label: "IPV" },
-    { value: "DPT_HB_HIB_LANJUTAN", label: "DPT-HB-Hib Lanjutan" },
-    { value: "CAMPAK_LANJUTAN", label: "Campak Lanjutan" },
-  ];
 
   const columns = [
     {
@@ -230,54 +237,34 @@ const ImunisasiList = () => {
       />
 
       {/* Stats Section */}
-      <div className="stats-section">
-        <Card
-          variant="surface-card"
-          padding="lg"
-          className="imunisasi-list__summary-card"
-        >
-          <div className="stat-label">Total Data</div>
-          <div className="stat-value">{stats.total}</div>
-          <div className="stat-note">imunisasi</div>
-        </Card>
-        <Card
-          variant="surface-card"
-          padding="lg"
-          className="imunisasi-list__summary-card"
-        >
-          <div className="stat-label">Menunggu Verifikasi</div>
-          <div className="stat-value">{stats.pending}</div>
-          <div className="stat-note">pending</div>
-        </Card>
-        <Card
-          variant="surface-card"
-          padding="lg"
-          className="imunisasi-list__summary-card"
-        >
-          <div className="stat-label">Disetujui</div>
-          <div className="stat-value">{stats.approved}</div>
-          <div className="stat-note">approved</div>
-        </Card>
-        <Card
-          variant="surface-card"
-          padding="lg"
-          className="imunisasi-list__summary-card"
-        >
-          <div className="stat-label">Dengan Suhu Tercatat</div>
-          <div className="stat-value">{stats.withTemperature}</div>
-          <div className="stat-note">suhu tercatat</div>
-        </Card>
+      <div className="im-stat-row">
+        <div className="im-stat-card">
+          <span className="im-stat-label">Total Data</span>
+          <span className="im-stat-value">{stats.total}</span>
+          <span className="im-stat-note">imunisasi</span>
+        </div>
+        <div className="im-stat-card">
+          <span className="im-stat-label">Menunggu Verifikasi</span>
+          <span className="im-stat-value">{stats.pending}</span>
+          <span className="im-stat-note">pending</span>
+        </div>
+        <div className="im-stat-card">
+          <span className="im-stat-label">Disetujui</span>
+          <span className="im-stat-value">{stats.approved}</span>
+          <span className="im-stat-note">approved</span>
+        </div>
+        <div className="im-stat-card">
+          <span className="im-stat-label">Data Ditolak</span>
+          <span className="im-stat-value">{stats.rejected}</span>
+          <span className="im-stat-note">perlu revisi</span>
+        </div>
       </div>
 
       {/* Filter Card */}
-      <Card
-        variant="surface-card"
-        padding="xl"
-        className="filter-card imunisasi-list__filter-card"
-      >
+      <div className="filter-card imunisasi-list__filter-card">
         <h3 className="filter-title">Filter Data Imunisasi</h3>
         <p className="filter-subtitle">
-          Cari data berdasarkan pasien, jenis imunisasi, dan tanggal layanan
+          Cari data berdasarkan pasien, bulan, dan tanggal layanan
         </p>
 
         <form onSubmit={handleSearch} className="filter-form">
@@ -289,24 +276,29 @@ const ImunisasiList = () => {
             onChange={(e) => setFilter({ ...filter, search: e.target.value })}
           />
           <div className="input-wrapper imunisasi-list__select-wrapper">
-            <label className="input-label" htmlFor="imunisasi-type-filter">
-              Jenis Imunisasi
+            <label className="input-label" htmlFor="im-bulan">
+              Bulan
             </label>
-            <Select
-              inputId="imunisasi-type-filter"
-              options={immunizationOptions}
-              value={immunizationOptions.find(
-                (opt) => opt.value === filter.jenis_imunisasi,
-              )}
-              onChange={(selectedOption) =>
-                setFilter({
-                  ...filter,
-                  jenis_imunisasi: selectedOption?.value || "",
-                })
-              }
-              isClearable
-              placeholder="Pilih jenis imunisasi..."
-            />
+            <select
+              id="im-bulan"
+              className="form-select"
+              value={filter.bulan}
+              onChange={(e) => setFilter({ ...filter, bulan: e.target.value })}
+            >
+              <option value="">Semua Bulan</option>
+              <option value="1">Januari</option>
+              <option value="2">Februari</option>
+              <option value="3">Maret</option>
+              <option value="4">April</option>
+              <option value="5">Mei</option>
+              <option value="6">Juni</option>
+              <option value="7">Juli</option>
+              <option value="8">Agustus</option>
+              <option value="9">September</option>
+              <option value="10">Oktober</option>
+              <option value="11">November</option>
+              <option value="12">Desember</option>
+            </select>
           </div>
           <Input
             label="Dari Tanggal"
@@ -324,6 +316,41 @@ const ImunisasiList = () => {
               setFilter({ ...filter, tanggal_end: e.target.value })
             }
           />
+          {isKoor && (
+            <>
+              <div className="input-wrapper">
+                <label className="input-label" htmlFor="im-village">Desa</label>
+                <select
+                  id="im-village"
+                  className="form-select"
+                  value={filter.village_id}
+                  onChange={(e) => handleVillageChange(e.target.value)}
+                >
+                  <option value="">Semua Desa</option>
+                  {villages.map((v) => (
+                    <option key={v.village_id} value={v.village_id}>{v.nama_desa}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="input-wrapper">
+                <label className="input-label" htmlFor="im-practice">Tempat Praktik</label>
+                <select
+                  id="im-practice"
+                  className="form-select"
+                  value={filter.practice_id}
+                  onChange={(e) => setFilter((f) => ({ ...f, practice_id: e.target.value }))}
+                  disabled={!filter.village_id}
+                >
+                  <option value="">
+                    {!filter.village_id ? "Pilih desa terlebih dahulu" : "Semua Tempat Praktik"}
+                  </option>
+                  {practicePlaces.map((p) => (
+                    <option key={p.practice_id} value={p.practice_id}>{p.nama_praktik}</option>
+                  ))}
+                </select>
+              </div>
+            </>
+          )}
           <div className="filter-actions">
             <Button type="submit" variant="primary">
               Cari
@@ -333,7 +360,7 @@ const ImunisasiList = () => {
             </Button>
           </div>
         </form>
-      </Card>
+      </div>
 
       {error && <div className="error-alert">{error}</div>}
 

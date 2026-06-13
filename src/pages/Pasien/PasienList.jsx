@@ -9,7 +9,6 @@ import {
   isBidanPraktik,
 } from "../../utils/roleHelpers";
 import PageHeader from "../../components/layout/PageHeader";
-import Card from "../../components/ui/Card";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import Table from "../../components/ui/Table";
@@ -134,7 +133,7 @@ const PasienList = () => {
       render: (_, row) => (
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
           <Button
-            variant="secondary-on-dark"
+            variant="secondary"
             size="sm"
             onClick={() => navigate(`/pasien/${row.pasien_id}`)}
           >
@@ -143,14 +142,14 @@ const PasienList = () => {
           {canManage && (
             <>
               <Button
-                variant="secondary-on-dark"
+                variant="secondary"
                 size="sm"
                 onClick={() => navigate(`/pasien/${row.pasien_id}/edit`)}
               >
                 Edit
               </Button>
               <Button
-                variant="secondary-on-dark"
+                variant="secondary"
                 size="sm"
                 onClick={() =>
                   setDeleteDialog({
@@ -186,43 +185,40 @@ const PasienList = () => {
       />
 
       {/* Stats Section */}
-      <div className="stats-section">
-        <Card variant="surface-dark" padding="lg">
-          <div className="stat-label">Total Pasien</div>
-          <div className="stat-value">{stats.totalPatients}</div>
-          <div className="stat-note">pasien terdaftar</div>
-        </Card>
-        <Card variant="surface-dark" padding="lg">
-          <div className="stat-label">Data Alamat Terisi</div>
-          <div className="stat-value">{stats.patientsWithAddress}</div>
-          <div className="stat-note">alamat lengkap</div>
-        </Card>
-        <Card variant="surface-dark" padding="lg">
-          <div className="stat-label">Filter Aktif</div>
-          <div className="stat-value-text">
+      <div className="pl-stat-row">
+        <div className="pl-stat-card">
+          <span className="pl-stat-label">Total Pasien</span>
+          <span className="pl-stat-value">{stats.totalPatients}</span>
+          <span className="pl-stat-note">pasien terdaftar</span>
+        </div>
+        <div className="pl-stat-card">
+          <span className="pl-stat-label">Data Alamat Terisi</span>
+          <span className="pl-stat-value">{stats.patientsWithAddress}</span>
+          <span className="pl-stat-note">alamat lengkap</span>
+        </div>
+        <div className="pl-stat-card">
+          <span className="pl-stat-label">Filter Aktif</span>
+          <span className="pl-stat-value pl-stat-value--text">
             {filter.search ? "Pencarian" : "Semua Data"}
-          </div>
-          <div className="stat-note">
+          </span>
+          <span className="pl-stat-note">
             {filter.search || "Belum ada kata kunci"}
-          </div>
-        </Card>
+          </span>
+        </div>
       </div>
 
       {/* Search Filter */}
-      <Card variant="surface-dark" padding="xl" className="filter-card">
-        <h3 className="filter-title">Pencarian Pasien</h3>
-        <p className="filter-subtitle">
-          Cari pasien berdasarkan nama atau NIK
-        </p>
-
-        <form onSubmit={handleSearch} className="filter-form">
+      <div className="pl-filter-box">
+        <h3 className="pl-filter-title">Pencarian Pasien</h3>
+        <p className="pl-filter-sub">Cari pasien berdasarkan nama atau NIK</p>
+        <form onSubmit={handleSearch} className="pl-filter-form">
           <Input
             type="text"
             placeholder="Ketik nama pasien atau NIK..."
             value={filter.search}
             onChange={(e) => setFilter({ ...filter, search: e.target.value })}
           />
-          <div className="filter-actions">
+          <div className="pl-filter-actions">
             <Button type="submit" variant="primary">
               Cari Data
             </Button>
@@ -231,7 +227,7 @@ const PasienList = () => {
             </Button>
           </div>
         </form>
-      </Card>
+      </div>
 
       {error && <div className="error-alert">{error}</div>}
 
@@ -254,7 +250,7 @@ const PasienList = () => {
           }
         />
       ) : (
-        <Table columns={columns} data={dataList} />
+        <Table columns={columns} data={dataList} className="pasien-list-table" />
       )}
 
       {/* Delete Confirmation Modal */}
@@ -272,7 +268,7 @@ const PasienList = () => {
         </p>
         <div className="modal-actions">
           <Button
-            variant="secondary-on-dark"
+            variant="secondary"
             onClick={() =>
               setDeleteDialog({ isOpen: false, dataId: null, patientName: "" })
             }

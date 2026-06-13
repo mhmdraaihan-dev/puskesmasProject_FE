@@ -143,6 +143,45 @@ const DashboardKoordinator = () => {
 
   return (
     <div className="dashboard-koordinator">
+      {/* Quick Actions */}
+      <Card
+        variant="surface-card"
+        padding="xl"
+        className="dashboard-koordinator__actions-section"
+      >
+        <h3 className="dashboard-koordinator__actions-title">Aksi Cepat</h3>
+        <div className="dashboard-koordinator__actions-grid">
+          <button
+            onClick={() => navigate('/rekapitulasi')}
+            className="dashboard-koordinator__action-btn"
+          >
+            <Activity size={24} />
+            <span>Lihat Rekapitulasi</span>
+          </button>
+          <button
+            onClick={() => navigate('/pemeriksaan-kehamilan')}
+            className="dashboard-koordinator__action-btn"
+          >
+            <Heart size={24} />
+            <span>Data Kehamilan</span>
+          </button>
+          <button
+            onClick={() => navigate('/persalinan')}
+            className="dashboard-koordinator__action-btn"
+          >
+            <Baby size={24} />
+            <span>Data Persalinan</span>
+          </button>
+          <button
+            onClick={() => navigate('/keluarga-berencana')}
+            className="dashboard-koordinator__action-btn"
+          >
+            <UsersIcon size={24} />
+            <span>Data KB</span>
+          </button>
+        </div>
+      </Card>
+
       {/* Stats Cards Grid */}
       <div className="dashboard-koordinator__stats">
         <StatsCard
@@ -203,45 +242,6 @@ const DashboardKoordinator = () => {
             className="dashboard-koordinator__table"
           />
         )}
-      </Card>
-
-      {/* Quick Actions */}
-      <Card
-        variant="surface-card"
-        padding="xl"
-        className="dashboard-koordinator__actions-section"
-      >
-        <h3 className="dashboard-koordinator__actions-title">Aksi Cepat</h3>
-        <div className="dashboard-koordinator__actions-grid">
-          <button
-            onClick={() => navigate('/rekapitulasi')}
-            className="dashboard-koordinator__action-btn"
-          >
-            <Activity size={24} />
-            <span>Lihat Rekapitulasi</span>
-          </button>
-          <button
-            onClick={() => navigate('/pemeriksaan-kehamilan')}
-            className="dashboard-koordinator__action-btn"
-          >
-            <Heart size={24} />
-            <span>Data Kehamilan</span>
-          </button>
-          <button
-            onClick={() => navigate('/persalinan')}
-            className="dashboard-koordinator__action-btn"
-          >
-            <Baby size={24} />
-            <span>Data Persalinan</span>
-          </button>
-          <button
-            onClick={() => navigate('/keluarga-berencana')}
-            className="dashboard-koordinator__action-btn"
-          >
-            <UsersIcon size={24} />
-            <span>Data KB</span>
-          </button>
-        </div>
       </Card>
     </div>
   );

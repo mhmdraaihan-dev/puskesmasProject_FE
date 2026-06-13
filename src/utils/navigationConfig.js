@@ -256,14 +256,14 @@ export const getNavigationForRole = (role, position_user, userId) => {
         ]
       },
       {
-        id: 'history',
-        label: 'Riwayat',
+        id: 'reports',
+        label: 'Laporan',
         items: [
           {
-            id: 'history',
-            label: 'Riwayat Verifikasi',
-            path: '/history',
-            icon: History
+            id: 'rekapitulasi',
+            label: 'Rekapitulasi',
+            path: '/rekapitulasi',
+            icon: FileText
           }
         ]
       },

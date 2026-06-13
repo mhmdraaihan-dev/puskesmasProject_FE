@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import PageHeader from "../../components/layout/PageHeader";
-import Card from "../../components/ui/Card";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import Modal from "../../components/ui/Modal";
@@ -31,48 +30,43 @@ const moduleOptions = [
   { value: "IMUNISASI", label: "Imunisasi" },
 ];
 
+const MONTH_OPTIONS = [
+  { value: "", label: "Semua Bulan" },
+  { value: "1", label: "Januari" }, { value: "2", label: "Februari" },
+  { value: "3", label: "Maret" }, { value: "4", label: "April" },
+  { value: "5", label: "Mei" }, { value: "6", label: "Juni" },
+  { value: "7", label: "Juli" }, { value: "8", label: "Agustus" },
+  { value: "9", label: "September" }, { value: "10", label: "Oktober" },
+  { value: "11", label: "November" }, { value: "12", label: "Desember" },
+];
+
 const getTypeLabel = (type) => {
   switch (type) {
-    case "KEHAMILAN":
-      return "Pemeriksaan Kehamilan";
-    case "PERSALINAN":
-      return "Persalinan";
-    case "KB":
-      return "Keluarga Berencana";
-    case "IMUNISASI":
-      return "Imunisasi";
-    default:
-      return type;
+    case "KEHAMILAN": return "Pemeriksaan Kehamilan";
+    case "PERSALINAN": return "Persalinan";
+    case "KB": return "Keluarga Berencana";
+    case "IMUNISASI": return "Imunisasi";
+    default: return type;
   }
 };
 
 const getDetailPath = (type, id) => {
   switch (type) {
-    case "KEHAMILAN":
-      return `/pemeriksaan-kehamilan/${id}`;
-    case "PERSALINAN":
-      return `/persalinan/${id}`;
-    case "KB":
-      return `/keluarga-berencana/${id}`;
-    case "IMUNISASI":
-      return `/imunisasi/${id}`;
-    default:
-      return "#";
+    case "KEHAMILAN": return `/pemeriksaan-kehamilan/${id}`;
+    case "PERSALINAN": return `/persalinan/${id}`;
+    case "KB": return `/keluarga-berencana/${id}`;
+    case "IMUNISASI": return `/imunisasi/${id}`;
+    default: return "#";
   }
 };
 
 const getServiceDate = (type, item) => {
   switch (type) {
-    case "KEHAMILAN":
-      return item.tanggal;
-    case "PERSALINAN":
-      return item.tanggal_partus || item.tanggal;
-    case "KB":
-      return item.tanggal_kunjungan || item.tanggal;
-    case "IMUNISASI":
-      return item.tgl_imunisasi || item.tanggal;
-    default:
-      return item.tanggal;
+    case "KEHAMILAN": return item.tanggal;
+    case "PERSALINAN": return item.tanggal_partus || item.tanggal;
+    case "KB": return item.tanggal_kunjungan || item.tanggal;
+    case "IMUNISASI": return item.tgl_imunisasi || item.tanggal;
+    default: return item.tanggal;
   }
 };
 
@@ -83,7 +77,9 @@ const PendingDataList = () => {
   const [filters, setFilters] = useState({
     module: "ALL",
     search: "",
-    village: "",
+    bulan: "",
+    tanggal_start: "",
+    tanggal_end: "",
   });
   const [rejectDialog, setRejectDialog] = useState({
     isOpen: false,
@@ -114,47 +110,23 @@ const PendingDataList = () => {
         getImunisasiList(params),
       ]);
 
+      const normalize = (items, type) =>
+        (items?.data || []).map((item) => ({
+          ...item,
+          type,
+          service_date: getServiceDate(type, item),
+          pasien_nama: item.pasien?.nama || "-",
+          pasien_nik: item.pasien?.nik || "-",
+          bidan_praktik: item.creator?.full_name || item.creator?.name || item.creator?.email || "-",
+          tempat_praktik: item.practice_place?.nama_praktik || "-",
+          lokasi_desa: item.practice_place?.village?.nama_desa || "-",
+        }));
+
       const normalizedData = [
-        ...(kehamilan?.data || []).map((item) => ({
-          ...item,
-          type: "KEHAMILAN",
-          service_date: getServiceDate("KEHAMILAN", item),
-          pasien_nama: item.pasien?.nama || "-",
-          pasien_nik: item.pasien?.nik || "-",
-          bidan_praktik:
-            item.creator?.full_name || item.creator?.name || item.creator?.email || "-",
-          lokasi_desa: item.practice_place?.village?.nama_desa || "-",
-        })),
-        ...(persalinan?.data || []).map((item) => ({
-          ...item,
-          type: "PERSALINAN",
-          service_date: getServiceDate("PERSALINAN", item),
-          pasien_nama: item.pasien?.nama || "-",
-          pasien_nik: item.pasien?.nik || "-",
-          bidan_praktik:
-            item.creator?.full_name || item.creator?.name || item.creator?.email || "-",
-          lokasi_desa: item.practice_place?.village?.nama_desa || "-",
-        })),
-        ...(kb?.data || []).map((item) => ({
-          ...item,
-          type: "KB",
-          service_date: getServiceDate("KB", item),
-          pasien_nama: item.pasien?.nama || "-",
-          pasien_nik: item.pasien?.nik || "-",
-          bidan_praktik:
-            item.creator?.full_name || item.creator?.name || item.creator?.email || "-",
-          lokasi_desa: item.practice_place?.village?.nama_desa || "-",
-        })),
-        ...(imunisasi?.data || []).map((item) => ({
-          ...item,
-          type: "IMUNISASI",
-          service_date: getServiceDate("IMUNISASI", item),
-          pasien_nama: item.pasien?.nama || "-",
-          pasien_nik: item.pasien?.nik || "-",
-          bidan_praktik:
-            item.creator?.full_name || item.creator?.name || item.creator?.email || "-",
-          lokasi_desa: item.practice_place?.village?.nama_desa || "-",
-        })),
+        ...normalize(kehamilan, "KEHAMILAN"),
+        ...normalize(persalinan, "PERSALINAN"),
+        ...normalize(kb, "KB"),
+        ...normalize(imunisasi, "IMUNISASI"),
       ];
 
       normalizedData.sort(
@@ -170,21 +142,34 @@ const PendingDataList = () => {
     }
   };
 
+  const handleReset = () => {
+    setFilters({ module: "ALL", search: "", bulan: "", tanggal_start: "", tanggal_end: "" });
+  };
+
   const filteredData = useMemo(
     () =>
       pendingData.filter((item) => {
-        const matchesModule =
-          filters.module === "ALL" || item.type === filters.module;
-        const searchValue = filters.search.trim().toLowerCase();
-        const matchesSearch =
-          !searchValue ||
-          item.pasien_nama?.toLowerCase().includes(searchValue) ||
-          item.pasien_nik?.toLowerCase().includes(searchValue);
-        const matchesVillage =
-          !filters.village ||
-          item.lokasi_desa?.toLowerCase().includes(filters.village.toLowerCase());
+        if (filters.module !== "ALL" && item.type !== filters.module) return false;
 
-        return matchesModule && matchesSearch && matchesVillage;
+        const searchValue = filters.search.trim().toLowerCase();
+        if (searchValue &&
+          !item.pasien_nama?.toLowerCase().includes(searchValue) &&
+          !item.pasien_nik?.toLowerCase().includes(searchValue)) return false;
+
+        if (filters.bulan) {
+          const month = item.service_date ? new Date(item.service_date).getMonth() + 1 : null;
+          if (month !== parseInt(filters.bulan, 10)) return false;
+        }
+
+        if (filters.tanggal_start) {
+          if (item.service_date && new Date(item.service_date) < new Date(filters.tanggal_start)) return false;
+        }
+
+        if (filters.tanggal_end) {
+          if (item.service_date && new Date(item.service_date) > new Date(filters.tanggal_end + "T23:59:59")) return false;
+        }
+
+        return true;
       }),
     [filters, pendingData],
   );
@@ -202,26 +187,17 @@ const PendingDataList = () => {
 
   const performVerification = async (id, type, status, alasan = "") => {
     const payload = { status, alasan };
-
     switch (type) {
-      case "KEHAMILAN":
-        return verifyKehamilan(id, payload);
-      case "PERSALINAN":
-        return verifyPersalinan(id, payload);
-      case "KB":
-        return verifyKB(id, payload);
-      case "IMUNISASI":
-        return verifyImunisasi(id, payload);
-      default:
-        throw new Error("Tipe data tidak dikenali");
+      case "KEHAMILAN": return verifyKehamilan(id, payload);
+      case "PERSALINAN": return verifyPersalinan(id, payload);
+      case "KB": return verifyKB(id, payload);
+      case "IMUNISASI": return verifyImunisasi(id, payload);
+      default: throw new Error("Tipe data tidak dikenali");
     }
   };
 
   const handleApprove = async (id, type, patientName) => {
-    if (!confirm(`Setujui data kesehatan pasien "${patientName}"?`)) {
-      return;
-    }
-
+    if (!confirm(`Setujui data kesehatan pasien "${patientName}"?`)) return;
     try {
       setVerifyLoadingId(`${type}-${id}`);
       await performVerification(id, type, VERIFICATION_STATUS.APPROVED, "Disetujui");
@@ -240,15 +216,9 @@ const PendingDataList = () => {
       alert("Alasan penolakan wajib diisi");
       return;
     }
-
     try {
       setVerifyLoadingId(`${rejectDialog.type}-${rejectDialog.id}`);
-      await performVerification(
-        rejectDialog.id,
-        rejectDialog.type,
-        VERIFICATION_STATUS.REJECTED,
-        rejectReason,
-      );
+      await performVerification(rejectDialog.id, rejectDialog.type, VERIFICATION_STATUS.REJECTED, rejectReason);
       alert("Data berhasil ditolak");
       setRejectDialog({ isOpen: false, id: null, type: null, patientName: "" });
       setRejectReason("");
@@ -273,72 +243,50 @@ const PendingDataList = () => {
         }
       />
 
-      <div className="stats-section">
-        <Card
-          variant="surface-card"
-          padding="lg"
-          className="pending-data-list__summary-card"
-        >
-          <div className="stat-label">Total Pending</div>
-          <div className="stat-value">{stats.total}</div>
-          <div className="stat-note">menunggu verifikasi</div>
-        </Card>
-        <Card
-          variant="surface-card"
-          padding="lg"
-          className="pending-data-list__summary-card"
-        >
-          <div className="stat-label">Kehamilan</div>
-          <div className="stat-value">{stats.kehamilan}</div>
-          <div className="stat-note">pemeriksaan</div>
-        </Card>
-        <Card
-          variant="surface-card"
-          padding="lg"
-          className="pending-data-list__summary-card"
-        >
-          <div className="stat-label">Persalinan</div>
-          <div className="stat-value">{stats.persalinan}</div>
-          <div className="stat-note">persalinan</div>
-        </Card>
-        <Card
-          variant="surface-card"
-          padding="lg"
-          className="pending-data-list__summary-card"
-        >
-          <div className="stat-label">KB / Imunisasi</div>
-          <div className="stat-value">
-            {stats.kb} / {stats.imunisasi}
-          </div>
-          <div className="stat-note">kb / imunisasi</div>
-        </Card>
+      {/* Stat Cards */}
+      <div className="pdl-stat-row">
+        <div className="pdl-stat-card">
+          <span className="pdl-stat-label">Total Pending</span>
+          <span className="pdl-stat-value">{stats.total}</span>
+          <span className="pdl-stat-note">menunggu verifikasi</span>
+        </div>
+        <div className="pdl-stat-card">
+          <span className="pdl-stat-label">Kehamilan</span>
+          <span className="pdl-stat-value">{stats.kehamilan}</span>
+          <span className="pdl-stat-note">pemeriksaan</span>
+        </div>
+        <div className="pdl-stat-card">
+          <span className="pdl-stat-label">Persalinan</span>
+          <span className="pdl-stat-value">{stats.persalinan}</span>
+          <span className="pdl-stat-note">persalinan</span>
+        </div>
+        <div className="pdl-stat-card">
+          <span className="pdl-stat-label">Keluarga Berencana</span>
+          <span className="pdl-stat-value">{stats.kb}</span>
+          <span className="pdl-stat-note">kb</span>
+        </div>
+        <div className="pdl-stat-card">
+          <span className="pdl-stat-label">Imunisasi</span>
+          <span className="pdl-stat-value">{stats.imunisasi}</span>
+          <span className="pdl-stat-note">imunisasi</span>
+        </div>
       </div>
 
-      <Card
-        variant="surface-card"
-        padding="xl"
-        className="filter-card pending-data-list__filter-card"
-      >
-        <h3 className="filter-title">Filter Verifikasi</h3>
-        <p className="filter-subtitle">
-          Persempit antrean verifikasi berdasarkan modul, pasien, atau desa
-        </p>
-
-        <div className="filter-form">
-          <div className="form-group pending-data-list__module-field">
-            <label className="input-label" htmlFor="pending-module-filter">
-              Modul
-            </label>
+      {/* Filter */}
+      <div className="pdl-filter-box">
+        <h3 className="pdl-filter-title">Filter Verifikasi</h3>
+        <p className="pdl-filter-sub">Persempit antrean berdasarkan modul, pasien, bulan, atau rentang tanggal</p>
+        <div className="pdl-filter-grid">
+          <div className="input-wrapper">
+            <label className="input-label" htmlFor="pdl-module">Modul</label>
             <select
-              id="pending-module-filter"
-              className="form-select"
+              id="pdl-module"
+              className="pdl-filter-select"
               value={filters.module}
               onChange={(e) => setFilters({ ...filters, module: e.target.value })}
             >
-              {moduleOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
+              {moduleOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
             </select>
           </div>
@@ -349,28 +297,46 @@ const PendingDataList = () => {
             value={filters.search}
             onChange={(e) => setFilters({ ...filters, search: e.target.value })}
           />
+          <div className="input-wrapper">
+            <label className="input-label" htmlFor="pdl-bulan">Bulan</label>
+            <select
+              id="pdl-bulan"
+              className="pdl-filter-select"
+              value={filters.bulan}
+              onChange={(e) => setFilters({ ...filters, bulan: e.target.value })}
+            >
+              {MONTH_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
           <Input
-            label="Lokasi Desa"
-            type="text"
-            placeholder="Cari nama desa..."
-            value={filters.village}
-            onChange={(e) => setFilters({ ...filters, village: e.target.value })}
+            label="Dari Tanggal"
+            type="date"
+            value={filters.tanggal_start}
+            onChange={(e) => setFilters({ ...filters, tanggal_start: e.target.value })}
           />
+          <Input
+            label="Sampai Tanggal"
+            type="date"
+            value={filters.tanggal_end}
+            onChange={(e) => setFilters({ ...filters, tanggal_end: e.target.value })}
+          />
+          <div className="filter-actions">
+            <Button type="button" variant="secondary" onClick={handleReset}>
+              Reset
+            </Button>
+          </div>
         </div>
-      </Card>
+      </div>
 
       {error && <div className="error-alert">{error}</div>}
 
-      <Card
-        variant="surface-card"
-        padding="xl"
-        className="table-card pending-data-list__table-card"
-      >
-        <h3 className="table-title">Antrean Verifikasi</h3>
-        <p className="table-subtitle">
-          {loading
-            ? "Memuat data pending..."
-            : `${filteredData.length} data siap direview`}
+      {/* Table */}
+      <div className="pdl-table-box">
+        <h3 className="pdl-table-title">Antrean Verifikasi</h3>
+        <p className="pdl-table-sub">
+          {loading ? "Memuat data pending..." : `${filteredData.length} data siap direview`}
         </p>
 
         <div className="table-wrapper">
@@ -388,6 +354,7 @@ const PendingDataList = () => {
                   <th>Pasien</th>
                   <th>Modul</th>
                   <th>Tanggal</th>
+                  <th>Tempat Praktik</th>
                   <th>Desa</th>
                   <th>Bidan Praktik</th>
                   <th>Status</th>
@@ -397,7 +364,6 @@ const PendingDataList = () => {
               <tbody>
                 {filteredData.map((item) => {
                   const rowLoading = verifyLoadingId === `${item.type}-${item.id}`;
-
                   return (
                     <tr key={`${item.type}-${item.id}`}>
                       <td className="patient-cell">
@@ -406,8 +372,9 @@ const PendingDataList = () => {
                       </td>
                       <td>{getTypeLabel(item.type)}</td>
                       <td>{formatDate(item.service_date || item.tanggal)}</td>
-                      <td>{item.lokasi_desa || "-"}</td>
-                      <td>{item.bidan_praktik || "-"}</td>
+                      <td>{item.tempat_praktik}</td>
+                      <td>{item.lokasi_desa}</td>
+                      <td>{item.bidan_praktik}</td>
                       <td>
                         <span className="pending-badge">Pending</span>
                       </td>
@@ -424,9 +391,7 @@ const PendingDataList = () => {
                           variant="success"
                           size="sm"
                           className="pending-data-list__action-btn"
-                          onClick={() =>
-                            handleApprove(item.id, item.type, item.pasien_nama)
-                          }
+                          onClick={() => handleApprove(item.id, item.type, item.pasien_nama)}
                           disabled={rowLoading}
                         >
                           {rowLoading ? "Proses..." : "Setujui"}
@@ -455,17 +420,12 @@ const PendingDataList = () => {
             </table>
           )}
         </div>
-      </Card>
+      </div>
 
       <Modal
         isOpen={rejectDialog.isOpen}
         onClose={() => {
-          setRejectDialog({
-            isOpen: false,
-            id: null,
-            type: null,
-            patientName: "",
-          });
+          setRejectDialog({ isOpen: false, id: null, type: null, patientName: "" });
           setRejectReason("");
         }}
         onConfirm={handleReject}
@@ -476,21 +436,19 @@ const PendingDataList = () => {
         type="danger"
         confirmDisabled={!rejectReason.trim()}
       >
-        <Card variant="surface-card" padding="md">
-          <div className="form-group">
-            <label className="form-label" htmlFor="reject-reason">
-              Alasan Penolakan <span className="required-asterisk">*</span>
-            </label>
-            <textarea
-              id="reject-reason"
-              className="form-textarea"
-              rows="5"
-              placeholder="Jelaskan alasan penolakan data ini..."
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
-            />
-          </div>
-        </Card>
+        <div className="form-group">
+          <label className="form-label" htmlFor="reject-reason">
+            Alasan Penolakan <span className="required-asterisk">*</span>
+          </label>
+          <textarea
+            id="reject-reason"
+            className="form-textarea"
+            rows="5"
+            placeholder="Jelaskan alasan penolakan data ini..."
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+          />
+        </div>
       </Modal>
     </div>
   );

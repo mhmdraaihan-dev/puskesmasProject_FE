@@ -258,8 +258,8 @@ export const reviseRejectedData = async (dataId, healthData) => {
   return response.data;
 };
 
-export const getRejectedData = async () => {
-  const response = await api.get("/health-data-rejected");
+export const getRejectedData = async (params = {}) => {
+  const response = await api.get("/health-data-rejected", { params });
   return response.data;
 };
 

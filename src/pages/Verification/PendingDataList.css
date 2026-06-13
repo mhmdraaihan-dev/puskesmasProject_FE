@@ -1,94 +1,29 @@
 .pending-data-list-page {
-  padding: 0 0 var(--spacing-xl);
+  padding: 0 0 2.5rem;
   max-width: 1320px;
   margin: 0 auto;
 }
 
-.pending-data-list-page .stats-section {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
+/* ---- Stat cards ---- */
+.pdl-stat-row { display: flex; flex-wrap: wrap; gap: 1.25rem; margin-bottom: 2rem; }
+.pdl-stat-card { flex: 0 0 200px; display: flex; flex-direction: column; justify-content: center; gap: 0.25rem; padding: 1.25rem 1.75rem; background: linear-gradient(160deg, #ffffff 0%, #f0f6ea 100%); border: 1px solid rgba(77, 122, 44, 0.15); border-radius: 20px; box-shadow: 0 4px 20px rgba(34, 52, 24, 0.07); }
+.pdl-stat-label { font-size: 0.7rem; font-weight: 700; color: #7a8f74; text-transform: uppercase; letter-spacing: 0.1em; }
+.pdl-stat-value { font-size: clamp(1.8rem, 2.4vw, 2.35rem); font-weight: 700; color: #1a2e1a; line-height: 1; }
+.pdl-stat-note { font-size: 0.875rem; color: #74836f; }
 
-.pending-data-list__summary-card {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 246, 235, 0.96)) !important;
-  border: 1px solid rgba(77, 122, 44, 0.14);
-  border-radius: 22px;
-  box-shadow:
-    0 18px 34px rgba(34, 52, 24, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.72);
-}
+/* ---- Filter box ---- */
+.pdl-filter-box { padding: 1.75rem 2rem; background: linear-gradient(160deg, #ffffff 0%, #f4f8ee 100%); border: 1px solid rgba(77, 122, 44, 0.14); border-radius: 20px; box-shadow: 0 4px 20px rgba(34, 52, 24, 0.06); margin-bottom: 1.5rem; }
+.pdl-filter-title { font-size: 1.1rem; font-weight: 700; color: #1a2e1a; margin: 0 0 0.25rem; }
+.pdl-filter-sub { font-size: 0.9rem; color: #7a8f74; margin: 0 0 1.25rem; }
+.pdl-filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; align-items: end; }
+.pdl-filter-select { height: 40px; width: 100%; padding: 0 0.75rem; font-size: 0.9375rem; color: #252523; background: #fafaf5; border: 1px solid #dbe5d1; border-radius: 6px; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+.pdl-filter-select:focus { outline: none; border-color: rgba(45, 104, 31, 0.34); box-shadow: 0 0 0 4px rgba(63, 134, 34, 0.08); }
+.pending-data-list-page .filter-actions { display: flex; align-items: flex-end; padding-bottom: 2px; }
 
-.pending-data-list-page .stat-label {
-  font-family: var(--font-sans);
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: #6d7e67;
-  margin-bottom: 0.35rem;
-}
-
-.pending-data-list-page .stat-value {
-  font-family: var(--font-sans);
-  font-size: clamp(1.8rem, 2.4vw, 2.35rem);
-  font-weight: 700;
-  color: #1f2f1f;
-  line-height: 1.2;
-  margin-bottom: 0.2rem;
-}
-
-.pending-data-list-page .stat-note {
-  font-family: var(--font-sans);
-  font-size: 0.9rem;
-  color: #74836f;
-}
-
-.pending-data-list-page .filter-card,
-.pending-data-list-page .table-card {
-  margin-bottom: 2rem;
-}
-
-.pending-data-list__filter-card,
-.pending-data-list__table-card {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(240, 245, 232, 0.95)) !important;
-  border: 1px solid rgba(77, 122, 44, 0.12);
-  border-radius: 24px;
-  box-shadow: 0 24px 44px rgba(35, 51, 24, 0.08);
-}
-
-.pending-data-list-page .filter-title,
-.pending-data-list-page .table-title {
-  font-family: var(--font-serif);
-  font-size: clamp(1.45rem, 2vw, 1.9rem);
-  font-weight: 600;
-  color: var(--color-ink);
-  margin-bottom: 0.45rem;
-}
-
-.pending-data-list-page .filter-subtitle,
-.pending-data-list-page .table-subtitle {
-  font-family: var(--font-sans);
-  font-size: 0.98rem;
-  color: var(--color-muted);
-  margin-bottom: 1.4rem;
-}
-
-.pending-data-list-page .filter-form {
-  display: grid;
-  grid-template-columns:
-    minmax(220px, 0.95fr)
-    minmax(260px, 1.35fr)
-    minmax(220px, 1fr);
-  gap: 1rem;
-  align-items: end;
-}
-
-.pending-data-list-page .filter-form > .input-wrapper,
-.pending-data-list-page .filter-form > .form-group {
-  min-width: 0;
-}
+/* ---- Table box ---- */
+.pdl-table-box { padding: 1.75rem 2rem; background: linear-gradient(160deg, #ffffff 0%, #f4f8ee 100%); border: 1px solid rgba(77, 122, 44, 0.14); border-radius: 20px; box-shadow: 0 4px 20px rgba(34, 52, 24, 0.06); }
+.pdl-table-title { font-size: 1.1rem; font-weight: 700; color: #1a2e1a; margin: 0 0 0.25rem; }
+.pdl-table-sub { font-size: 0.9rem; color: #7a8f74; margin: 0 0 1.25rem; }
 
 .pending-data-list-page .form-group {
   display: flex;
@@ -274,17 +209,9 @@
     padding: 0 0 var(--spacing-lg);
   }
 
-  .pending-data-list-page .stats-section {
-    grid-template-columns: 1fr;
-  }
-
-  .pending-data-list-page .filter-form {
-    grid-template-columns: 1fr;
-  }
-
-  .pending-data-list-page .stat-value {
-    font-size: 1.5rem;
-  }
+    .pdl-stat-row { gap: 0.75rem; }
+  .pdl-stat-card { flex: 1 1 calc(50% - 0.375rem); }
+  .pdl-filter-grid { grid-template-columns: 1fr; }
 
   .pending-data-list-page .action-cell {
     min-width: 220px;

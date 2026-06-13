@@ -1,138 +1,135 @@
-/* PasienForm Page Styles */
+/* PasienForm Page Styles — light green-white theme */
+
 .pasien-form-page {
-  padding: var(--spacing-6) 0;
+  padding: 0 0 2.5rem;
   max-width: 900px;
   margin: 0 auto;
 }
 
-/* Form Grid */
+/* ---- Form card wrapper ---- */
+.pf-form-card {
+  background: linear-gradient(160deg, #ffffff 0%, #f0f6ea 100%);
+  border: 1px solid rgba(77, 122, 44, 0.15);
+  border-radius: 24px;
+  padding: 2rem 2.25rem;
+  box-shadow: 0 4px 24px rgba(34, 52, 24, 0.08);
+}
+
+/* ---- Form grid ---- */
 .pasien-form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-5);
+  gap: 1.25rem;
 }
 
-/* Form Group */
+/* ---- Form labels (override App.css global that sets color-on-dark) ---- */
+.pasien-form-page .form-label,
+.pasien-form-page .input-label {
+  color: #252523;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.required-asterisk {
+  color: #c44545;
+  margin-left: 2px;
+}
+
+/* ---- Textarea ---- */
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-2);
+  gap: 0.35rem;
 }
 
 .form-group--full {
   grid-column: 1 / -1;
 }
 
-.form-label {
-  font-family: var(--font-sans);
-  font-size: var(--font-size-body-sm);
-  font-weight: 500;
-  color: var(--color-text-primary-dark);
-  display: block;
-  margin-bottom: var(--spacing-1);
-}
-
-.required-asterisk {
-  color: var(--color-error);
-  margin-left: 2px;
-}
-
-/* Form Textarea */
 .form-textarea {
-  padding: var(--spacing-3);
-  font-family: var(--font-sans);
-  font-size: var(--font-size-body-md);
-  color: var(--color-text-primary-dark);
-  background-color: var(--color-canvas);
-  border: 1px solid rgba(73, 62, 50, 0.1);
-  border-radius: var(--border-radius-sm);
+  width: 100%;
+  padding: 0.65rem 0.875rem;
+  background: #ffffff;
+  border: 1px solid rgba(77, 122, 44, 0.25);
+  border-radius: 12px;
+  color: #252523;
+  font-size: 0.95rem;
+  font-family: inherit;
   resize: vertical;
-  transition: all 0.2s ease;
+  min-height: 100px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
 }
 
 .form-textarea:focus {
   outline: none;
-  border-color: var(--color-primary-dark);
-  box-shadow: 0 0 0 3px rgba(204, 120, 92, 0.15);
+  border-color: #4f9228;
+  box-shadow: 0 0 0 3px rgba(79, 146, 40, 0.15);
 }
 
 .form-textarea::placeholder {
-  color: var(--color-text-muted);
+  color: #a9b8a4;
 }
 
-/* Error Text */
+/* ---- Error text ---- */
 .error-text {
-  font-family: var(--font-sans);
-  font-size: var(--font-size-body-sm);
-  color: var(--color-error);
-  margin-top: var(--spacing-1);
+  font-size: 0.8rem;
+  color: #c44545;
+  margin-top: 0.15rem;
 }
 
-/* Info Box */
+/* ---- Info box ---- */
 .info-box {
   grid-column: 1 / -1;
-  padding: var(--spacing-4);
-  background-color: rgba(204, 120, 92, 0.1);
-  border: 1px solid rgba(204, 120, 92, 0.2);
-  border-radius: var(--border-radius-md);
-  margin-top: var(--spacing-2);
+  background: rgba(79, 146, 40, 0.07);
+  border: 1px solid rgba(79, 146, 40, 0.2);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
 }
 
 .info-title {
-  font-family: var(--font-sans);
-  font-size: var(--font-size-body-md);
-  font-weight: 600;
-  color: var(--color-text-primary-dark);
-  margin-bottom: var(--spacing-2);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #2f6b22;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 0.35rem;
 }
 
 .info-hint {
-  font-family: var(--font-sans);
-  font-size: var(--font-size-body-sm);
-  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  color: #54644f;
   margin: 0;
   line-height: 1.5;
 }
 
-/* Form Actions */
+/* ---- Form actions ---- */
 .form-actions {
   grid-column: 1 / -1;
   display: flex;
   justify-content: flex-end;
-  gap: var(--spacing-3);
-  margin-top: var(--spacing-4);
-  padding-top: var(--spacing-5);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 0.875rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(77, 122, 44, 0.12);
 }
 
-/* Error Alert */
-.error-alert {
-  padding: var(--spacing-4);
-  margin-bottom: var(--spacing-5);
-  background-color: rgba(198, 69, 69, 0.15);
-  border: 1px solid var(--color-error);
-  border-radius: var(--border-radius-md);
-  color: var(--color-error);
-  font-family: var(--font-sans);
-  font-size: var(--font-size-body-md);
+/* ---- Error alert ---- */
+.pasien-form-page .error-alert {
+  grid-column: 1 / -1;
+  padding: 0.875rem 1rem;
+  background: rgba(196, 69, 69, 0.1);
+  border: 1px solid rgba(196, 69, 69, 0.25);
+  border-radius: 12px;
+  color: #c44545;
+  font-size: 0.9rem;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .pasien-form-page {
-    padding: var(--spacing-4) 0;
-  }
-
-  .pasien-form-grid {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-4);
-  }
-
-  .form-actions {
-    flex-direction: column-reverse;
-  }
-
-  .form-actions button {
-    width: 100%;
-  }
+/* ---- Responsive ---- */
+@media (max-width: 640px) {
+  .pf-form-card { padding: 1.5rem 1.25rem; }
+  .pasien-form-grid { grid-template-columns: 1fr; }
+  .form-group--full { grid-column: 1; }
+  .info-box { grid-column: 1; }
+  .form-actions { grid-column: 1; flex-direction: column-reverse; }
+  .form-actions button { width: 100%; }
 }

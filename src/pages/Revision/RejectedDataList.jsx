@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import StatusBadge from "../../components/StatusBadge";
 import PageHeader from "../../components/layout/PageHeader";
-import Card from "../../components/ui/Card";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
+import Table from "../../components/ui/Table";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import EmptyState from "../../components/ui/EmptyState";
 import { useAuth } from "../../context/AuthContext";
@@ -115,7 +115,7 @@ const RejectedDataList = () => {
   const [rejectedData, setRejectedData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState({ search: "", nik: "", tanggal_start: "", tanggal_end: "", bulan: "" });
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -128,11 +128,15 @@ const RejectedDataList = () => {
     fetchRejectedData();
   }, [user, navigate]);
 
-  const fetchRejectedData = async () => {
+  const fetchRejectedData = async (overrideFilter = filter) => {
     try {
       setLoading(true);
       setError("");
-      const response = await getRejectedData();
+      const params = { ...overrideFilter };
+      Object.keys(params).forEach((key) => {
+        if (!params[key]) delete params[key];
+      });
+      const response = await getRejectedData(params);
       setRejectedData(normalizeRejectedItems(response.data || []));
     } catch (err) {
       setError("Gagal memuat data yang ditolak");
@@ -142,27 +146,90 @@ const RejectedDataList = () => {
     }
   };
 
-  const filteredData = useMemo(() => {
-    const keyword = search.trim().toLowerCase();
+  const handleSearch = (e) => {
+    e.preventDefault();
+    fetchRejectedData();
+  };
 
-    if (!keyword) {
-      return rejectedData;
-    }
+  const handleReset = () => {
+    const resetFilter = { search: "", nik: "", tanggal_start: "", tanggal_end: "", bulan: "" };
+    setFilter(resetFilter);
+    fetchRejectedData(resetFilter);
+  };
 
-    return rejectedData.filter((item) =>
-      [
-        item.patientName,
-        item.patientNik,
-        item.moduleLabel,
-        item.verifierName,
-        item.practiceName,
-        item.villageName,
-      ]
-        .join(" ")
-        .toLowerCase()
-        .includes(keyword),
-    );
-  }, [rejectedData, search]);
+  const filteredData = rejectedData;
+
+  const columns = [
+    {
+      key: "patientName",
+      label: "Nama Pasien",
+      sortable: true,
+      render: (value) => <span style={{ fontWeight: 600 }}>{value}</span>,
+    },
+    {
+      key: "patientNik",
+      label: "NIK",
+      render: (value) => (
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.9em" }}>{value}</span>
+      ),
+    },
+    {
+      key: "moduleLabel",
+      label: "Modul",
+      render: (value) => (
+        <span className="rd-module-badge">{value}</span>
+      ),
+    },
+    {
+      key: "rejectReason",
+      label: "Alasan Penolakan",
+      render: (value) => (
+        <span style={{ color: value ? "#252523" : "#a9b8a4" }}>
+          {value || "—"}
+        </span>
+      ),
+    },
+    {
+      key: "verifierName",
+      label: "Diverifikasi Oleh",
+      render: (value) => value || "-",
+    },
+    {
+      key: "rejectedAt",
+      label: "Tanggal Ditolak",
+      sortable: true,
+      render: (value) => formatDateTime(value),
+    },
+    {
+      key: "status",
+      label: "Status",
+      render: (value) => <StatusBadge status={value} />,
+    },
+    {
+      key: "actions",
+      label: "Aksi",
+      render: (_, row) => (
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => row.detailRoute && navigate(row.detailRoute)}
+            disabled={!row.detailRoute}
+          >
+            Detail
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => row.reviseRoute && navigate(row.reviseRoute)}
+            disabled={!row.reviseRoute}
+          >
+            Revisi
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   const summaryCards = useMemo(() => {
     const uniqueModules = new Set(rejectedData.map((item) => item.moduleLabel)).size;
@@ -206,42 +273,89 @@ const RejectedDataList = () => {
       />
 
       {/* Stats Section */}
-      <div className="stats-section">
+      <div className="rd-stat-row">
         {summaryCards.map((card) => (
-          <Card
-            key={card.label}
-            variant="surface-card"
-            padding="lg"
-            className="rejected-data-list__summary-card"
-          >
-            <div className="stat-label">{card.label}</div>
-            <div className="stat-value">{card.value}</div>
-            <div className="stat-note">{card.note}</div>
-          </Card>
+          <div key={card.label} className="rd-stat-card">
+            <span className="rd-stat-label">{card.label}</span>
+            <span className="rd-stat-value">{card.value}</span>
+            <span className="rd-stat-note">{card.note}</span>
+          </div>
         ))}
       </div>
 
-      {/* Filter and List Section */}
-      <Card
-        variant="surface-card"
-        padding="xl"
-        className="list-card rejected-data-list__list-card"
-      >
+      {/* Filter Section */}
+      <div className="rd-filter-box">
+        <h3 className="rd-filter-title">Filter Data Ditolak</h3>
+        <p className="rd-filter-sub">Persempit berdasarkan nama, NIK, bulan, atau rentang tanggal</p>
+        <form onSubmit={handleSearch} className="rd-filter-grid">
+          <Input
+            label="Cari Nama / Modul"
+            type="text"
+            placeholder="Nama pasien, modul, verifier..."
+            value={filter.search}
+            onChange={(e) => setFilter({ ...filter, search: e.target.value })}
+          />
+          <Input
+            label="Cari NIK"
+            type="text"
+            placeholder="Nomor Induk Kependudukan..."
+            value={filter.nik}
+            onChange={(e) => setFilter({ ...filter, nik: e.target.value })}
+          />
+          <div className="input-wrapper">
+            <label className="input-label" htmlFor="rd-bulan">Bulan</label>
+            <select
+              id="rd-bulan"
+              className="rd-filter-select"
+              value={filter.bulan}
+              onChange={(e) => setFilter({ ...filter, bulan: e.target.value })}
+            >
+              <option value="">Semua Bulan</option>
+              <option value="1">Januari</option>
+              <option value="2">Februari</option>
+              <option value="3">Maret</option>
+              <option value="4">April</option>
+              <option value="5">Mei</option>
+              <option value="6">Juni</option>
+              <option value="7">Juli</option>
+              <option value="8">Agustus</option>
+              <option value="9">September</option>
+              <option value="10">Oktober</option>
+              <option value="11">November</option>
+              <option value="12">Desember</option>
+            </select>
+          </div>
+          <Input
+            label="Dari Tanggal"
+            type="date"
+            value={filter.tanggal_start}
+            onChange={(e) => setFilter({ ...filter, tanggal_start: e.target.value })}
+          />
+          <Input
+            label="Sampai Tanggal"
+            type="date"
+            value={filter.tanggal_end}
+            onChange={(e) => setFilter({ ...filter, tanggal_end: e.target.value })}
+          />
+          <div className="filter-actions">
+            <Button type="submit" variant="primary">
+              Cari
+            </Button>
+            <Button type="button" variant="secondary" onClick={handleReset}>
+              Reset
+            </Button>
+          </div>
+        </form>
+      </div>
+
+      {/* List Section */}
+      <div className="rd-list-box">
         <div className="list-header">
           <div>
             <h3 className="list-title">Daftar Data Ditolak</h3>
             <p className="list-subtitle">
-              Cari cepat berdasarkan nama pasien, NIK, modul, verifier, atau tempat
-              praktik
+              {filteredData.length} dari {rejectedData.length} data ditampilkan
             </p>
-          </div>
-          <div className="search-wrapper">
-            <Input
-              type="text"
-              placeholder="Cari data revisi..."
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-            />
           </div>
         </div>
 
@@ -258,251 +372,17 @@ const RejectedDataList = () => {
             }
           />
         ) : (
-          <div className="rejected-items-grid">
-            {filteredData.map((data) => (
-              <Card
-                key={`${data.moduleKey}-${data.id}`}
-                variant="surface-card"
-                padding="xl"
-                className="rejected-item"
-              >
-                <div className="item-header">
-                  <div>
-                    <div className="module-badge">{data.moduleLabel}</div>
-                    <h3 className="patient-name">{data.patientName}</h3>
-                    <p className="patient-meta">
-                      NIK {data.patientNik} • {data.practiceName} • {data.villageName}
-                    </p>
-                  </div>
-                  <StatusBadge status={data.status} />
-                </div>
-
-                <div className="meta-grid">
-                  <div className="meta-item">
-                    <span className="meta-label">Ditolak oleh</span>
-                    <strong className="meta-value">{data.verifierName}</strong>
-                  </div>
-                  <div className="meta-item">
-                    <span className="meta-label">Tanggal ditolak</span>
-                    <strong className="meta-value">{formatDateTime(data.rejectedAt)}</strong>
-                  </div>
-                  <div className="meta-item">
-                    <span className="meta-label">Aksi revisi</span>
-                    <strong className="meta-value">
-                      {data.moduleKey === "legacy"
-                        ? "Form revisi lama"
-                        : "Edit modul asli"}
-                    </strong>
-                  </div>
-                </div>
-
-                <div className="rejection-reason-box">
-                  <div className="rejection-title">Alasan Penolakan</div>
-                  <p className="rejection-text">
-                    {data.rejectReason || "Belum ada alasan yang dikirim backend."}
-                  </p>
-                </div>
-
-                <div className="item-actions">
-                  <Button
-                    variant="secondary"
-                    onClick={() => data.detailRoute && navigate(data.detailRoute)}
-                    disabled={!data.detailRoute}
-                  >
-                    Detail
-                  </Button>
-                  <Button
-                    variant="warning"
-                    onClick={() => data.reviseRoute && navigate(data.reviseRoute)}
-                    disabled={!data.reviseRoute}
-                  >
-                    Revisi Data
-                  </Button>
-                </div>
-              </Card>
-            ))}
-          </div>
+          <Table
+            columns={columns}
+            data={filteredData}
+            className="rejected-data-table"
+          />
         )}
-      </Card>
+      </div>
     </div>
   );
 };
 
 
-const styles = {
-  page: {
-    maxWidth: "1240px",
-    paddingBottom: "3rem",
-  },
-  header: {
-    alignItems: "flex-start",
-    gap: "1rem",
-    marginBottom: "1.5rem",
-  },
-  title: {
-    marginBottom: "0.4rem",
-  },
-  subtitle: {
-    margin: 0,
-  },
-  headerActions: {
-    display: "flex",
-    gap: "0.75rem",
-    flexWrap: "wrap",
-  },
-  secondaryButton: {
-    width: "auto",
-    minWidth: "170px",
-    paddingInline: "1rem",
-  },
-  section: {
-    marginBottom: "1.5rem",
-  },
-  summaryGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "1rem",
-  },
-  summaryCard: {
-    maxWidth: "none",
-    margin: 0,
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.45rem",
-  },
-  summaryLabel: {
-    fontSize: "0.78rem",
-    textTransform: "uppercase",
-    letterSpacing: "0.06em",
-    color: "var(--color-text-muted)",
-  },
-  summaryValue: {
-    fontSize: "1.8rem",
-    lineHeight: 1.1,
-  },
-  summaryNote: {
-    fontSize: "0.9rem",
-    color: "var(--color-text-muted)",
-  },
-  filterCard: {
-    maxWidth: "none",
-    margin: 0,
-    padding: "1.35rem",
-  },
-  sectionHead: {
-    display: "flex",
-    justifyContent: "space-between",
-    gap: "1rem",
-    flexWrap: "wrap",
-    marginBottom: "1rem",
-  },
-  sectionTitle: {
-    marginBottom: "0.35rem",
-  },
-  sectionText: {
-    margin: 0,
-  },
-  searchWrap: {
-    minWidth: "280px",
-    flex: "1 1 320px",
-    maxWidth: "420px",
-  },
-  loadingState: {
-    textAlign: "center",
-    padding: "3rem 1rem",
-  },
-  emptyStateCard: {
-    maxWidth: "none",
-    margin: 0,
-    textAlign: "center",
-    padding: "2.5rem 1rem",
-  },
-  listGrid: {
-    display: "grid",
-    gap: "1rem",
-  },
-  itemCard: {
-    maxWidth: "none",
-    margin: 0,
-    padding: "1.2rem",
-  },
-  itemHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: "1rem",
-    flexWrap: "wrap",
-    marginBottom: "0.9rem",
-  },
-  eyebrow: {
-    fontSize: "0.78rem",
-    textTransform: "uppercase",
-    letterSpacing: "0.08em",
-    color: "var(--color-primary-dark)",
-    fontWeight: "700",
-    marginBottom: "0.4rem",
-  },
-  patientName: {
-    fontSize: "1.18rem",
-    marginBottom: "0.25rem",
-  },
-  patientMeta: {
-    margin: 0,
-  },
-  metaGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-    gap: "0.85rem",
-    marginBottom: "0.9rem",
-  },
-  metaBlock: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.35rem",
-    padding: "0.9rem 1rem",
-    borderRadius: "14px",
-    background: "rgba(255,255,255,0.62)",
-    border: "1px solid rgba(73, 62, 50, 0.1)",
-  },
-  metaLabel: {
-    fontSize: "0.76rem",
-    textTransform: "uppercase",
-    letterSpacing: "0.05em",
-    color: "var(--color-text-muted)",
-  },
-  rejectionBox: {
-    padding: "1rem",
-    borderRadius: "16px",
-    background: "rgba(198, 69, 69, 0.08)",
-    border: "1px solid rgba(198, 69, 69, 0.18)",
-  },
-  rejectionTitle: {
-    fontSize: "0.88rem",
-    fontWeight: "700",
-    marginBottom: "0.35rem",
-    color: "#9a4141",
-  },
-  rejectionText: {
-    margin: 0,
-    lineHeight: 1.6,
-    color: "var(--color-text-main)",
-  },
-  actionsRow: {
-    marginTop: "1rem",
-    display: "flex",
-    gap: "0.75rem",
-    flexWrap: "wrap",
-  },
-  detailButton: {
-    width: "auto",
-    minWidth: "110px",
-    paddingInline: "1rem",
-  },
-  reviseButton: {
-    width: "auto",
-    minWidth: "140px",
-    paddingInline: "1rem",
-  },
-};
 
 export default RejectedDataList;

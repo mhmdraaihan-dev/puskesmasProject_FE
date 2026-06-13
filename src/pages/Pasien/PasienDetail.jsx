@@ -5,7 +5,6 @@ import { getPasienDetail } from "../../services/api";
 import { formatDate } from "../../utils/dateFormatter";
 import { isBidanPraktik } from "../../utils/roleHelpers";
 import PageHeader from "../../components/layout/PageHeader";
-import Card from "../../components/ui/Card";
 import Button from "../../components/Button";
 import StatusBadge from "../../components/StatusBadge";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
@@ -221,7 +220,7 @@ const PasienDetail = () => {
       />
 
       {/* Patient Info Card */}
-      <Card variant="surface-dark" padding="xl" className="patient-hero-card">
+      <div className="pd-hero-card">
         <div className="patient-hero-header">
           <div className="patient-identity">
             <div className="patient-avatar">{patientInitial}</div>
@@ -266,11 +265,11 @@ const PasienDetail = () => {
             </button>
           ))}
         </div>
-      </Card>
+      </div>
 
       {/* History Card */}
       {activeConfig && (
-        <Card variant="surface-dark" padding="xl" className="history-card">
+        <div className="pd-history-card">
           <div className="history-header">
             <div>
               <h3 className="history-title">{activeConfig.label}</h3>
@@ -336,7 +335,7 @@ const PasienDetail = () => {
               )}
             </div>
           )}
-        </Card>
+        </div>
       )}
     </div>
   );

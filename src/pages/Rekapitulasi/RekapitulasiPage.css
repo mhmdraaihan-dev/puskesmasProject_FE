@@ -1,0 +1,57 @@
+/* RekapitulasiPage — light green-white theme */
+
+.rekap-page {
+  max-width: 1320px;
+  padding-bottom: 3rem;
+}
+
+/* ---- Stat cards (shown after search) ---- */
+.rekap-stat-row { display: flex; flex-wrap: wrap; gap: 1.25rem; margin-bottom: 2rem; }
+.rekap-stat-card { flex: 0 0 210px; display: flex; flex-direction: column; justify-content: center; gap: 0.25rem; padding: 1.25rem 1.75rem; background: linear-gradient(160deg, #ffffff 0%, #f0f6ea 100%); border: 1px solid rgba(77, 122, 44, 0.15); border-radius: 20px; box-shadow: 0 4px 20px rgba(34, 52, 24, 0.07); }
+.rekap-stat-label { font-size: 0.7rem; font-weight: 700; color: #7a8f74; text-transform: uppercase; letter-spacing: 0.1em; }
+.rekap-stat-value { font-size: clamp(1.8rem, 2.2vw, 2.2rem); font-weight: 700; color: #1a2e1a; line-height: 1; }
+.rekap-stat-value--text { font-size: clamp(0.95rem, 1.3vw, 1.1rem); line-height: 1.3; }
+.rekap-stat-note { font-size: 0.875rem; color: #74836f; }
+
+/* ---- Filter box ---- */
+.rekap-filter-box { padding: 1.75rem 2rem; background: linear-gradient(160deg, #ffffff 0%, #f4f8ee 100%); border: 1px solid rgba(77, 122, 44, 0.14); border-radius: 20px; box-shadow: 0 4px 20px rgba(34, 52, 24, 0.06); margin-bottom: 1.5rem; }
+.rekap-filter-title { font-size: 1.1rem; font-weight: 700; color: #1a2e1a; margin: 0 0 0.25rem; }
+.rekap-filter-sub { font-size: 0.9rem; color: #7a8f74; margin: 0 0 1.25rem; }
+.rekap-filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; align-items: end; }
+
+.rekap-select { height: 40px; width: 100%; padding: 0 0.75rem; font-size: 0.9375rem; color: #252523; background: #fafaf5; border: 1px solid #dbe5d1; border-radius: 6px; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+.rekap-select:focus { outline: none; border-color: rgba(45, 104, 31, 0.34); box-shadow: 0 0 0 4px rgba(63, 134, 34, 0.08); }
+.rekap-select:disabled { opacity: 0.55; cursor: not-allowed; background: #f0f0ec; }
+
+.rekap-page .filter-actions { display: flex; align-items: flex-end; gap: 0.75rem; padding-bottom: 2px; }
+
+/* ---- Table card ---- */
+.rekap-table-card { padding: 1.5rem; border-radius: 22px; overflow-x: auto; max-width: none; margin-bottom: 0; }
+.rekap-table-header { margin-bottom: 1rem; }
+.rekap-table-title { font-size: 1.05rem; font-weight: 700; color: #1a2e1a; margin: 0 0 0.25rem; }
+.rekap-table-sub { font-size: 0.875rem; color: #7a8f74; margin: 0; }
+.rekap-table-wrapper { overflow-x: auto; }
+
+/* ---- Pagination ---- */
+.rekap-pagination { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding-top: 1.25rem; border-top: 1px solid rgba(77, 122, 44, 0.1); margin-top: 1rem; }
+.rekap-page-info { font-size: 0.875rem; color: #7a8f74; }
+.rekap-page-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+/* ---- Print header ---- */
+.rekap-print-header { padding: 1.5rem; text-align: center; border-bottom: 2px solid #333; margin-bottom: 1rem; }
+.rekap-print-header h2 { font-size: 14pt; margin: 0 0 0.5rem; }
+.rekap-print-header p { font-size: 10pt; margin: 0; }
+
+/* ---- Responsive ---- */
+@media (max-width: 900px) {
+  .rekap-stat-row { gap: 0.75rem; }
+  .rekap-stat-card { flex: 1 1 calc(50% - 0.375rem); }
+  .rekap-filter-grid { grid-template-columns: 1fr 1fr; }
+  .rekap-filter-box { padding: 1.25rem 1rem; }
+  .rekap-pagination { flex-direction: column; align-items: flex-start; }
+}
+
+@media (max-width: 600px) {
+  .rekap-filter-grid { grid-template-columns: 1fr; }
+  .rekap-page-btns { gap: 0.35rem; }
+}
