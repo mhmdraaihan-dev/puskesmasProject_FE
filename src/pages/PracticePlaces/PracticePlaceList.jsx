@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { isAdmin } from "../../utils/roleHelpers";
@@ -7,6 +7,8 @@ import Table from "../../components/ui/Table";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import EmptyState from "../../components/ui/EmptyState";
 import Button from "../../components/Button";
+import Input from "../../components/Input";
+import Card from "../../components/ui/Card";
 import Modal from "../../components/ui/Modal";
 import "../../styles/design-system.css";
 import "./PracticePlaceList.css";
@@ -26,6 +28,7 @@ const PracticePlaceList = () => {
   const [practicePlaces, setPracticePlaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
   const [deleteDialog, setDeleteDialog] = useState({
     isOpen: false,
     practiceId: null,
@@ -41,6 +44,17 @@ const PracticePlaceList = () => {
     }
     fetchPracticePlaces();
   }, [user, navigate]);
+
+  const filteredPracticePlaces = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+    if (!keyword) return practicePlaces;
+    return practicePlaces.filter((place) => {
+      const nama = place.nama_praktik?.toLowerCase() || "";
+      const alamat = place.alamat?.toLowerCase() || "";
+      const desa = place.village?.nama_desa?.toLowerCase() || "";
+      return nama.includes(keyword) || alamat.includes(keyword) || desa.includes(keyword);
+    });
+  }, [search, practicePlaces]);
 
   const fetchPracticePlaces = async () => {
     try {
@@ -137,6 +151,32 @@ const PracticePlaceList = () => {
         }
       />
 
+      {/* Stat Cards */}
+      <div className="ppl-stat-row">
+        <div className="ppl-stat-card">
+          <span className="ppl-stat-label">Total Tempat Praktik</span>
+          <span className="ppl-stat-value">{practicePlaces.length}</span>
+          <span className="ppl-stat-note">lokasi terdaftar</span>
+        </div>
+        <div className="ppl-stat-card">
+          <span className="ppl-stat-label">Hasil Filter</span>
+          <span className="ppl-stat-value">{filteredPracticePlaces.length}</span>
+          <span className="ppl-stat-note">lokasi tampil saat ini</span>
+        </div>
+      </div>
+
+      {/* Filter Controls */}
+      <Card variant="surface-card" padding="lg" className="ppl-filter-card">
+        <div className="filter-section">
+          <Input
+            type="text"
+            placeholder="Cari berdasarkan nama tempat praktik, alamat, atau desa..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      </Card>
+
       {error && (
         <div className="error-alert" style={{ marginBottom: "var(--spacing-md)" }}>
           {error}
@@ -146,19 +186,25 @@ const PracticePlaceList = () => {
       {/* Table */}
       {loading ? (
         <LoadingSpinner size="lg" />
-      ) : practicePlaces.length === 0 ? (
+      ) : filteredPracticePlaces.length === 0 ? (
         <EmptyState
-          message="Belum ada data tempat praktik"
+          message={search ? "Tidak ada tempat praktik yang cocok dengan pencarian" : "Belum ada data tempat praktik"}
           action={
-            <Button variant="primary" onClick={() => navigate("/practice-places/add")}>
-              Tambah Tempat Praktik Pertama
-            </Button>
+            search ? (
+              <Button variant="secondary" onClick={() => setSearch("")}>
+                Reset Pencarian
+              </Button>
+            ) : (
+              <Button variant="primary" onClick={() => navigate("/practice-places/add")}>
+                Tambah Tempat Praktik Pertama
+              </Button>
+            )
           }
         />
       ) : (
         <Table
           columns={columns}
-          data={practicePlaces}
+          data={filteredPracticePlaces}
           className="practice-place-list-table"
         />
       )}

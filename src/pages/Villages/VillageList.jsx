@@ -8,6 +8,7 @@ import Table from "../../components/ui/Table";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import EmptyState from "../../components/ui/EmptyState";
 import Button from "../../components/Button";
+import Input from "../../components/Input";
 import Card from "../../components/ui/Card";
 import Modal from "../../components/ui/Modal";
 import "../../styles/design-system.css";
@@ -30,6 +31,7 @@ const VillageList = () => {
   const [villages, setVillages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
   const [deleteDialog, setDeleteDialog] = useState({
     isOpen: false,
     villageId: null,
@@ -45,6 +47,16 @@ const VillageList = () => {
     }
     fetchVillages();
   }, [user, navigate]);
+
+  const filteredVillages = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+    if (!keyword) return villages;
+    return villages.filter((village) => {
+      const nama = village.nama_desa?.toLowerCase() || "";
+      const kode = village.village_code?.toLowerCase() || "";
+      return nama.includes(keyword) || kode.includes(keyword);
+    });
+  }, [search, villages]);
 
   const summary = useMemo(() => {
     const totalVillages = villages.length;
@@ -176,7 +188,24 @@ const VillageList = () => {
           <span className="vl-stat-value">{summary.totalPractices}</span>
           <span className="vl-stat-note">lokasi praktik</span>
         </div>
+        <div className="vl-stat-card">
+          <span className="vl-stat-label">Hasil Filter</span>
+          <span className="vl-stat-value">{filteredVillages.length}</span>
+          <span className="vl-stat-note">desa tampil saat ini</span>
+        </div>
       </div>
+
+      {/* Filter Controls */}
+      <Card variant="surface-card" padding="lg" className="vl-filter-card">
+        <div className="filter-section">
+          <Input
+            type="text"
+            placeholder="Cari berdasarkan nama desa atau kode desa..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      </Card>
 
       {error && (
         <div className="error-alert">
@@ -186,17 +215,23 @@ const VillageList = () => {
 
       {loading ? (
         <LoadingSpinner size="lg" />
-      ) : villages.length === 0 ? (
+      ) : filteredVillages.length === 0 ? (
         <EmptyState
-          message="Belum ada data desa"
+          message={search ? "Tidak ada desa yang cocok dengan pencarian" : "Belum ada data desa"}
           action={
-            <Button variant="primary" onClick={() => navigate("/villages/add")}>
-              Tambah Desa Pertama
-            </Button>
+            search ? (
+              <Button variant="secondary" onClick={() => setSearch("")}>
+                Reset Pencarian
+              </Button>
+            ) : (
+              <Button variant="primary" onClick={() => navigate("/villages/add")}>
+                Tambah Desa Pertama
+              </Button>
+            )
           }
         />
       ) : (
-        <Table columns={columns} data={villages} className="village-list-table" />
+        <Table columns={columns} data={filteredVillages} className="village-list-table" />
       )}
 
       <Modal

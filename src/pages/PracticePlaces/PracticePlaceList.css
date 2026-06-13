@@ -5,6 +5,73 @@
   margin: 0 auto;
 }
 
+/* Stat Cards */
+.ppl-stat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.ppl-stat-card {
+  flex: 0 0 260px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 1.5rem 2rem;
+  background: linear-gradient(160deg, #ffffff 0%, #f0f6ea 100%);
+  border: 1px solid rgba(77, 122, 44, 0.15);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(34, 52, 24, 0.07);
+}
+
+.ppl-stat-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #7a8f74;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.ppl-stat-value {
+  font-size: clamp(2rem, 2.6vw, 2.5rem);
+  font-weight: 700;
+  color: #1a2e1a;
+  line-height: 1;
+}
+
+.ppl-stat-note {
+  font-size: 0.875rem;
+  color: #74836f;
+}
+
+/* Filter Card */
+.ppl-filter-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(241, 246, 235, 0.94)) !important;
+  border: 1px solid rgba(77, 122, 44, 0.12);
+  border-radius: 22px;
+  box-shadow: 0 18px 34px rgba(34, 52, 24, 0.06);
+  margin-bottom: 1.85rem;
+  padding: 1.3rem 1.4rem !important;
+}
+
+.ppl-filter-card .filter-section {
+  width: 100%;
+}
+
+.ppl-filter-card .filter-section .input {
+  min-height: 50px;
+  background: rgba(255, 255, 255, 0.98);
+  border-color: rgba(77, 122, 44, 0.14);
+  color: #233022;
+}
+
+.ppl-filter-card .filter-section .input:focus {
+  border-color: rgba(45, 104, 31, 0.34);
+  box-shadow: 0 0 0 4px rgba(63, 134, 34, 0.08);
+}
+
 .practice-place-list-table {
   background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(237, 242, 230, 0.94));
   border: 1px solid rgba(77, 122, 44, 0.12);
@@ -60,6 +127,16 @@
 @media (max-width: 768px) {
   .practice-place-list-page {
     padding: 0 0 var(--spacing-lg);
+  }
+
+  .ppl-stat-row {
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .ppl-stat-card {
+    flex: 1 1 calc(50% - 0.375rem);
+    padding: 1.25rem 1.5rem;
   }
 
   .practice-place-list-table {

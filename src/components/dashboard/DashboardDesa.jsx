@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileCheck, Clock, CheckCircle, XCircle, Activity, Heart, Baby, Users as UsersIcon } from 'lucide-react';
+import { FileCheck, Clock, CheckCircle, XCircle, Activity, Heart, Baby, Users as UsersIcon, Syringe } from 'lucide-react';
 import StatsCard from './StatsCard';
 import Card from '../ui/Card';
 import Table from '../ui/Table';
@@ -213,6 +213,13 @@ const DashboardDesa = () => {
           >
             <UsersIcon size={20} />
             <span>Data KB</span>
+          </button>
+          <button
+            onClick={() => navigate('/imunisasi')}
+            className="dashboard-desa__action-btn"
+          >
+            <Syringe size={20} />
+            <span>Data Imunisasi</span>
           </button>
         </div>
       </Card>
