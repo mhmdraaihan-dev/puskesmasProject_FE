@@ -204,13 +204,27 @@ const VillageList = () => {
         onClose={() =>
           setDeleteDialog({ isOpen: false, villageId: null, villageName: "" })
         }
-        onConfirm={handleDelete}
         title="Hapus Desa"
-        message={`Apakah Anda yakin ingin menghapus desa "${deleteDialog.villageName}"? Tindakan ini tidak dapat dibatalkan.`}
-        confirmText="Hapus"
-        cancelText="Batal"
-        type="danger"
-      />
+        size="sm"
+      >
+        <p>
+          Apakah Anda yakin ingin menghapus desa <strong>"{deleteDialog.villageName}"</strong>?
+          Tindakan ini tidak dapat dibatalkan.
+        </p>
+        <div className="modal-actions">
+          <Button
+            variant="secondary"
+            onClick={() =>
+              setDeleteDialog({ isOpen: false, villageId: null, villageName: "" })
+            }
+          >
+            Batal
+          </Button>
+          <Button variant="danger" onClick={handleDelete}>
+            Hapus
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };

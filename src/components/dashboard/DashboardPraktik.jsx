@@ -159,6 +159,48 @@ const DashboardPraktik = () => {
 
   return (
     <div className="dashboard-praktik">
+      {/* Quick Actions */}
+      <Card variant="surface-card" padding="xl">
+        <h3 className="dashboard-praktik__actions-title">Aksi Cepat</h3>
+        <div className="dashboard-praktik__actions-grid">
+          <button
+            onClick={() => navigate('/pasien')}
+            className="dashboard-praktik__action-btn"
+          >
+            <Users size={24} />
+            <span>Data Pasien</span>
+          </button>
+          <button
+            onClick={() => navigate('/pemeriksaan-kehamilan')}
+            className="dashboard-praktik__action-btn dashboard-praktik__action-btn--kehamilan"
+          >
+            <Heart size={24} />
+            <span>Kehamilan</span>
+          </button>
+          <button
+            onClick={() => navigate('/persalinan')}
+            className="dashboard-praktik__action-btn dashboard-praktik__action-btn--persalinan"
+          >
+            <Baby size={24} />
+            <span>Persalinan</span>
+          </button>
+          <button
+            onClick={() => navigate('/keluarga-berencana')}
+            className="dashboard-praktik__action-btn dashboard-praktik__action-btn--kb"
+          >
+            <UserCheck size={24} />
+            <span>KB</span>
+          </button>
+          <button
+            onClick={() => navigate('/imunisasi')}
+            className="dashboard-praktik__action-btn dashboard-praktik__action-btn--imunisasi"
+          >
+            <Syringe size={24} />
+            <span>Imunisasi</span>
+          </button>
+        </div>
+      </Card>
+
       {/* Stats Cards Grid */}
       <div className="dashboard-praktik__stats">
         <StatsCard
@@ -242,50 +284,6 @@ const DashboardPraktik = () => {
         )}
       </Card>
 
-      {/* Quick Actions */}
-      <Card variant="surface-card" padding="xl">
-        <h3 className="dashboard-praktik__actions-title">Tambah Data Pelayanan</h3>
-        <p className="dashboard-praktik__actions-subtitle">
-          Pilih jenis pelayanan untuk menambah data baru
-        </p>
-        <div className="dashboard-praktik__actions-grid">
-          <button
-            onClick={() => navigate('/pasien')}
-            className="dashboard-praktik__action-btn"
-          >
-            <Users size={24} />
-            <span>Data Pasien</span>
-          </button>
-          <button
-            onClick={() => navigate('/pemeriksaan-kehamilan/add')}
-            className="dashboard-praktik__action-btn dashboard-praktik__action-btn--kehamilan"
-          >
-            <Heart size={24} />
-            <span>Kehamilan</span>
-          </button>
-          <button
-            onClick={() => navigate('/persalinan/add')}
-            className="dashboard-praktik__action-btn dashboard-praktik__action-btn--persalinan"
-          >
-            <Baby size={24} />
-            <span>Persalinan</span>
-          </button>
-          <button
-            onClick={() => navigate('/keluarga-berencana/add')}
-            className="dashboard-praktik__action-btn dashboard-praktik__action-btn--kb"
-          >
-            <UserCheck size={24} />
-            <span>KB</span>
-          </button>
-          <button
-            onClick={() => navigate('/imunisasi/add')}
-            className="dashboard-praktik__action-btn dashboard-praktik__action-btn--imunisasi"
-          >
-            <Syringe size={24} />
-            <span>Imunisasi</span>
-          </button>
-        </div>
-      </Card>
     </div>
   );
 };

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useLocation } from 'react-router-dom';
-import Input from '../components/Input';
+import { Eye, EyeOff } from 'lucide-react';
 import Button from '../components/Button';
 import './Login.css';
 
@@ -21,6 +21,7 @@ const Login = () => {
   const location = useLocation();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const notice = location.state?.sessionMessage || '';
 
   const onSubmit = async (data) => {
@@ -49,7 +50,7 @@ const Login = () => {
                   className="login-logo"
                 />
               </div>
-              <h1 className="login-title">Masuk</h1>
+              <h1 className="login-title">Puskesmas Lebakwangi</h1>
               <p className="login-subtitle">
                 Gunakan akun Anda untuk mengakses portal internal Puskesmas.
               </p>
@@ -72,12 +73,12 @@ const Login = () => {
                 <label htmlFor="email" className="login-form__label">
                   Email
                 </label>
-                <Input
+                <input
                   id="email"
                   type="email"
                   placeholder="nama@email.com"
-                  error={errors.email?.message}
-                  {...register('email', { 
+                  className={`login-password-input${errors.email ? ' login-password-input--error' : ''}`}
+                  {...register('email', {
                     required: 'Email wajib diisi',
                     pattern: {
                       value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
@@ -85,25 +86,41 @@ const Login = () => {
                     }
                   })}
                 />
+                {errors.email && (
+                  <p className="login-password-error">{errors.email.message}</p>
+                )}
               </div>
 
               <div className="login-form__field">
                 <label htmlFor="password" className="login-form__label">
                   Password
                 </label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Masukkan password"
-                  error={errors.password?.message}
-                  {...register('password', { 
-                    required: 'Password wajib diisi',
-                    minLength: {
-                      value: 6,
-                      message: 'Password minimal 6 karakter'
-                    }
-                  })}
-                />
+                <div className="login-password-wrapper">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Masukkan password"
+                    className={`login-password-input${errors.password ? ' login-password-input--error' : ''}`}
+                    {...register('password', {
+                      required: 'Password wajib diisi',
+                      minLength: {
+                        value: 6,
+                        message: 'Password minimal 6 karakter'
+                      }
+                    })}
+                  />
+                  <button
+                    type="button"
+                    className="login-password-toggle"
+                    onClick={() => setShowPassword((v) => !v)}
+                    aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="login-password-error">{errors.password.message}</p>
+                )}
               </div>
 
               <Button

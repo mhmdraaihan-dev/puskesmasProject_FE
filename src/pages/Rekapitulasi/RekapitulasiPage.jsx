@@ -16,6 +16,7 @@ import {
   getKBList,
   getKehamilanList,
   getPersalinanList,
+  getPracticePlaces,
   getPracticePlacesByVillage,
   getVillages,
 } from "../../services/api";
@@ -86,13 +87,15 @@ const RekapitulasiPage = () => {
     }
   }, [isKoor]);
 
-  // Load practice places for Bidan Desa on mount (from their assigned village)
+  // Load practice places for Bidan Desa on mount
   useEffect(() => {
-    if (isDesa && user?.village_id) {
-      getPracticePlacesByVillage(user.village_id)
-        .then((res) => setPracticePlaces(res.data || []))
-        .catch((err) => console.error("Gagal memuat tempat praktik:", err));
-    }
+    if (!isDesa) return;
+    const loader = user?.village_id
+      ? getPracticePlacesByVillage(user.village_id)
+      : getPracticePlaces();
+    loader
+      .then((res) => setPracticePlaces(res.data || []))
+      .catch((err) => console.error("Gagal memuat tempat praktik:", err));
   }, [isDesa, user?.village_id]);
 
   // For Bidan Koordinator: load practice places when village changes

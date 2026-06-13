@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileCheck, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { FileCheck, Clock, CheckCircle, XCircle, Activity, Heart, Baby, Users as UsersIcon } from 'lucide-react';
 import StatsCard from './StatsCard';
 import Card from '../ui/Card';
 import Table from '../ui/Table';
@@ -182,6 +182,41 @@ const DashboardDesa = () => {
 
   return (
     <div className="dashboard-desa">
+      {/* Quick Actions */}
+      <Card variant="surface-card" padding="lg" className="dashboard-desa__actions-card">
+        <h3 className="dashboard-desa__actions-title">Aksi Cepat</h3>
+        <div className="dashboard-desa__actions-grid">
+          <button
+            onClick={() => navigate('/rekapitulasi')}
+            className="dashboard-desa__action-btn dashboard-desa__action-btn--primary"
+          >
+            <Activity size={20} />
+            <span>Lihat Rekapitulasi</span>
+          </button>
+          <button
+            onClick={() => navigate('/pemeriksaan-kehamilan')}
+            className="dashboard-desa__action-btn"
+          >
+            <Heart size={20} />
+            <span>Data Kehamilan</span>
+          </button>
+          <button
+            onClick={() => navigate('/persalinan')}
+            className="dashboard-desa__action-btn"
+          >
+            <Baby size={20} />
+            <span>Data Persalinan</span>
+          </button>
+          <button
+            onClick={() => navigate('/keluarga-berencana')}
+            className="dashboard-desa__action-btn"
+          >
+            <UsersIcon size={20} />
+            <span>Data KB</span>
+          </button>
+        </div>
+      </Card>
+
       {/* Stats Cards Grid */}
       <div className="dashboard-desa__stats">
         <StatsCard
@@ -205,27 +240,6 @@ const DashboardDesa = () => {
           icon={XCircle}
         />
       </div>
-
-      {/* Quick Actions */}
-      <Card variant="surface-card" padding="lg" className="dashboard-desa__actions-card">
-        <h3 className="dashboard-desa__actions-title">Aksi Cepat</h3>
-        <div className="dashboard-desa__actions-grid">
-          <button
-            onClick={() => navigate('/verification/pending')}
-            className="dashboard-desa__action-btn dashboard-desa__action-btn--primary"
-          >
-            <AlertCircle size={20} />
-            <span>Verifikasi Data</span>
-          </button>
-          <button
-            onClick={() => navigate('/history')}
-            className="dashboard-desa__action-btn"
-          >
-            <FileCheck size={20} />
-            <span>Lihat Histori</span>
-          </button>
-        </div>
-      </Card>
 
       {/* Pending Verification Tasks */}
       <Card variant="surface-card" padding="xl">

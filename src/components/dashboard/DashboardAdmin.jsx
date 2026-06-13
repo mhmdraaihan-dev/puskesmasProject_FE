@@ -90,6 +90,29 @@ const DashboardAdmin = () => {
 
   return (
     <div className="dashboard-admin">
+      {/* Quick Actions */}
+      <Card variant="surface-card" padding="xl" className="dashboard-admin__actions">
+        <h3 className="dashboard-admin__actions-title">Aksi Cepat</h3>
+        <p className="dashboard-admin__actions-subtitle">
+          Kelola data master dan pengguna sistem
+        </p>
+        <div className="dashboard-admin__actions-grid">
+          {quickActions.map(({ label, path, icon: Icon, primary }) => (
+            <button
+              key={path}
+              onClick={() => navigate(path)}
+              className={[
+                'dashboard-admin__action-btn',
+                primary ? 'dashboard-admin__action-btn--primary' : '',
+              ].filter(Boolean).join(' ')}
+            >
+              <Icon size={24} />
+              <span>{label}</span>
+            </button>
+          ))}
+        </div>
+      </Card>
+
       {/* Stats Cards Grid */}
       <div className="dashboard-admin__stats">
         <StatsCard
@@ -126,54 +149,6 @@ const DashboardAdmin = () => {
           icon={Building2}
         />
       </div>
-
-      {/* Quick Actions */}
-      <Card variant="surface-card" padding="xl" className="dashboard-admin__actions">
-        <h3 className="dashboard-admin__actions-title">Aksi Cepat</h3>
-        <p className="dashboard-admin__actions-subtitle">
-          Kelola data master dan pengguna sistem
-        </p>
-        <div className="dashboard-admin__actions-grid">
-          {quickActions.map(({ label, path, icon: Icon, primary }) => (
-            <button
-              key={path}
-              onClick={() => navigate(path)}
-              className={[
-                'dashboard-admin__action-btn',
-                primary ? 'dashboard-admin__action-btn--primary' : '',
-              ].filter(Boolean).join(' ')}
-            >
-              <Icon size={24} />
-              <span>{label}</span>
-            </button>
-          ))}
-        </div>
-      </Card>
-
-      {/* System Info */}
-      <Card variant="surface-card" padding="xl" className="dashboard-admin__system-info">
-        <h3 className="dashboard-admin__system-info-title">Informasi Sistem</h3>
-        <div className="dashboard-admin__system-info-grid">
-          <div className="dashboard-admin__system-info-item">
-            <span className="dashboard-admin__system-info-label">Total Akun Terdaftar</span>
-            <span className="dashboard-admin__system-info-value">{stats.totalUsers}</span>
-          </div>
-          <div className="dashboard-admin__system-info-item">
-            <span className="dashboard-admin__system-info-label">Wilayah Aktif</span>
-            <span className="dashboard-admin__system-info-value">{stats.totalVillages}</span>
-          </div>
-          <div className="dashboard-admin__system-info-item">
-            <span className="dashboard-admin__system-info-label">Lokasi Praktik</span>
-            <span className="dashboard-admin__system-info-value">{stats.totalPracticePlaces}</span>
-          </div>
-          <div className="dashboard-admin__system-info-item">
-            <span className="dashboard-admin__system-info-label">Status Sistem</span>
-            <span className="dashboard-admin__system-info-value dashboard-admin__system-info-value--success">
-              Operasional
-            </span>
-          </div>
-        </div>
-      </Card>
     </div>
   );
 };

@@ -92,12 +92,6 @@ export const getNavigationForRole = (role, position_user, userId) => {
             icon: Users
           },
           {
-            id: 'add-user',
-            label: 'Tambah Pengguna',
-            path: '/add-user',
-            icon: UserPlus
-          },
-          {
             id: 'villages',
             label: 'Desa',
             path: '/villages',

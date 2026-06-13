@@ -88,6 +88,13 @@ const VillageDetail = () => {
     );
   }
 
+  const allBidan = [
+    ...(village.users || []).map((u) => ({ ...u, practiceName: "-" })),
+    ...(village.practice_places || []).flatMap((p) =>
+      (p.users || []).map((u) => ({ ...u, practiceName: p.nama_praktik }))
+    ),
+  ];
+
   const userColumns = [
     {
       key: "full_name",
@@ -104,6 +111,16 @@ const VillageDetail = () => {
       key: "position_user",
       label: "Posisi",
       render: (value) => getPositionLabel(value),
+    },
+    {
+      key: "practiceName",
+      label: "Tempat Praktik",
+      render: (value) =>
+        value && value !== "-" ? (
+          <span className="vd-practice-tag">{value}</span>
+        ) : (
+          <span className="vd-practice-tag vd-practice-tag--desa">—</span>
+        ),
     },
   ];
 
@@ -151,13 +168,25 @@ const VillageDetail = () => {
         </div>
       </div>
 
-      {/* Bidan Table */}
+      {/* Bidan Table — all bidan (desa + praktik) */}
       <Card variant="surface-card" padding="xl" className="section-card detail-surface-card">
-        <h3 className="section-title">Daftar Bidan</h3>
-        <p className="section-subtitle">Tenaga yang terdaftar pada desa ini</p>
+        <div className="vd-section-head">
+          <div>
+            <h3 className="section-title">Daftar Bidan</h3>
+            <p className="section-subtitle">Semua bidan desa dan bidan praktik yang terdaftar pada wilayah ini</p>
+          </div>
+          <div className="vd-bidan-badges">
+            <span className="vd-count-badge vd-count-badge--desa">
+              Bidan Desa: {village.users?.length || 0}
+            </span>
+            <span className="vd-count-badge vd-count-badge--praktik">
+              Bidan Praktik: {midwifeSummary.totalBidanPraktik}
+            </span>
+          </div>
+        </div>
 
-        {village.users && village.users.length > 0 ? (
-          <Table columns={userColumns} data={village.users} className="village-detail-table" />
+        {allBidan.length > 0 ? (
+          <Table columns={userColumns} data={allBidan} className="village-detail-table" />
         ) : (
           <div className="empty-state">
             <p>Belum ada bidan di desa ini</p>
@@ -173,15 +202,28 @@ const VillageDetail = () => {
         {village.practice_places && village.practice_places.length > 0 ? (
           <div className="practice-grid">
             {village.practice_places.map((place) => (
-              <div key={place.practice_id} className="practice-card">
-                <h4 className="practice-title">{place.nama_praktik}</h4>
-                <p className="practice-address">{place.alamat}</p>
+              <div
+                key={place.practice_id}
+                className="practice-card"
+                onClick={() => navigate(`/practice-places/${place.practice_id}`)}
+                style={{ cursor: "pointer" }}
+              >
+                <div className="practice-card-header">
+                  <h4 className="practice-title">{place.nama_praktik}</h4>
+                  <span className="practice-count-badge">
+                    {place._count?.users ?? place.users?.length ?? 0} bidan
+                  </span>
+                </div>
+                <p className="practice-address">{place.alamat || "-"}</p>
                 {Array.isArray(place.users) && place.users.length > 0 ? (
-                  <p className="practice-staff">
-                    Bidan: {place.users.map((u) => u.full_name).join(", ")}
-                  </p>
-                ) : place.user ? (
-                  <p className="practice-staff">Bidan: {place.user.full_name}</p>
+                  <ul className="practice-staff-list">
+                    {place.users.map((u) => (
+                      <li key={u.user_id} className="practice-staff-item">
+                        <span className="practice-staff-name">{u.full_name}</span>
+                        <span className="practice-staff-pos">{getPositionLabel(u.position_user)}</span>
+                      </li>
+                    ))}
+                  </ul>
                 ) : (
                   <p className="practice-staff empty">Belum ada bidan terhubung</p>
                 )}
