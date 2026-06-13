@@ -240,21 +240,6 @@ const PemeriksaanKehamilanList = () => {
           <span className="pk-stat-value">{stats.total}</span>
           <span className="pk-stat-note">pemeriksaan</span>
         </div>
-        <div className="pk-stat-card">
-          <span className="pk-stat-label">Menunggu Verifikasi</span>
-          <span className="pk-stat-value">{stats.pending}</span>
-          <span className="pk-stat-note">pending</span>
-        </div>
-        <div className="pk-stat-card">
-          <span className="pk-stat-label">Disetujui</span>
-          <span className="pk-stat-value">{stats.approved}</span>
-          <span className="pk-stat-note">approved</span>
-        </div>
-        <div className="pk-stat-card">
-          <span className="pk-stat-label">Data Ditolak</span>
-          <span className="pk-stat-value">{stats.rejected}</span>
-          <span className="pk-stat-note">perlu revisi</span>
-        </div>
       </div>
 
       {/* Filter Card */}
