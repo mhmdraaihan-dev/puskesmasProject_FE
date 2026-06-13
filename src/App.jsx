@@ -9,7 +9,6 @@ import AddUser from "./pages/AddUser";
 import EditUser from "./pages/EditUser";
 import ChangePassword from "./pages/ChangePassword";
 import ResetPassword from "./pages/ResetPassword";
-import LeavePage from "./pages/Leaves/LeavePage";
 
 // Village Management
 import VillageList from "./pages/Villages/VillageList";
@@ -162,15 +161,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/users/:userId/leaves"
-            element={
-              <ProtectedRoute allowedRoles={["ADMIN"]}>
-                <LeavePage />
-              </ProtectedRoute>
-            }
-          />
-
           {/* Village Management */}
           <Route
             path="/villages"

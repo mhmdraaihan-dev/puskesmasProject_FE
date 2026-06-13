@@ -111,6 +111,7 @@ const VillageDetail = () => {
     <div className="village-detail-page">
       <PageHeader
         title={village.nama_desa}
+        subtitle="Ringkasan wilayah, bidan terhubung, dan tempat praktik dalam satu tampilan."
         actions={
           <>
             <Button variant="secondary" onClick={() => navigate("/villages")}>
@@ -127,36 +128,36 @@ const VillageDetail = () => {
       />
 
       {/* Summary Cards */}
-      <div className="stats-section">
-        <Card variant="surface-dark" padding="lg">
-          <div className="stat-label">Total Bidan Wilayah</div>
-          <div className="stat-value">{midwifeSummary.totalBidanWilayah}</div>
-          <div className="stat-note">bidan terdaftar</div>
-        </Card>
-        <Card variant="surface-dark" padding="lg">
-          <div className="stat-label">Bidan Desa</div>
-          <div className="stat-value">{midwifeSummary.totalBidanDesa}</div>
-          <div className="stat-note">bidan desa</div>
-        </Card>
-        <Card variant="surface-dark" padding="lg">
-          <div className="stat-label">Bidan Praktik</div>
-          <div className="stat-value">{midwifeSummary.totalBidanPraktik}</div>
-          <div className="stat-note">bidan praktik</div>
-        </Card>
-        <Card variant="surface-dark" padding="lg">
-          <div className="stat-label">Tempat Praktik</div>
-          <div className="stat-value">{village.practice_places?.length || 0}</div>
-          <div className="stat-note">lokasi praktik</div>
-        </Card>
+      <div className="vd-stat-row">
+        <div className="vd-stat-card">
+          <span className="vd-stat-label">Total Bidan Wilayah</span>
+          <span className="vd-stat-value">{midwifeSummary.totalBidanWilayah}</span>
+          <span className="vd-stat-note">bidan terdaftar</span>
+        </div>
+        <div className="vd-stat-card">
+          <span className="vd-stat-label">Bidan Desa</span>
+          <span className="vd-stat-value">{midwifeSummary.totalBidanDesa}</span>
+          <span className="vd-stat-note">bidan desa</span>
+        </div>
+        <div className="vd-stat-card">
+          <span className="vd-stat-label">Bidan Praktik</span>
+          <span className="vd-stat-value">{midwifeSummary.totalBidanPraktik}</span>
+          <span className="vd-stat-note">bidan praktik</span>
+        </div>
+        <div className="vd-stat-card">
+          <span className="vd-stat-label">Tempat Praktik</span>
+          <span className="vd-stat-value">{village.practice_places?.length || 0}</span>
+          <span className="vd-stat-note">lokasi praktik</span>
+        </div>
       </div>
 
       {/* Bidan Table */}
-      <Card variant="surface-dark" padding="xl" className="section-card">
+      <Card variant="surface-card" padding="xl" className="section-card detail-surface-card">
         <h3 className="section-title">Daftar Bidan</h3>
         <p className="section-subtitle">Tenaga yang terdaftar pada desa ini</p>
 
         {village.users && village.users.length > 0 ? (
-          <Table columns={userColumns} data={village.users} />
+          <Table columns={userColumns} data={village.users} className="village-detail-table" />
         ) : (
           <div className="empty-state">
             <p>Belum ada bidan di desa ini</p>
@@ -165,7 +166,7 @@ const VillageDetail = () => {
       </Card>
 
       {/* Practice Places */}
-      <Card variant="surface-dark" padding="xl" className="section-card">
+      <Card variant="surface-card" padding="xl" className="section-card detail-surface-card">
         <h3 className="section-title">Tempat Praktik</h3>
         <p className="section-subtitle">Daftar praktik yang terhubung ke desa ini</p>
 

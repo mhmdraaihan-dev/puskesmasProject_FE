@@ -94,21 +94,21 @@ const PracticePlaceList = () => {
       render: (_, row) => (
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
           <Button
-            variant="secondary-on-dark"
+            variant="secondary"
             size="sm"
             onClick={() => navigate(`/practice-places/${row.practice_id}`)}
           >
             Detail
           </Button>
           <Button
-            variant="secondary-on-dark"
+            variant="secondary"
             size="sm"
             onClick={() => navigate(`/practice-places/${row.practice_id}/edit`)}
           >
             Edit
           </Button>
           <Button
-            variant="secondary-on-dark"
+            variant="danger"
             size="sm"
             onClick={() =>
               setDeleteDialog({
@@ -129,6 +129,7 @@ const PracticePlaceList = () => {
     <div className="practice-place-list-page">
       <PageHeader
         title="Daftar Tempat Praktik"
+        subtitle="Kelola lokasi praktik, wilayah, dan bidan yang terhubung dalam satu halaman."
         actions={
           <Button variant="primary" onClick={() => navigate("/practice-places/add")}>
             Tambah Tempat Praktik
@@ -137,7 +138,7 @@ const PracticePlaceList = () => {
       />
 
       {error && (
-        <div className="error-alert" style={{ marginBottom: "var(--spacing-5)" }}>
+        <div className="error-alert" style={{ marginBottom: "var(--spacing-md)" }}>
           {error}
         </div>
       )}
@@ -155,7 +156,11 @@ const PracticePlaceList = () => {
           }
         />
       ) : (
-        <Table columns={columns} data={practicePlaces} />
+        <Table
+          columns={columns}
+          data={practicePlaces}
+          className="practice-place-list-table"
+        />
       )}
 
       {/* Delete Confirmation Modal */}
@@ -172,7 +177,7 @@ const PracticePlaceList = () => {
         </p>
         <div className="modal-actions">
           <Button
-            variant="secondary-on-dark"
+            variant="secondary"
             onClick={() =>
               setDeleteDialog({ isOpen: false, practiceId: null, practiceName: "" })
             }
@@ -180,12 +185,8 @@ const PracticePlaceList = () => {
             Batal
           </Button>
           <Button
-            variant="primary"
+            variant="danger"
             onClick={handleDelete}
-            style={{ 
-              backgroundColor: "var(--color-error)",
-              borderColor: "var(--color-error)"
-            }}
           >
             Hapus
           </Button>

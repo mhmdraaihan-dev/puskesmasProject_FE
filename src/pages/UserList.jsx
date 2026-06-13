@@ -107,23 +107,16 @@ const UserList = () => {
       key: "actions",
       label: "Aksi",
       render: (_, row) => (
-        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+        <div className="user-list-actions">
           <Button
-            variant="secondary-on-dark"
-            size="sm"
-            onClick={() => navigate(`/users/${row.user_id}/leaves`)}
-          >
-            Cuti
-          </Button>
-          <Button
-            variant="secondary-on-dark"
+            variant="secondary"
             size="sm"
             onClick={() => navigate(`/edit-user/${row.user_id}`)}
           >
             Edit
           </Button>
           <Button
-            variant="secondary-on-dark"
+            variant={row.status_user === "ACTIVE" ? "warning" : "success"}
             size="sm"
             onClick={() => handleStatusToggle(row.user_id, row.status_user)}
           >
@@ -137,7 +130,8 @@ const UserList = () => {
   return (
     <div className="user-list-page">
       <PageHeader
-        heading="Manajemen Pengguna"
+        heading="Daftar Pengguna"
+        subtitle="Kelola akun, perbarui status user, dan rapikan akses master data."
         actions={
           <Button variant="primary" onClick={() => navigate("/add-user")}>
             Tambah Pengguna
@@ -146,33 +140,35 @@ const UserList = () => {
       />
 
       {/* Stats Cards */}
-      <div className="stats-section">
-        <Card variant="surface-dark" padding="lg">
-          <div className="stat-label">Total User</div>
-          <div className="stat-value">{users.length}</div>
-          <div className="stat-note">akun terdaftar</div>
-        </Card>
-        <Card variant="surface-dark" padding="lg">
-          <div className="stat-label">User Aktif</div>
-          <div className="stat-value">{activeUsers}</div>
-          <div className="stat-note">siap digunakan</div>
-        </Card>
-        <Card variant="surface-dark" padding="lg">
-          <div className="stat-label">Hasil Filter</div>
-          <div className="stat-value">{filteredUsers.length}</div>
-          <div className="stat-note">user tampil saat ini</div>
-        </Card>
+      <div className="ul-stat-row">
+        <div className="ul-stat-card">
+          <span className="ul-stat-label">Total User</span>
+          <span className="ul-stat-value">{users.length}</span>
+          <span className="ul-stat-note">akun terdaftar</span>
+        </div>
+        <div className="ul-stat-card">
+          <span className="ul-stat-label">User Aktif</span>
+          <span className="ul-stat-value">{activeUsers}</span>
+          <span className="ul-stat-note">siap digunakan</span>
+        </div>
+        <div className="ul-stat-card">
+          <span className="ul-stat-label">Hasil Filter</span>
+          <span className="ul-stat-value">{filteredUsers.length}</span>
+          <span className="ul-stat-note">user tampil saat ini</span>
+        </div>
       </div>
 
       {/* Filter Controls */}
-      <div className="filter-section">
-        <Input
-          type="text"
-          placeholder="Cari berdasarkan nama, email, atau posisi..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
+      <Card variant="surface-card" padding="lg" className="user-list-filter-card">
+        <div className="filter-section">
+          <Input
+            type="text"
+            placeholder="Cari berdasarkan nama, email, atau posisi..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      </Card>
 
       {/* Table */}
       {loading ? (
@@ -193,7 +189,7 @@ const UserList = () => {
           }
         />
       ) : (
-        <Table columns={columns} data={filteredUsers} />
+        <Table columns={columns} data={filteredUsers} className="user-list-table" />
       )}
     </div>
   );

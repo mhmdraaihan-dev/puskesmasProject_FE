@@ -85,6 +85,7 @@ const PracticePlaceDetail = () => {
     <div className="practice-place-detail-page">
       <PageHeader
         title={place.nama_praktik}
+        subtitle="Lihat detail lokasi praktik, wilayah, dan bidan yang terhubung."
         actions={
           <>
             <Button variant="secondary" onClick={() => navigate("/practice-places")}>
@@ -103,52 +104,55 @@ const PracticePlaceDetail = () => {
       />
 
       {/* Summary Cards */}
-      <div className="stats-section">
-        <Card variant="surface-dark" padding="lg">
-          <div className="stat-label">Bidan Terhubung</div>
-          <div className="stat-value">{assignedUsers.length}</div>
-          <div className="stat-note">bidan praktik</div>
-        </Card>
-        <Card variant="surface-dark" padding="lg">
-          <div className="stat-label">Desa</div>
-          <div className="stat-value-text">{place.village?.nama_desa || "-"}</div>
-          <div className="stat-note">wilayah praktik</div>
-        </Card>
-        <Card variant="surface-dark" padding="lg">
-          <div className="stat-label">Riwayat Data</div>
-          <div className="stat-value">{place._count?.health_data || 0}</div>
-          <div className="stat-note">data tersimpan</div>
-        </Card>
+      <div className="ppd-stat-row">
+        <div className="ppd-stat-card">
+          <span className="ppd-stat-label">Bidan Terhubung</span>
+          <span className="ppd-stat-value">{assignedUsers.length}</span>
+          <span className="ppd-stat-note">bidan praktik</span>
+        </div>
+        <div className="ppd-stat-card">
+          <span className="ppd-stat-label">Desa</span>
+          <span className="ppd-stat-value ppd-stat-value--text">{place.village?.nama_desa || "-"}</span>
+          <span className="ppd-stat-note">wilayah praktik</span>
+        </div>
+        <div className="ppd-stat-card">
+          <span className="ppd-stat-label">Riwayat Data</span>
+          <span className="ppd-stat-value">{place._count?.health_data || 0}</span>
+          <span className="ppd-stat-note">data tersimpan</span>
+        </div>
       </div>
 
       {/* Practice Place Details */}
-      <Card variant="surface-dark" padding="xl" className="section-card">
-        <h3 className="section-title">Informasi Tempat Praktik</h3>
-        <p className="section-subtitle">Detail lokasi dan alamat praktik</p>
-
-        <div className="detail-grid">
-          <div className="detail-item">
-            <div className="detail-label">Nama Praktik</div>
-            <div className="detail-value">{place.nama_praktik}</div>
+      <div className="ppd-info-card ppd-section">
+        <h3 className="ppd-section-title">Informasi Tempat Praktik</h3>
+        <p className="ppd-section-sub">Detail lokasi dan alamat praktik</p>
+        <div className="ppd-detail-grid">
+          <div className="ppd-detail-item">
+            <span className="ppd-detail-label">Nama Praktik</span>
+            <span className="ppd-detail-value">{place.nama_praktik}</span>
           </div>
-          <div className="detail-item">
-            <div className="detail-label">Desa</div>
-            <div className="detail-value">{place.village?.nama_desa || "-"}</div>
+          <div className="ppd-detail-item">
+            <span className="ppd-detail-label">Desa</span>
+            <span className="ppd-detail-value">{place.village?.nama_desa || "-"}</span>
           </div>
-          <div className="detail-item detail-item--full">
-            <div className="detail-label">Alamat Lengkap</div>
-            <div className="detail-value">{place.alamat || "-"}</div>
+          <div className="ppd-detail-item ppd-detail-item--full">
+            <span className="ppd-detail-label">Alamat Lengkap</span>
+            <span className="ppd-detail-value">{place.alamat || "-"}</span>
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Associated Users Table */}
-      <Card variant="surface-dark" padding="xl" className="section-card">
+      <Card variant="surface-card" padding="xl" className="section-card detail-surface-card">
         <h3 className="section-title">Bidan Praktik</h3>
         <p className="section-subtitle">Tenaga yang terhubung ke tempat praktik ini</p>
 
         {assignedUsers.length > 0 ? (
-          <Table columns={userColumns} data={assignedUsers} />
+          <Table
+            columns={userColumns}
+            data={assignedUsers}
+            className="practice-place-detail-table"
+          />
         ) : (
           <div className="empty-state">
             <p>Belum ada bidan praktik yang terhubung</p>

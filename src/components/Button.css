@@ -21,7 +21,7 @@
 
 .button:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(204, 120, 92, 0.15);
+  box-shadow: 0 0 0 3px rgba(63, 134, 34, 0.25);
 }
 
 /* Variants */

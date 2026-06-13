@@ -9,6 +9,7 @@ import Input from "../../components/Input";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import "../../styles/design-system.css";
 import "../AddUser.css";
+import "./VillageForm.css";
 
 const VillageForm = () => {
   const { villageId } = useParams();
@@ -67,16 +68,21 @@ const VillageForm = () => {
 
   if (fetching) {
     return (
-      <div className="add-user-page">
+      <div className="add-user-page master-form-page">
         <LoadingSpinner size="lg" />
       </div>
     );
   }
 
   return (
-    <div className="add-user-page">
+    <div className="add-user-page master-form-page">
       <PageHeader
-        heading={isEditMode ? "Edit Desa" : "Tambah Desa Baru"}
+        heading={isEditMode ? "Edit Desa" : "Tambah Desa"}
+        subtitle={
+          isEditMode
+            ? "Perbarui data wilayah yang menjadi acuan penugasan bidan dan praktik."
+            : "Tambahkan desa baru untuk kebutuhan struktur data master."
+        }
         actions={
           <Button variant="secondary" onClick={() => navigate("/villages")}>
             Kembali
@@ -84,9 +90,9 @@ const VillageForm = () => {
         }
       />
 
-      <Card variant="surface-dark" padding="xl">
+      <Card variant="surface-card" padding="xl" className="master-form-card">
         {error && (
-          <div className="error-alert" style={{ marginBottom: "var(--spacing-5)" }}>
+          <div className="error-alert">
             {error}
           </div>
         )}
@@ -107,21 +113,25 @@ const VillageForm = () => {
             </p>
           </div>
 
-          <div className="form-actions">
-            <Button
+          <div className="vf-actions">
+            <button
               type="button"
-              variant="secondary"
+              className="vf-btn vf-btn-cancel"
               onClick={() => navigate("/villages")}
             >
               Batal
-            </Button>
-            <Button type="submit" variant="primary" disabled={loading}>
+            </button>
+            <button
+              type="submit"
+              className="vf-btn vf-btn-submit"
+              disabled={loading}
+            >
               {loading
                 ? "Menyimpan..."
                 : isEditMode
                   ? "Update Desa"
                   : "Tambah Desa"}
-            </Button>
+            </button>
           </div>
         </form>
       </Card>

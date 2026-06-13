@@ -116,21 +116,21 @@ const VillageList = () => {
       render: (_, row) => (
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
           <Button
-            variant="secondary-on-dark"
+            variant="secondary"
             size="sm"
             onClick={() => navigate(`/villages/${row.village_id}`)}
           >
             Detail
           </Button>
           <Button
-            variant="secondary-on-dark"
+            variant="secondary"
             size="sm"
             onClick={() => navigate(`/villages/${row.village_id}/edit`)}
           >
             Edit
           </Button>
           <Button
-            variant="secondary-on-dark"
+            variant="danger"
             size="sm"
             onClick={() =>
               setDeleteDialog({
@@ -160,26 +160,26 @@ const VillageList = () => {
         }
       />
 
-      <div className="stats-section">
-        <Card variant="surface-card" padding="md" className="village-summary-card">
-          <div className="stat-label">Total Desa</div>
-          <div className="stat-value">{summary.totalVillages}</div>
-          <div className="stat-note">desa terdaftar</div>
-        </Card>
-        <Card variant="surface-card" padding="md" className="village-summary-card">
-          <div className="stat-label">Total Bidan</div>
-          <div className="stat-value">{summary.totalMidwives}</div>
-          <div className="stat-note">bidan aktif</div>
-        </Card>
-        <Card variant="surface-card" padding="md" className="village-summary-card">
-          <div className="stat-label">Tempat Praktik</div>
-          <div className="stat-value">{summary.totalPractices}</div>
-          <div className="stat-note">lokasi praktik</div>
-        </Card>
+      <div className="vl-stat-row">
+        <div className="vl-stat-card">
+          <span className="vl-stat-label">Total Desa</span>
+          <span className="vl-stat-value">{summary.totalVillages}</span>
+          <span className="vl-stat-note">desa terdaftar</span>
+        </div>
+        <div className="vl-stat-card">
+          <span className="vl-stat-label">Total Bidan</span>
+          <span className="vl-stat-value">{summary.totalMidwives}</span>
+          <span className="vl-stat-note">bidan aktif</span>
+        </div>
+        <div className="vl-stat-card">
+          <span className="vl-stat-label">Tempat Praktik</span>
+          <span className="vl-stat-value">{summary.totalPractices}</span>
+          <span className="vl-stat-note">lokasi praktik</span>
+        </div>
       </div>
 
       {error && (
-        <div className="error-alert" style={{ marginBottom: "var(--spacing-5)" }}>
+        <div className="error-alert">
           {error}
         </div>
       )}

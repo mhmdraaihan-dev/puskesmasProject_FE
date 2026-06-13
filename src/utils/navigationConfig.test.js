@@ -12,13 +12,6 @@ import {
   UserPlus,
   Map,
   Building,
-  User,
-  ClipboardList,
-  Heart,
-  Shield,
-  Activity,
-  FileText,
-  Clock,
   AlertCircle,
   History,
   Settings
@@ -55,71 +48,29 @@ describe('getNavigationForRole', () => {
       expect(dashboardGroup.items[0].icon).toBe(Home);
     });
 
-    it('should include User Management group', () => {
-      const navigation = getNavigationForRole('ADMIN', null);
-      const userManagementGroup = navigation.find(g => g.id === 'user-management');
-      
-      expect(userManagementGroup).toBeDefined();
-      expect(userManagementGroup.label).toBe('Manajemen Pengguna');
-      expect(userManagementGroup.items).toHaveLength(2);
-      expect(userManagementGroup.items[0].path).toBe('/users');
-      expect(userManagementGroup.items[0].icon).toBe(Users);
-      expect(userManagementGroup.items[1].path).toBe('/add-user');
-      expect(userManagementGroup.items[1].icon).toBe(UserPlus);
-    });
-
-    it('should include Master Data group with 3 items', () => {
+    it('should include Master Data group for ADMIN role', () => {
       const navigation = getNavigationForRole('ADMIN', null);
       const masterDataGroup = navigation.find(g => g.id === 'master-data');
       
       expect(masterDataGroup).toBeDefined();
       expect(masterDataGroup.label).toBe('Data Master');
-      expect(masterDataGroup.items).toHaveLength(3);
-      expect(masterDataGroup.items[0].path).toBe('/villages');
-      expect(masterDataGroup.items[0].icon).toBe(Map);
-      expect(masterDataGroup.items[1].path).toBe('/practice-places');
-      expect(masterDataGroup.items[1].icon).toBe(Building);
-      expect(masterDataGroup.items[2].path).toBe('/pasien');
-      expect(masterDataGroup.items[2].icon).toBe(User);
+      expect(masterDataGroup.items).toHaveLength(4);
+      expect(masterDataGroup.items[0].path).toBe('/users');
+      expect(masterDataGroup.items[0].icon).toBe(Users);
+      expect(masterDataGroup.items[1].path).toBe('/add-user');
+      expect(masterDataGroup.items[1].icon).toBe(UserPlus);
+      expect(masterDataGroup.items[2].path).toBe('/villages');
+      expect(masterDataGroup.items[2].icon).toBe(Map);
+      expect(masterDataGroup.items[3].path).toBe('/practice-places');
+      expect(masterDataGroup.items[3].icon).toBe(Building);
     });
 
-    it('should include Service Modules group with 4 items', () => {
+    it('should not expose admin service, verification, or report groups in navigation', () => {
       const navigation = getNavigationForRole('ADMIN', null);
-      const serviceModulesGroup = navigation.find(g => g.id === 'service-modules');
       
-      expect(serviceModulesGroup).toBeDefined();
-      expect(serviceModulesGroup.label).toBe('Modul Layanan');
-      expect(serviceModulesGroup.items).toHaveLength(4);
-      expect(serviceModulesGroup.items[0].path).toBe('/pemeriksaan-kehamilan');
-      expect(serviceModulesGroup.items[0].icon).toBe(ClipboardList);
-      expect(serviceModulesGroup.items[1].path).toBe('/persalinan');
-      expect(serviceModulesGroup.items[1].icon).toBe(Heart);
-      expect(serviceModulesGroup.items[2].path).toBe('/keluarga-berencana');
-      expect(serviceModulesGroup.items[2].icon).toBe(Shield);
-      expect(serviceModulesGroup.items[3].path).toBe('/imunisasi');
-      expect(serviceModulesGroup.items[3].icon).toBe(Activity);
-    });
-
-    it('should include Verification group', () => {
-      const navigation = getNavigationForRole('ADMIN', null);
-      const verificationGroup = navigation.find(g => g.id === 'verification');
-      
-      expect(verificationGroup).toBeDefined();
-      expect(verificationGroup.label).toBe('Verifikasi');
-      expect(verificationGroup.items).toHaveLength(1);
-      expect(verificationGroup.items[0].path).toBe('/pending-data');
-      expect(verificationGroup.items[0].icon).toBe(Clock);
-    });
-
-    it('should include Reports group', () => {
-      const navigation = getNavigationForRole('ADMIN', null);
-      const reportsGroup = navigation.find(g => g.id === 'reports');
-      
-      expect(reportsGroup).toBeDefined();
-      expect(reportsGroup.label).toBe('Laporan');
-      expect(reportsGroup.items).toHaveLength(1);
-      expect(reportsGroup.items[0].path).toBe('/rekapitulasi');
-      expect(reportsGroup.items[0].icon).toBe(FileText);
+      expect(navigation.find(g => g.id === 'service-modules')).toBeUndefined();
+      expect(navigation.find(g => g.id === 'verification')).toBeUndefined();
+      expect(navigation.find(g => g.id === 'reports')).toBeUndefined();
     });
 
     it('should include Settings group', () => {
@@ -152,10 +103,9 @@ describe('getNavigationForRole', () => {
       expect(navigation.find(g => g.id === 'settings')).toBeDefined();
     });
 
-    it('should NOT include User Management or Master Data groups', () => {
+    it('should NOT include admin-only master data groups', () => {
       const navigation = getNavigationForRole('USER', 'bidan_koordinator');
       
-      expect(navigation.find(g => g.id === 'user-management')).toBeUndefined();
       expect(navigation.find(g => g.id === 'master-data')).toBeUndefined();
     });
   });
@@ -222,7 +172,7 @@ describe('getNavigationForRole', () => {
       expect(revisionGroup).toBeDefined();
       expect(revisionGroup.label).toBe('Revisi');
       expect(revisionGroup.items).toHaveLength(1);
-      expect(revisionGroup.items[0].path).toBe('/rejected-data');
+      expect(revisionGroup.items[0].path).toBe('/revision/rejected');
       expect(revisionGroup.items[0].icon).toBe(AlertCircle);
     });
 
@@ -264,9 +214,8 @@ describe('getNavigationForRole', () => {
       });
     });
 
-    it('should include Service Modules group with 4 items for all roles', () => {
+    it('should include Service Modules group with 4 items for service roles only', () => {
       const roles = [
-        ['ADMIN', null],
         ['USER', 'bidan_koordinator'],
         ['USER', 'bidan_desa'],
         ['USER', 'bidan_praktik']

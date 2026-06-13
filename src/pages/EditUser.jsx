@@ -81,7 +81,7 @@ const EditUser = () => {
 
     if (!isAdmin(user)) {
       alert("Akses ditolak. Halaman ini hanya untuk Admin.");
-      navigate("/");
+      navigate("/users");
       return;
     }
     loadFormData();
@@ -133,26 +133,27 @@ const EditUser = () => {
 
   if (loadingUser) {
     return (
-      <div className="add-user-page">
+      <div className="add-user-page master-form-page">
         <LoadingSpinner size="lg" />
       </div>
     );
   }
 
   return (
-    <div className="add-user-page">
+    <div className="add-user-page master-form-page">
       <PageHeader
-        heading="Edit User"
+        heading="Edit Pengguna"
+        subtitle="Perbarui detail akun tanpa membuka modul lain di luar data master."
         actions={
-          <Button variant="secondary" onClick={() => navigate("/")}>
+          <Button variant="secondary" onClick={() => navigate("/users")}>
             Batal
           </Button>
         }
       />
 
-      <Card variant="surface-dark" padding="xl">
+      <Card variant="surface-card" padding="xl" className="master-form-card">
         {error && (
-          <div className="error-alert" style={{ marginBottom: "var(--spacing-5)" }}>
+          <div className="error-alert" style={{ marginBottom: "var(--spacing-md)" }}>
             {error}
           </div>
         )}

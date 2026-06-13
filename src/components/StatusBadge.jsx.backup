@@ -1,0 +1,107 @@
+import PropTypes from 'prop-types';
+import '../App.css';
+
+/**
+ * StatusBadge Component - Design System Compliant
+ * 
+ * Displays status badges with semantic colors and badge-pill styling.
+ * Supports size variations and uses 15% alpha backgrounds.
+ * 
+ * Requirements: 2.1, 2.2, 2.9, 5.6, 9.3, 9.4
+ */
+const StatusBadge = ({ status, size = 'md', className = '' }) => {
+    const getStatusConfig = () => {
+        const normalizedStatus = status?.toUpperCase();
+        
+        switch (normalizedStatus) {
+            case 'PENDING':
+                return {
+                    label: 'Menunggu Verifikasi',
+                    color: '#d4a017', // warning
+                    background: 'rgba(212, 160, 23, 0.15)' // 15% alpha
+                };
+            case 'APPROVED':
+                return {
+                    label: 'Disetujui',
+                    color: '#5db872', // success
+                    background: 'rgba(93, 184, 114, 0.15)' // 15% alpha
+                };
+            case 'REJECTED':
+                return {
+                    label: 'Ditolak',
+                    color: '#c64545', // error
+                    background: 'rgba(198, 69, 69, 0.15)' // 15% alpha
+                };
+            case 'ACTIVE':
+                return {
+                    label: 'Aktif',
+                    color: '#5db872', // success
+                    background: 'rgba(93, 184, 114, 0.15)' // 15% alpha
+                };
+            case 'INACTIVE':
+                return {
+                    label: 'Tidak Aktif',
+                    color: '#6c6a64', // muted
+                    background: 'rgba(108, 106, 100, 0.15)' // 15% alpha
+                };
+            default:
+                return {
+                    label: status,
+                    color: '#6c6a64', // muted
+                    background: 'rgba(108, 106, 100, 0.15)' // 15% alpha
+                };
+        }
+    };
+
+    const getSizeStyles = () => {
+        switch (size) {
+            case 'sm':
+                return {
+                    fontSize: '11px',
+                    padding: '2px 8px'
+                };
+            case 'md':
+            default:
+                return {
+                    fontSize: '13px',
+                    padding: '4px 12px'
+                };
+        }
+    };
+
+    const config = getStatusConfig();
+    const sizeStyles = getSizeStyles();
+
+    return (
+        <span
+            className={`status-badge status-badge--${size} ${className}`}
+            style={{
+                display: 'inline-block',
+                color: config.color,
+                background: config.background,
+                fontSize: sizeStyles.fontSize,
+                padding: sizeStyles.padding,
+                borderRadius: '9999px', // badge-pill
+                fontWeight: '500',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                border: 'none'
+            }}
+        >
+            {config.label}
+        </span>
+    );
+};
+
+StatusBadge.propTypes = {
+    status: PropTypes.string.isRequired,
+    size: PropTypes.oneOf(['sm', 'md']),
+    className: PropTypes.string
+};
+
+StatusBadge.defaultProps = {
+    size: 'md',
+    className: ''
+};
+
+export default StatusBadge;

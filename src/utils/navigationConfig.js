@@ -13,7 +13,6 @@ import {
   UserPlus,
   Map,
   Building,
-  User,
   ClipboardList,
   Heart,
   Shield,
@@ -83,8 +82,8 @@ export const getNavigationForRole = (role, position_user, userId) => {
         ]
       },
       {
-        id: 'user-management',
-        label: 'Manajemen Pengguna',
+        id: 'master-data',
+        label: 'Data Master',
         items: [
           {
             id: 'users',
@@ -97,13 +96,7 @@ export const getNavigationForRole = (role, position_user, userId) => {
             label: 'Tambah Pengguna',
             path: '/add-user',
             icon: UserPlus
-          }
-        ]
-      },
-      {
-        id: 'master-data',
-        label: 'Data Master',
-        items: [
+          },
           {
             id: 'villages',
             label: 'Desa',
@@ -115,66 +108,6 @@ export const getNavigationForRole = (role, position_user, userId) => {
             label: 'Tempat Praktik',
             path: '/practice-places',
             icon: Building
-          },
-          {
-            id: 'pasien',
-            label: 'Pasien',
-            path: '/pasien',
-            icon: User
-          }
-        ]
-      },
-      {
-        id: 'service-modules',
-        label: 'Modul Layanan',
-        items: [
-          {
-            id: 'pemeriksaan-kehamilan',
-            label: 'Pemeriksaan Kehamilan',
-            path: '/pemeriksaan-kehamilan',
-            icon: ClipboardList
-          },
-          {
-            id: 'persalinan',
-            label: 'Persalinan',
-            path: '/persalinan',
-            icon: Heart
-          },
-          {
-            id: 'keluarga-berencana',
-            label: 'Keluarga Berencana',
-            path: '/keluarga-berencana',
-            icon: Shield
-          },
-          {
-            id: 'imunisasi',
-            label: 'Imunisasi',
-            path: '/imunisasi',
-            icon: Activity
-          }
-        ]
-      },
-      {
-        id: 'verification',
-        label: 'Verifikasi',
-        items: [
-          {
-            id: 'pending-data',
-            label: 'Data Menunggu',
-            path: '/verification/pending',
-            icon: Clock
-          }
-        ]
-      },
-      {
-        id: 'reports',
-        label: 'Laporan',
-        items: [
-          {
-            id: 'rekapitulasi',
-            label: 'Rekapitulasi',
-            path: '/rekapitulasi',
-            icon: FileText
           }
         ]
       },

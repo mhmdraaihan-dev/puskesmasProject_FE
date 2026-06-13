@@ -53,7 +53,7 @@ const AddUser = () => {
   useEffect(() => {
     if (!isAdmin(user)) {
       alert("Akses ditolak. Halaman ini hanya untuk Admin.");
-      navigate("/");
+      navigate("/users");
       return;
     }
     fetchVillages();
@@ -136,19 +136,20 @@ const AddUser = () => {
   };
 
   return (
-    <div className="add-user-page">
+    <div className="add-user-page master-form-page">
       <PageHeader
-        heading="Tambah User Baru"
+        heading="Tambah Pengguna"
+        subtitle="Buat akun baru untuk admin atau bidan sesuai struktur wilayah kerja."
         actions={
-          <Button variant="secondary" onClick={() => navigate("/")}>
+          <Button variant="secondary" onClick={() => navigate("/users")}>
             Batal
           </Button>
         }
       />
 
-      <Card variant="surface-dark" padding="xl">
+      <Card variant="surface-card" padding="xl" className="master-form-card">
         {error && (
-          <div className="error-alert" style={{ marginBottom: "var(--spacing-5)" }}>
+          <div className="error-alert">
             {error}
           </div>
         )}

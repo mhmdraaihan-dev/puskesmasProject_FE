@@ -136,9 +136,9 @@ const PracticePlaceForm = () => {
   }
 
   return (
-    <div className="practice-place-form-page">
+    <div className="practice-place-form-page master-form-page">
       <PageHeader
-        title={isEditMode ? "Edit Tempat Praktik" : "Tambah Tempat Praktik Baru"}
+        title={isEditMode ? "Edit Tempat Praktik" : "Tambah Tempat Praktik"}
         subtitle={
           isEditMode
             ? "Perbarui informasi praktik, desa, dan bidan terhubung"
@@ -151,9 +151,13 @@ const PracticePlaceForm = () => {
         }
       />
 
-      <Card variant="surface-dark" padding="xl">
+      <Card
+        variant="surface-card"
+        padding="xl"
+        className="master-form-card practice-place-form-card"
+      >
         {error && (
-          <div className="error-alert" style={{ marginBottom: "var(--spacing-5)" }}>
+          <div className="error-alert" style={{ marginBottom: "var(--spacing-md)" }}>
             {error}
           </div>
         )}

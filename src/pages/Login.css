@@ -35,11 +35,19 @@
   z-index: 1;
 }
 
+.login-container--compact {
+  max-width: 480px;
+}
+
 .login-shell {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(380px, 460px);
   gap: clamp(1.5rem, 4vw, 4rem);
   align-items: center;
+}
+
+.login-shell--single {
+  display: block;
 }
 
 .login-showcase {
@@ -167,6 +175,10 @@
   position: relative;
 }
 
+.login-card--compact {
+  padding: clamp(1.5rem, 3vw, 2rem);
+}
+
 .login-card::before {
   content: "";
   position: absolute;
@@ -178,7 +190,7 @@
 
 .login-header {
   text-align: center;
-  margin-bottom: 1.75rem;
+  margin-bottom: 1.4rem;
   position: relative;
   z-index: 1;
 }
@@ -204,23 +216,14 @@
   border-radius: 20px;
 }
 
-.login-eyebrow {
-  font-size: 0.76rem;
-  font-weight: 700;
-  color: #2d681f;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  margin-bottom: 0.9rem;
-}
-
 .login-title {
-  font-family: var(--font-display);
-  font-size: clamp(2.3rem, 4vw, 3.2rem);
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: -0.04em;
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 3vw, 2.6rem);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
   color: #1b4217;
-  margin: 0 0 0.85rem;
+  margin: 0 0 0.65rem;
   background: none;
   -webkit-background-clip: initial;
   -webkit-text-fill-color: #1b4217;
@@ -228,9 +231,9 @@
 }
 
 .login-subtitle {
-  font-size: 0.97rem;
+  font-size: 0.94rem;
   color: #5b6f58;
-  line-height: 1.7;
+  line-height: 1.6;
   margin: 0;
 }
 
@@ -310,37 +313,6 @@
   background: linear-gradient(135deg, #24591a, #417d23) !important;
 }
 
-.login-footer {
-  margin-top: 1.4rem;
-  text-align: center;
-  position: relative;
-  z-index: 1;
-}
-
-.login-footer__text {
-  font-size: 0.9rem;
-  color: #697a66;
-  margin: 0;
-}
-
-.login-footer__link {
-  color: #2f6b22;
-  text-decoration: none;
-  font-weight: 700;
-  transition: color 0.2s ease;
-}
-
-.login-footer__link:hover {
-  color: #24591a;
-  text-decoration: underline;
-}
-
-.login-footer__link:focus-visible {
-  outline: 2px solid #2f6b22;
-  outline-offset: 2px;
-  border-radius: 2px;
-}
-
 @media (max-width: 980px) {
   .login-shell {
     grid-template-columns: 1fr;
@@ -357,7 +329,7 @@
   }
 
   .login-card {
-    padding: 1.35rem;
+    padding: 1.3rem;
     border-radius: 24px;
   }
 

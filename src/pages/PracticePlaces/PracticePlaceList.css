@@ -1,8 +1,39 @@
 /* PracticePlaceList Page Styles */
 .practice-place-list-page {
-  padding: var(--spacing-6) 0;
-  max-width: 1400px;
+  padding: 0 0 var(--spacing-xl);
+  max-width: 1320px;
   margin: 0 auto;
+}
+
+.practice-place-list-table {
+  background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(237, 242, 230, 0.94));
+  border: 1px solid rgba(77, 122, 44, 0.12);
+  border-radius: 24px;
+  padding: 0.95rem 1.1rem;
+  margin-top: 0.65rem;
+  box-shadow: 0 24px 44px rgba(35, 51, 24, 0.08);
+}
+
+.practice-place-list-table .table {
+  color: #233022;
+}
+
+.practice-place-list-table .table-header {
+  padding: 0.95rem 0.75rem;
+  border-bottom: 1px solid rgba(77, 122, 44, 0.12);
+  color: #54644f;
+  font-size: 0.86rem;
+  letter-spacing: 0.04em;
+}
+
+.practice-place-list-table .table-cell {
+  padding: 0.95rem 0.75rem;
+  border-bottom: 1px solid rgba(77, 122, 44, 0.08);
+  vertical-align: middle;
+}
+
+.practice-place-list-table .table-row:hover {
+  background: rgba(79, 146, 40, 0.045);
 }
 
 /* Error Alert */
@@ -28,7 +59,11 @@
 /* Responsive */
 @media (max-width: 768px) {
   .practice-place-list-page {
-    padding: var(--spacing-4) 0;
+    padding: 0 0 var(--spacing-lg);
+  }
+
+  .practice-place-list-table {
+    padding: 0.55rem 0.75rem;
   }
 
   .modal-actions {

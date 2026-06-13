@@ -6,6 +6,30 @@ import Card from '../ui/Card';
 import { getUsers, getVillages, getPracticePlaces } from '../../services/api';
 import './DashboardAdmin.css';
 
+const quickActions = [
+  {
+    label: 'Tambah User',
+    path: '/add-user',
+    icon: Users,
+    primary: true,
+  },
+  {
+    label: 'Kelola Desa',
+    path: '/villages',
+    icon: MapPin,
+  },
+  {
+    label: 'Kelola Tempat Praktik',
+    path: '/practice-places',
+    icon: Building2,
+  },
+  {
+    label: 'Daftar User',
+    path: '/users',
+    icon: FileText,
+  },
+];
+
 /**
  * DashboardAdmin Component
  * 
@@ -110,34 +134,19 @@ const DashboardAdmin = () => {
           Kelola data master dan pengguna sistem
         </p>
         <div className="dashboard-admin__actions-grid">
-          <button
-            onClick={() => navigate('/users/add')}
-            className="dashboard-admin__action-btn dashboard-admin__action-btn--primary"
-          >
-            <Users size={24} />
-            <span>Tambah User</span>
-          </button>
-          <button
-            onClick={() => navigate('/villages')}
-            className="dashboard-admin__action-btn"
-          >
-            <MapPin size={24} />
-            <span>Kelola Desa</span>
-          </button>
-          <button
-            onClick={() => navigate('/practice-places')}
-            className="dashboard-admin__action-btn"
-          >
-            <Building2 size={24} />
-            <span>Kelola Tempat Praktik</span>
-          </button>
-          <button
-            onClick={() => navigate('/users')}
-            className="dashboard-admin__action-btn"
-          >
-            <FileText size={24} />
-            <span>Daftar User</span>
-          </button>
+          {quickActions.map(({ label, path, icon: Icon, primary }) => (
+            <button
+              key={path}
+              onClick={() => navigate(path)}
+              className={[
+                'dashboard-admin__action-btn',
+                primary ? 'dashboard-admin__action-btn--primary' : '',
+              ].filter(Boolean).join(' ')}
+            >
+              <Icon size={24} />
+              <span>{label}</span>
+            </button>
+          ))}
         </div>
       </Card>
 
