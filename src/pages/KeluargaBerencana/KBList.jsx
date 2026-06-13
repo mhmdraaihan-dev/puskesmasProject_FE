@@ -242,21 +242,6 @@ const KBList = () => {
           <span className="kbs-stat-value">{stats.total}</span>
           <span className="kbs-stat-note">pelayanan KB</span>
         </div>
-        <div className="kbs-stat-card">
-          <span className="kbs-stat-label">Menunggu Verifikasi</span>
-          <span className="kbs-stat-value">{stats.pending}</span>
-          <span className="kbs-stat-note">pending</span>
-        </div>
-        <div className="kbs-stat-card">
-          <span className="kbs-stat-label">Disetujui</span>
-          <span className="kbs-stat-value">{stats.approved}</span>
-          <span className="kbs-stat-note">approved</span>
-        </div>
-        <div className="kbs-stat-card">
-          <span className="kbs-stat-label">Data Ditolak</span>
-          <span className="kbs-stat-value">{stats.rejected}</span>
-          <span className="kbs-stat-note">perlu revisi</span>
-        </div>
       </div>
 
       {/* Filter Card */}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Activity, Heart, Baby, Users as UsersIcon, Syringe, FileCheck } from 'lucide-react';
+import { Activity, Heart, Baby, Users as UsersIcon, Syringe } from 'lucide-react';
 import StatsCard from './StatsCard';
 import Card from '../ui/Card';
 import LoadingSpinner from '../ui/LoadingSpinner';
@@ -23,7 +23,6 @@ const DashboardKoordinator = () => {
     persalinan: 0,
     kb: 0,
     imunisasi: 0,
-    totalApproved: 0,
   });
 
   useEffect(() => {
@@ -41,7 +40,6 @@ const DashboardKoordinator = () => {
         persalinan: summary.persalinan || 0,
         kb: summary['keluarga-berencana'] || summary.kb || 0,
         imunisasi: summary.imunisasi || 0,
-        totalApproved: summary.total || 0,
       });
     } catch (error) {
       console.error('Failed to fetch koordinator data:', error);
@@ -108,11 +106,6 @@ const DashboardKoordinator = () => {
 
       {/* Stats Cards Grid */}
       <div className="dashboard-koordinator__stats">
-        <StatsCard
-          title="Total Approved"
-          value={stats.totalApproved}
-          icon={FileCheck}
-        />
         <StatsCard
           title="Kehamilan"
           value={stats.kehamilan}

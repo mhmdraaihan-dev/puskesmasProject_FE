@@ -243,21 +243,6 @@ const ImunisasiList = () => {
           <span className="im-stat-value">{stats.total}</span>
           <span className="im-stat-note">imunisasi</span>
         </div>
-        <div className="im-stat-card">
-          <span className="im-stat-label">Menunggu Verifikasi</span>
-          <span className="im-stat-value">{stats.pending}</span>
-          <span className="im-stat-note">pending</span>
-        </div>
-        <div className="im-stat-card">
-          <span className="im-stat-label">Disetujui</span>
-          <span className="im-stat-value">{stats.approved}</span>
-          <span className="im-stat-note">approved</span>
-        </div>
-        <div className="im-stat-card">
-          <span className="im-stat-label">Data Ditolak</span>
-          <span className="im-stat-value">{stats.rejected}</span>
-          <span className="im-stat-note">perlu revisi</span>
-        </div>
       </div>
 
       {/* Filter Card */}

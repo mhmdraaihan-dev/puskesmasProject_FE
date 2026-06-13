@@ -255,21 +255,6 @@ const PersalinanList = () => {
           <span className="ps-stat-value">{stats.total}</span>
           <span className="ps-stat-note">persalinan</span>
         </div>
-        <div className="ps-stat-card">
-          <span className="ps-stat-label">Menunggu Verifikasi</span>
-          <span className="ps-stat-value">{stats.pending}</span>
-          <span className="ps-stat-note">pending</span>
-        </div>
-        <div className="ps-stat-card">
-          <span className="ps-stat-label">Disetujui</span>
-          <span className="ps-stat-value">{stats.approved}</span>
-          <span className="ps-stat-note">approved</span>
-        </div>
-        <div className="ps-stat-card">
-          <span className="ps-stat-label">Data Ditolak</span>
-          <span className="ps-stat-value">{stats.rejected}</span>
-          <span className="ps-stat-note">perlu revisi</span>
-        </div>
       </div>
 
       {/* Filter Card */}
